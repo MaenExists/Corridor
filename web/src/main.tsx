@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Atlas, Summary } from "./Map";
+import { Atlas } from "./Map";
+import { Evidence, Observation } from "./Evidence";
+import { Reports, readSyntheticReport } from "./Reports";
 import type { Case } from "../../shared/schema";
 import { BANNER, dateLabel, localJSON } from "./data";
-import type { Cases, Forecasts, Selection } from "./data";
+import type { Cases, Evaluation, Forecasts, Selection } from "./data";
 import "./style.css";
 
 function App() {
@@ -11,7 +13,9 @@ function App() {
   const [forecasts,setForecasts] = useState<Forecasts|null>(null);
   const [selection,setSelection] = useState<Selection>({area:"Ernakulam"});
   const [horizon,setHorizon] = useState<7|28>(28);
-  const [observation,setObservation] = useState<Case|null>(null);
+  const [observation,setObservation] = useState<{row:Case;cutoff:string}|null>(null);
+  const [report,setReport] = useState<Evaluation|null>(null);
+  const [view,setView] = useState<"map"|"report">("map");
   const [fault,setFault] = useState("");
   const fetchForecast = useCallback(async () => {
     const f = await localJSON<Forecasts>("/generated/forecasts.json");
@@ -24,6 +28,7 @@ function App() {
       setCases(c);
     }),fetchForecast()]).catch(()=>setFault("Run `make demo` from the project folder to prepare the synthetic workspace."));
   },[fetchForecast]);
+  useEffect(()=>{localJSON("/generated/eval_report.json").then(readSyntheticReport).then(setReport).catch(()=>{});},[]);
   const select=useCallback((s:Selection)=>{setSelection(s);setObservation(null);},[]);
   const forecast=forecasts?.forecasts.find(f=>f.horizon_days===horizon && ("area" in selection ? f.area===selection.area :
     f.connection?.join("|")===selection.connection.join("|")));
@@ -32,10 +37,12 @@ function App() {
       <div className="disclaimer">{BANNER}</div>
       <header className="masthead"><a href="/" className="brand"><span className="logomark" aria-hidden>╱╱</span> Corridor</a>
         <span className="track-pill">SYNTHETIC DATA</span>
-        <nav aria-label="Workspace"><button aria-current="page">Map workspace</button></nav>
+        <nav aria-label="Workspace"><button aria-current={view==="map"?"page":undefined} onClick={()=>setView("map")}>Map workspace</button>
+          <button aria-current={view==="report"?"page":undefined} onClick={()=>setView("report")}>Model report</button></nav>
       </header>
     </div>
     <main className="main-shell">
+      {view === "report" ? <Reports current={report}/> : <>
       <div className="workspace-header"><div><div className="section-kicker">Kerala case observatory</div><h1>Forecast atlas</h1>
         <p>Compare documented case patterns with the places where reporting is thin.</p></div>
         {forecasts && <div className="freshness"><span>Generated at <time dateTime={forecasts.generated_at}>{dateLabel(forecasts.generated_at)} {forecasts.generated_at.slice(11,16)} UTC</time></span>
@@ -44,11 +51,13 @@ function App() {
       {fault && <div role="alert" className="notice">{fault}</div>}
       {!fault && !forecasts && <p aria-live="polite">Loading the synthetic archive…</p>}
       {cases && forecasts && <div className="atlas-layout">
-        <Atlas data={cases} forecasts={forecasts} selection={selection} select={select} horizon={horizon} setHorizon={setHorizon} openCase={setObservation}/>
-        <div><Summary selection={selection} forecast={forecast}/>
-          {observation && <section className="paper"><h3>Fictional observation</h3><p>{observation.event_date} · {observation.substance_category || "Unknown substance"}</p></section>}
+        <Atlas data={cases} forecasts={forecasts} selection={selection} select={select} horizon={horizon} setHorizon={setHorizon}
+          openCase={(row,cutoff)=>setObservation({row,cutoff})}/>
+        <div><Evidence selection={selection} forecast={forecast} report={report} openReport={()=>setView("report")}/>
+          {observation && <Observation key={observation.row.case_id} {...observation} close={()=>setObservation(null)}/>}
         </div>
       </div>}
+      </>}
     </main>
   </>;
 }

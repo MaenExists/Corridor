@@ -3,8 +3,8 @@ import L from "leaflet";
 import type { FeatureCollection } from "geojson";
 import "leaflet/dist/leaflet.css";
 import geography from "../../shared/geography.json";
-import type { Case, Forecast } from "../../shared/schema";
-import { CENTER, DISTRICTS, NODES, NOTICE, dateLabel, localJSON } from "./data";
+import type { Case } from "../../shared/schema";
+import { CENTER, DISTRICTS, NODES, dateLabel, localJSON } from "./data";
 import type { Cases, Forecasts, Place, Selection } from "./data";
 
 type Layers = "forecast" | "history" | "movement" | "coverage";
@@ -28,7 +28,7 @@ function historical(c: Case, end: string, from: string) {
 
 export function Atlas({ data, forecasts, selection, select, horizon, setHorizon, openCase }:
   { data: Cases; forecasts: Forecasts; selection: Selection; select: (s: Selection)=>void;
-    horizon: 7 | 28; setHorizon: (h: 7|28)=>void; openCase: (c: Case)=>void }) {
+    horizon: 7 | 28; setHorizon: (h: 7|28)=>void; openCase: (c: Case, cutoff: string)=>void }) {
   const holder = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const group = useRef<L.LayerGroup | null>(null);
@@ -185,20 +185,9 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
         <label>Source<select value={sources} onChange={e=>setSources(e.target.value)}><option value="">All fictional</option><option value="primary">Primary fixture</option><option value="syndicated">With syndicated copy</option></select></label>
       </div>
       <p className="small">Filters affect history, not the frozen forecasts. {data.connections_label}.</p>
-      <div className="case-links">{visibleRows.slice(0,5).map(c=><button className="quiet" key={c.case_id} onClick={()=>openCase(c)}>
+      <div className="case-links">{visibleRows.slice(0,5).map(c=><button className="quiet" key={c.case_id} onClick={()=>openCase(c,date)}>
         {c.event_date && dateLabel(c.event_date)} · {c.substance_category || "Unknown substance"}</button>)}
         {!visibleRows.length && <span>No documented entries for this selection and filter. This is not evidence of no activity.</span>}</div>
     </details>
   </section>;
-}
-
-export function Summary({ selection, forecast }: { selection: Selection; forecast?: Forecast }) {
-  const title = "area" in selection ? selection.area : selection.connection.join(" → ");
-  return <aside className="evidence-panel"><div className="section-kicker">Forecast evidence</div>
-    <h2>{title}</h2>{forecast ? <>
-    <div className="estimate">{forecast.abstained ? "Abstained" : `${forecast.estimate?.toFixed(1)}`}</div>
-    <p>{forecast.abstain_reason || "Expected documented cases"}</p>
-    {forecast.interval && <p>Estimated range: {forecast.interval.join("–")}</p>}
-    <p className="small">{dateLabel(forecast.window_start)} to {dateLabel(forecast.window_end)}</p>
-    </> : <p>No dated forecast for this selection.</p>}<p className="notice">{NOTICE}</p></aside>;
 }
