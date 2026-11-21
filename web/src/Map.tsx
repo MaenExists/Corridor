@@ -7,8 +7,11 @@ import type { Case } from "../../shared/schema";
 import { CENTER, DISTRICTS, NODES, dateLabel, localJSON } from "./data";
 import type { Cases, Forecasts, Place, Selection } from "./data";
 
-type Layers = "forecast" | "history" | "movement" | "coverage";
-const LAYERS: [Layers, string][] = [["forecast", "Forecast"], ["history", "History"], ["movement", "Documented connections"], ["coverage", "Coverage"]];
+type Layers = "forecast" | "history" | "movement" | "coverage" | "infrastructure";
+const LAYERS: [Layers, string][] = [["forecast", "Forecast"], ["history", "History"], ["movement", "Documented connections"],
+  ["coverage", "Coverage"], ["infrastructure", "Infrastructure hypotheses"]];
+// Purely fictional and deliberately different from the generator's documented edges.
+const EXAMPLE_INFRASTRUCTURE = [["Wayanad","Palakkad"],["Idukki","Kollam"],["Kannur","Malappuram"]];
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
 const days = (start: string, end: string) => Math.round((Date.parse(end) - Date.parse(start)) / 86400000);
 const shift = (start: string, n: number) => new Date(Date.parse(start) + n * 86400000).toISOString().slice(0, 10);
@@ -26,15 +29,15 @@ function historical(c: Case, end: string, from: string) {
     !c.correction_history.some(e => e.kind === "withdrawal" && typeof e.effective_at === "string" && e.effective_at <= end);
 }
 
-export function Atlas({ data, forecasts, selection, select, horizon, setHorizon, openCase }:
+export function Atlas({ data, forecasts, selection, select, horizon, setHorizon, openCase, connections = true }:
   { data: Cases; forecasts: Forecasts; selection: Selection; select: (s: Selection)=>void;
-    horizon: 7 | 28; setHorizon: (h: 7|28)=>void; openCase: (c: Case, cutoff: string)=>void }) {
+    horizon: 7 | 28; setHorizon: (h: 7|28)=>void; openCase: (c: Case, cutoff: string)=>void; connections?: boolean }) {
   const holder = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const group = useRef<L.LayerGroup | null>(null);
   const [boundary,setBoundary] = useState<FeatureCollection | null>(null);
   const [places,setPlaces] = useState<Place[]>([]);
-  const [layers,setLayers] = useState<Record<Layers,boolean>>({ forecast: true, history: false, movement: false, coverage: true });
+  const [layers,setLayers] = useState<Record<Layers,boolean>>({ forecast: true, history: false, movement: false, coverage: true, infrastructure:false });
   const [query,setQuery] = useState("");
   const [searchOpen,setSearchOpen] = useState(false);
   const [place,setPlace] = useState<Place | null>(null);
@@ -124,18 +127,22 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
         marker.addTo(g);
       }
     }
+    if (connections && layers.infrastructure) for(const [a,b] of EXAMPLE_INFRASTRUCTURE) {
+      L.polyline([NODES[a],NODES[b]],{color:"#d0af80",opacity:.73,dashArray:"1 5",weight:2})
+        .addTo(g).bindTooltip(text("Fictional infrastructure hypothesis · no movement evidence"),{className:"atlas-tooltip"});
+    }
     for(const f of moves) {
       const pair=f.connection!;
       const marked="connection" in selection && selection.connection.join("|")===pair.join("|");
       const seen=observedConnections.has(pair.join("|"));
-      if (!NODES[pair[0]] || !NODES[pair[1]] || (!marked && !(layers.movement && seen))) continue;
+      if (!connections || !NODES[pair[0]] || !NODES[pair[1]] || (!marked && !(layers.movement && seen))) continue;
       L.polyline(line(NODES[pair[0]],NODES[pair[1]]),{weight:marked?3:2,color:marked?"#e6eff0":"#ad9ee1",dashArray:"5 7",opacity:.88})
         .addTo(g).bindTooltip(text(`${pair[0]} → ${pair[1]} (invented connection)`),{className:"atlas-tooltip"})
         .on("click",()=>{setPlace(null);select({connection:pair});});
     }
     if(place) L.circleMarker([place.lat,place.lon], {radius:9,color:"#e8bc83",weight:2,fillOpacity:.15}).addTo(g)
       .bindTooltip(text(place.name),{permanent:true,direction:"right",className:"atlas-tooltip"});
-  },[boundary,layers,byArea,moves,selection,data,horizon,counts,observedConnections,place,select]);
+  },[boundary,layers,byArea,moves,selection,data,horizon,counts,observedConnections,place,select,connections]);
   function choose(option: {name:string;district:string;profile:Place|null}) {
     setQuery(option.name); setSearchOpen(false); setPlace(option.profile); select({area:option.district});
     map.current?.flyTo(option.profile ? [option.profile.lat,option.profile.lon] : CENTER[option.district], 9, {animate:false});
@@ -154,20 +161,21 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
         <option value={7}>7 days</option><option value={28}>28 days</option></select></label>
       <label>District profile<select value={"area" in selection?selection.area:""} onChange={e=>{if(e.target.value)setArea(e.target.value);}}>
         <option value="" disabled>Pick district</option>{DISTRICTS.map(n=><option key={n}>{n}</option>)}</select></label>
-      <label>Known connection<select value={"connection" in selection?selection.connection.join("|"):""} onChange={e=>{
+      {connections && <label>Known connection<select value={"connection" in selection?selection.connection.join("|"):""} onChange={e=>{
         if(e.target.value){setPlace(null);setLayers(s=>({...s,movement:true}));select({connection:e.target.value.split("|") as [string,string]});}}}>
-        <option value="" disabled>Choose invented link</option>{moves.map(r=><option key={r.connection!.join("|")} value={r.connection!.join("|")}>{r.connection!.join(" → ")}</option>)}</select></label>
+        <option value="" disabled>Choose invented link</option>{moves.map(r=><option key={r.connection!.join("|")} value={r.connection!.join("|")}>{r.connection!.join(" → ")}</option>)}</select></label>}
     </div>
     <div className="atlas-stage">
       <div ref={holder} className="leaflet-atlas" aria-label="Interactive Kerala map, district scale"/>
       <div className="chart-map-mark"><span>KERALA</span><small>8°–13° N / 74°–78° E</small></div>
-      <div className="layer-tray">{LAYERS.map(([key,label])=><label key={key} className={layers[key]?"on":""}>
+      <div className="layer-tray">{LAYERS.filter(([key])=>connections || !["movement","infrastructure"].includes(key)).map(([key,label])=><label key={key} className={layers[key]?"on":""}>
         <input type="checkbox" checked={layers[key]} onChange={e=>setLayers(s=>({...s,[key]:e.target.checked}))}/>{label}
       </label>)}</div>
     </div>
     <div className="atlas-legend"><span><i className="swatch forecast"/>Forecast estimate</span>
       <span><i className="swatch unknown"/>Coverage unknown / thin</span>
-      <span><i className="swatch movement"/>Invented documented connection</span>
+      {connections && <span><i className="swatch movement"/>Invented documented connection</span>}
+      {connections && layers.infrastructure && <span><i className="swatch infrastructure"/>Fictional infrastructure hypothesis · not evidence</span>}
       <button className="quiet" onClick={()=>{setPlace(null);map.current?.fitBounds([[8.22,74.45],[13.02,77.69]]);}}>Reset view</button></div>
     {place && <div className="locality"><strong>{place.name} {place.local_name && <span lang="ml">{place.local_name}</span>}</strong>
       <span>{place.district} · geographic context only; forecasts remain district-level.</span>
@@ -184,7 +192,7 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
         <label>Evidence<select value={evidence} onChange={e=>setEvidence(e.target.value)}><option value="">All documentation</option><option value="reviewed">Reviewed by date</option><option value="reported">Not reviewed by date</option></select></label>
         <label>Source<select value={sources} onChange={e=>setSources(e.target.value)}><option value="">All fictional</option><option value="primary">Primary fixture</option><option value="syndicated">With syndicated copy</option></select></label>
       </div>
-      <p className="small">Filters affect history, not the frozen forecasts. {data.connections_label}.</p>
+      <p className="small">Filters affect history, not the frozen forecasts.{connections && ` ${data.connections_label}.`}</p>
       <div className="case-links">{visibleRows.slice(0,5).map(c=><button className="quiet" key={c.case_id} onClick={()=>openCase(c,date)}>
         {c.event_date && dateLabel(c.event_date)} · {c.substance_category || "Unknown substance"}</button>)}
         {!visibleRows.length && <span>No documented entries for this selection and filter. This is not evidence of no activity.</span>}</div>

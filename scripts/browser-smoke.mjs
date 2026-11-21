@@ -55,8 +55,10 @@ try {
     await page.getByRole("button", {name:"Save brief"}).click();
     await page.getByRole("status").filter({hasText:"Brief saved"}).waitFor();
     await page.getByLabel("Assessment").selectOption("Baseline disagreement");
+    const put = page.waitForResponse(r=>r.request().method()==="PUT" && new URL(r.url()).pathname.startsWith("/api/briefs/"));
     await page.getByRole("button", {name:"Save brief"}).click();
-    await page.getByText("Baseline disagreement · Request independent aggregate data", {exact:true}).first().waitFor();
+    assert.ok((await put).ok());
+    await page.locator(".saved-brief").first().getByText("Baseline disagreement · Request independent aggregate data", {exact:true}).waitFor();
     const gotDownload = page.waitForEvent("download");
     await page.getByRole("button", {name:"Export JSON"}).first().click();
     const output = JSON.parse(await readFile(await (await gotDownload).path(), "utf8"));
@@ -65,6 +67,35 @@ try {
     assert.equal(output.assessment, "Baseline disagreement");
     assert.ok(output.forecast_at_export.model_version.startsWith("synthetic-"));
   }
+  await page.getByRole("button", {name:"Data & coverage", exact:true}).click();
+  await page.getByRole("heading", {name:"Monthly source volume"}).waitFor();
+  await page.getByLabel("Demo role").selectOption("planner");
+  assert.equal(await page.getByRole("button", {name:"News inbox", exact:true}).count(), 0);
+  await page.getByRole("button", {name:"Map workspace", exact:true}).click();
+  await page.getByRole("heading", {name:"Forecast atlas"}).waitFor();
+  assert.equal(await page.getByLabel("Known connection").count(), 0);
+  await page.getByLabel("Data track").selectOption("real");
+  await page.getByRole("heading", {name:"Real-data results"}).waitFor();
+  assert.equal(await page.locator(".leaflet-atlas").count(),0);
+  assert.ok(await page.getByLabel("Open reviewed real aggregate").isDisabled());
+  await page.getByLabel("I have reviewed this aggregate for disclosure.").check();
+  const upload = page.getByLabel("Open reviewed real aggregate");
+  const fixture = {schema:"corridor-real-aggregate-v1",synthetic:false,minimum_group:3,
+    data_cutoff:"2025-11-20",generated_at:"2025-11-22T09:00:00Z",
+    districts:[{district:"Wayanad",cases:4,metrics:[],ratios:[]},{district:"Ernakulam",cases:30,metrics:[{
+      horizon_days:28,distinct_event_support:10,windows:12,metrics:{poisson_gbm:1.2345}
+    }],ratios:[]}]};
+  await upload.setInputFiles({name:"aggregate.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify({...fixture,cases:[{private:"would be invalid"}]}))});
+  await page.getByRole("alert").filter({hasText:"Raw or unrecognised"}).waitFor();
+  await upload.setInputFiles({name:"safe-aggregate.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(fixture))});
+  await page.getByRole("heading", {name:"District aggregate"}).waitFor();
+  await page.getByRole("row", {name:/Wayanad Suppressed/}).waitFor();
+  await page.getByRole("row", {name:/Ernakulam 30 1.23/}).waitFor();
+  assert.ok(await page.getByText("Coverage unknown", {exact:true}).count() >= 2);
+  await page.getByLabel("Data track").selectOption("synthetic");
+  await page.getByRole("heading", {name:"Forecast atlas"}).waitFor();
+  await page.setViewportSize({width:390,height:850});
+  assert.ok(await page.evaluate(()=>document.body.scrollWidth <= window.innerWidth+2));
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);
   console.log("Browser: map, coverage, search, evidence, local report import and replay passed without external requests.");

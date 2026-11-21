@@ -251,16 +251,22 @@ def coverage_section(ds):
     for district in real_input.DISTRICTS:
         count = sum(d(r["event_date"]) >= ds.start for r in area.get(district, ()))
         display = count if ds.synthetic or count >= ds.cfg["min_release_group"] else None
-        ratios = [{"year": year, "ratio": ds.ratio(district, year) if ds.synthetic or
-                   sum(d(r["event_date"]).year == year for r in area.get(district, ())) >= ds.cfg["min_release_group"] else None}
-                  for dd, year in sorted(ds.official) if dd == district]
+        ratios = []
+        for dd, year in sorted(ds.official):
+            if dd != district:
+                continue
+            numerator = sum(d(r["event_date"]).year == year for r in area.get(district, ()))
+            enough = ds.synthetic or numerator >= ds.cfg["min_release_group"]
+            ratios.append({"year": year, "ratio": ds.ratio(district, year) if enough else None,
+                           "observed_cases": numerator if enough else None})
         groups.append({"location": district, "cases": display, "ratios": ratios,
                        "coverage": ds.coverage.get(district) if ds.synthetic else None})
     return {"sources": ["Fictional fixtures"] if ds.synthetic else ["Public news reports", "High Court judgments"],
             "months": volume, "districts": groups, "minimum_quantity_grams": ds.cfg["minimum_quantity_grams"],
             "before_quantity_rule": sum(base_counts.values()), "after_quantity_rule": sum(
                 sum(d(r["event_date"]) >= ds.start for r in values) for values in area.values()),
-            "campaign_markers": len(ds.campaigns), "effort": "No independent observed effort series.",
+            "campaign_markers": len(ds.campaigns), "coverage_floor": ds.cfg["real_min_coverage_ratio"],
+            "effort": "No independent observed effort series.",
             "note": "Coverage ratio is a rough proxy; police and excise counts can overlap and include small possession cases. Use verified comparable non-overlapping counts only."}
 
 
@@ -275,12 +281,18 @@ def aggregate_for_picker(report):
         for h, table in area.items():
             g = table.get(district)
             if g and release_cell(g["distinct_event_support"], g["metrics"]["last_56_days"]["n"], n):
-                rows.append({"horizon_days": h, "distinct_event_support": g["distinct_event_support"],
+                rows.append({"horizon_days": h, "distinct_event_support": g["distinct_event_support"], "windows": g["metrics"]["last_56_days"]["n"],
                              "metrics": {m: v["mae"] for m, v in g["metrics"].items()}})
-        districts.append({"district": district, "cases": r["cases"], "metrics": rows})
+        ratios = [{"year": v["year"], "ratio": v["ratio"], "observed_cases": v["observed_cases"]}
+                  for v in r["ratios"] if isinstance(v.get("observed_cases"), int) and v["observed_cases"] >= n]
+        districts.append({"district": district, "cases": r["cases"] if isinstance(r["cases"], int) and r["cases"] >= n else None,
+                          "metrics": rows, "ratios": ratios})
+    months = [{**row, "articles": row["articles"] if isinstance(row["articles"], int) and row["articles"] >= n else None}
+              for row in report["coverage"]["months"]]
     return {"schema": "corridor-real-aggregate-v1", "synthetic": False, "minimum_group": n,
             "label": LABEL_REAL, "universe": UNIVERSE, "districts": districts, "data_cutoff": report["data_cutoff"],
-            "generated_at": report["generated_at"]}
+            "generated_at": report["generated_at"], "coverage_minimum": report["coverage"].get("coverage_floor", .05),
+            "months": [{**r, "mix_change": False, "possible_break": False} if r["articles"] is None else r for r in months]}
 
 
 def html_report(report):
@@ -349,4 +361,20 @@ def run(track):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("track", choices=["synthetic", "real"])
-    run(p.parse_args().track)
+    p.add_argument("--release-existing", action="store_true", help="Rebuild the private picker file without re-scoring.")
+    args = p.parse_args()
+    if args.release_existing:
+        private_report = report_dir("real") / "eval_report.json"
+        if args.track != "real":
+            p.error("--release-existing is only for real reports")
+        if not private_report.exists():
+            print("REAL: no private aggregate report to prepare.")
+        else:
+            report = json.loads(private_report.read_text())
+            if report.get("synthetic") is not False:
+                raise SystemExit("Unexpected report track")
+            os.umask(0o077)
+            dump(private_report.parent / "ui_aggregate.json", aggregate_for_picker(report))
+            print("REAL: private picker file rebuilt; owner review required before opening. Holdout was not re-scored.")
+    else:
+        run(args.track)

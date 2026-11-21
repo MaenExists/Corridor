@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api feed
+.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api feed release-real
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -11,6 +11,8 @@ evaluate:
 real:
 	$(PY) -m ml.data.real_input
 	$(PY) -m ml.evaluate.run real
+release-real:
+	$(PY) -m ml.evaluate.run real --release-existing
 forecast:
 	$(PY) -m ml.forecast.batch
 refresh:

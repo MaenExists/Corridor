@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export WRANGLER_SEND_METRICS=false
+export WRANGLER_HIDE_BANNER=true
 export CLOUDFLARE_ENV=local
 export CORRIDOR_REVIEW_KEY="${CORRIDOR_REVIEW_KEY:-$(.venv/bin/python -c 'import secrets; print(secrets.token_urlsafe(12))')}"
 wrangler=("./node_modules/.bin/wrangler" "--config" "worker/wrangler.jsonc")
