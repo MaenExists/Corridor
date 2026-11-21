@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Atlas } from "./Map";
 import { Evidence, Observation } from "./Evidence";
 import { Reports, readSyntheticReport } from "./Reports";
+import { Inbox } from "./Review";
 import type { Case } from "../../shared/schema";
 import { BANNER, dateLabel, localJSON } from "./data";
 import type { Cases, Evaluation, Forecasts, Selection } from "./data";
@@ -15,7 +16,8 @@ function App() {
   const [horizon,setHorizon] = useState<7|28>(28);
   const [observation,setObservation] = useState<{row:Case;cutoff:string}|null>(null);
   const [report,setReport] = useState<Evaluation|null>(null);
-  const [view,setView] = useState<"map"|"report">("map");
+  const [view,setView] = useState<"map"|"report"|"inbox">("map");
+  const [reviewKey,setReviewKey] = useState("");
   const [fault,setFault] = useState("");
   const fetchForecast = useCallback(async () => {
     const f = await localJSON<Forecasts>("/generated/forecasts.json");
@@ -38,11 +40,13 @@ function App() {
       <header className="masthead"><a href="/" className="brand"><span className="logomark" aria-hidden>╱╱</span> Corridor</a>
         <span className="track-pill">SYNTHETIC DATA</span>
         <nav aria-label="Workspace"><button aria-current={view==="map"?"page":undefined} onClick={()=>setView("map")}>Map workspace</button>
-          <button aria-current={view==="report"?"page":undefined} onClick={()=>setView("report")}>Model report</button></nav>
+          <button aria-current={view==="report"?"page":undefined} onClick={()=>setView("report")}>Model report</button>
+          <button aria-current={view==="inbox"?"page":undefined} onClick={()=>setView("inbox")}>News inbox</button></nav>
       </header>
     </div>
     <main className="main-shell">
-      {view === "report" ? <Reports current={report}/> : <>
+      {view === "report" ? <Reports current={report}/> : view=== "inbox" ?
+        <Inbox reviewKey={reviewKey} setKey={setReviewKey} refresh={fetchForecast}/> : <>
       <div className="workspace-header"><div><div className="section-kicker">Kerala case observatory</div><h1>Forecast atlas</h1>
         <p>Compare documented case patterns with the places where reporting is thin.</p></div>
         {forecasts && <div className="freshness"><span>Generated at <time dateTime={forecasts.generated_at}>{dateLabel(forecasts.generated_at)} {forecasts.generated_at.slice(11,16)} UTC</time></span>

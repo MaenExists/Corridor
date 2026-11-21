@@ -28,6 +28,20 @@ try {
   await page.getByRole("heading", { name: "Replay the held-out windows" }).waitFor();
   await page.getByRole("button", { name: "Play replay" }).click();
   await page.getByRole("button", { name: "Pause replay" }).click();
+  if (process.env.CORRIDOR_REVIEW_KEY) {
+    await page.getByRole("button", { name: "News inbox" }).click();
+    await page.getByText("Possible duplicate", { exact: true }).waitFor();
+    await page.getByLabel("Local analyst review key").fill(process.env.CORRIDOR_REVIEW_KEY);
+    const verify = page.locator("article").filter({hasText:"Ernakulam archive adds"}).getByRole("button", { name: "Verify fixture" });
+    if (await verify.count()) {
+      await verify.click();
+      await page.getByRole("status").filter({hasText:"Verified at"}).waitFor();
+    }
+    const current = await page.request.get("http://127.0.0.1:5173/api/cues/verified");
+    assert.ok((await current.json()).items.some(r=>r.district==="Ernakulam"));
+    const before = await page.request.get("http://127.0.0.1:5173/api/cues/verified?before=2026-11-20T00:00:00Z");
+    assert.deepEqual((await before.json()).items, []);
+  }
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);
   console.log("Browser: map, coverage, search, evidence, local report import and replay passed without external requests.");

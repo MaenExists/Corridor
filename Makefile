@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api
+.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api feed
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -15,6 +15,8 @@ forecast:
 	$(PY) -m ml.forecast.batch
 refresh:
 	$(PY) -m ml.forecast.batch --reviewed-cues
+feed:
+	$(PY) -m ml.collector.feed
 typecheck:
 	npm run typecheck
 	$(PY) -c 'from shared.schema import Case, Forecast; print("Python contracts import")'

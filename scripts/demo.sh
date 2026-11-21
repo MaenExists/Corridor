@@ -23,6 +23,7 @@ curl --silent --fail http://127.0.0.1:8787/api/health > /dev/null
 if [[ "${1:-}" == "--api-only" ]]; then
   wait "$worker"
 else
+  .venv/bin/python -m ml.collector.feed
   echo "Corridor: http://127.0.0.1:5173 (SYNTHETIC DATA)"
   echo "Local analyst review key (for fixture inbox and leads): $CORRIDOR_REVIEW_KEY"
   ./node_modules/.bin/vite --config web/vite.config.ts &
