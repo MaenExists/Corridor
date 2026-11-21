@@ -15,5 +15,5 @@ export interface Lead {
 }
 export interface Brief {
   id: string; district: string; horizon_days: 7 | 28; assessment: string;
-  next_step: string; updated_at: string; role: Role; synthetic: true;
+  next_step: string; updated_at: string; role: Role; connection: string | null; synthetic: true;
 }

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
 
 const browser = await chromium.launch();
@@ -41,6 +42,28 @@ try {
     assert.ok((await current.json()).items.some(r=>r.district==="Ernakulam"));
     const before = await page.request.get("http://127.0.0.1:5173/api/cues/verified?before=2026-11-20T00:00:00Z");
     assert.deepEqual((await before.json()).items, []);
+    const blocked = await page.request.get("http://127.0.0.1:5173/api/leads");
+    assert.equal(blocked.status(), 403);
+    await page.getByRole("button", {name:"Leads", exact:true}).click();
+    await page.getByRole("button", {name:"Submit practice lead"}).click();
+    await page.getByRole("status").filter({hasText:"Practice lead stored"}).waitFor();
+    await page.getByRole("button", {name:"Open review queue"}).click();
+    await page.getByRole("button", {name:"Mark reviewed"}).first().click();
+    await page.getByRole("status").filter({hasText:"Lead review saved"}).waitFor();
+    await page.getByRole("button", {name:"Briefs", exact:true}).click();
+    await page.getByLabel("Brief connection").selectOption("Thrissur|Ernakulam");
+    await page.getByRole("button", {name:"Save brief"}).click();
+    await page.getByRole("status").filter({hasText:"Brief saved"}).waitFor();
+    await page.getByLabel("Assessment").selectOption("Baseline disagreement");
+    await page.getByRole("button", {name:"Save brief"}).click();
+    await page.getByText("Baseline disagreement · Request independent aggregate data", {exact:true}).first().waitFor();
+    const gotDownload = page.waitForEvent("download");
+    await page.getByRole("button", {name:"Export JSON"}).first().click();
+    const output = JSON.parse(await readFile(await (await gotDownload).path(), "utf8"));
+    assert.equal(output.synthetic, true);
+    assert.equal(output.subject, "Thrissur → Ernakulam");
+    assert.equal(output.assessment, "Baseline disagreement");
+    assert.ok(output.forecast_at_export.model_version.startsWith("synthetic-"));
   }
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);

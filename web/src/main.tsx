@@ -4,6 +4,7 @@ import { Atlas } from "./Map";
 import { Evidence, Observation } from "./Evidence";
 import { Reports, readSyntheticReport } from "./Reports";
 import { Inbox } from "./Review";
+import { Briefs, Leads } from "./Workflows";
 import type { Case } from "../../shared/schema";
 import { BANNER, dateLabel, localJSON } from "./data";
 import type { Cases, Evaluation, Forecasts, Selection } from "./data";
@@ -16,7 +17,7 @@ function App() {
   const [horizon,setHorizon] = useState<7|28>(28);
   const [observation,setObservation] = useState<{row:Case;cutoff:string}|null>(null);
   const [report,setReport] = useState<Evaluation|null>(null);
-  const [view,setView] = useState<"map"|"report"|"inbox">("map");
+  const [view,setView] = useState<"map"|"report"|"inbox"|"leads"|"briefs">("map");
   const [reviewKey,setReviewKey] = useState("");
   const [fault,setFault] = useState("");
   const fetchForecast = useCallback(async () => {
@@ -41,12 +42,16 @@ function App() {
         <span className="track-pill">SYNTHETIC DATA</span>
         <nav aria-label="Workspace"><button aria-current={view==="map"?"page":undefined} onClick={()=>setView("map")}>Map workspace</button>
           <button aria-current={view==="report"?"page":undefined} onClick={()=>setView("report")}>Model report</button>
-          <button aria-current={view==="inbox"?"page":undefined} onClick={()=>setView("inbox")}>News inbox</button></nav>
+          <button aria-current={view==="inbox"?"page":undefined} onClick={()=>setView("inbox")}>News inbox</button>
+          <button aria-current={view==="leads"?"page":undefined} onClick={()=>setView("leads")}>Leads</button>
+          <button aria-current={view==="briefs"?"page":undefined} onClick={()=>setView("briefs")}>Briefs</button></nav>
       </header>
     </div>
     <main className="main-shell">
       {view === "report" ? <Reports current={report}/> : view=== "inbox" ?
-        <Inbox reviewKey={reviewKey} setKey={setReviewKey} refresh={fetchForecast}/> : <>
+        <Inbox reviewKey={reviewKey} setKey={setReviewKey} refresh={fetchForecast}/> :
+        view==="leads" ? <Leads reviewKey={reviewKey} setKey={setReviewKey} role="analyst"/> :
+        view==="briefs" ? <Briefs forecasts={forecasts} selection={selection} horizon={horizon} role="analyst"/> : <>
       <div className="workspace-header"><div><div className="section-kicker">Kerala case observatory</div><h1>Forecast atlas</h1>
         <p>Compare documented case patterns with the places where reporting is thin.</p></div>
         {forecasts && <div className="freshness"><span>Generated at <time dateTime={forecasts.generated_at}>{dateLabel(forecasts.generated_at)} {forecasts.generated_at.slice(11,16)} UTC</time></span>
@@ -57,7 +62,7 @@ function App() {
       {cases && forecasts && <div className="atlas-layout">
         <Atlas data={cases} forecasts={forecasts} selection={selection} select={select} horizon={horizon} setHorizon={setHorizon}
           openCase={(row,cutoff)=>setObservation({row,cutoff})}/>
-        <div><Evidence selection={selection} forecast={forecast} report={report} openReport={()=>setView("report")}/>
+        <div><Evidence selection={selection} forecast={forecast} report={report} openReport={()=>setView("report")} startBrief={()=>setView("briefs")}/>
           {observation && <Observation key={observation.row.case_id} {...observation} close={()=>setObservation(null)}/>}
         </div>
       </div>}

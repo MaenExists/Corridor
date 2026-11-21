@@ -142,13 +142,19 @@ async function api(req: Request, env: Env): Promise<Response> {
   const brief = path.match(/^\/api\/briefs\/([a-zA-Z0-9_-]{1,100})$/);
   if ((path === "/api/briefs" && method === "POST") || (brief && method === "PUT")) {
     const v = await body(req);
-    if (!only(v,["district","horizon_days","assessment","next_step","role"]) || !isDistrict(v.district) || ![7,28].includes(Number(v.horizon_days))
+    if (!only(v,["district","horizon_days","assessment","next_step","role","connection"]) || !isDistrict(v.district) || ![7,28].includes(Number(v.horizon_days))
       || !includes(ASSESSMENTS,v.assessment) || !includes(NEXT_STEPS,v.next_step) || !includes(["analyst","planner"],v.role))
       return problem("Use the demo brief options; no personal or case details.", 400);
+    if (v.connection != null) {
+      const pair = await assets(env,u,"cases_synthetic.json");
+      if (v.role!=="analyst" || typeof v.connection!=="string" ||
+        !(pair.connections as string[][]).some(p=>p.join("|")===v.connection && p[1]===v.district))
+        return problem("Use an invented known connection from the synthetic atlas.",400);
+    }
     const id = brief?.[1] ?? uuid();
-    const fields = [v.district,Number(v.horizon_days),v.assessment,v.next_step,now(),v.role];
-    const result = await (brief ? db.prepare("UPDATE briefs SET district=?,horizon_days=?,assessment=?,next_step=?,updated_at=?,role=? WHERE id=?").bind(...fields,id) :
-      db.prepare("INSERT INTO briefs VALUES (?,?,?,?,?,?,?)").bind(id,...fields)).run();
+    const fields = [v.district,Number(v.horizon_days),v.assessment,v.next_step,now(),v.role,v.connection ?? null];
+    const result = await (brief ? db.prepare("UPDATE briefs SET district=?,horizon_days=?,assessment=?,next_step=?,updated_at=?,role=?,connection=? WHERE id=?").bind(...fields,id) :
+      db.prepare("INSERT INTO briefs (id,district,horizon_days,assessment,next_step,updated_at,role,connection) VALUES (?,?,?,?,?,?,?,?)").bind(id,...fields)).run();
     if (!result.meta.changes) return problem("Brief not found.", 404);
     return json({ item: tag((await db.prepare("SELECT * FROM briefs WHERE id=?").bind(id).first<Doc>()) ?? {}) }, brief ? 200 : 201);
   }

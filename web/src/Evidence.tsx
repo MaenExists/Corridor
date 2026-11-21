@@ -3,8 +3,8 @@ import type { Case, Forecast } from "../../shared/schema";
 import { NOTICE, dateLabel, methodName, pct } from "./data";
 import type { Evaluation, Selection } from "./data";
 
-export function Evidence({ selection, forecast, report, openReport }:
-  { selection: Selection; forecast?: Forecast; report?: Evaluation | null; openReport: ()=>void }) {
+export function Evidence({ selection, forecast, report, openReport, startBrief }:
+  { selection: Selection; forecast?: Forecast; report?: Evaluation | null; openReport: ()=>void; startBrief:()=>void }) {
   const title = "area" in selection ? selection.area : selection.connection.join(" → ");
   const match = report?.tasks.find(t=>t.horizon_days===forecast?.horizon_days && t.scope===("area" in selection?"area":"corridor"));
   const local = match?.locations.find(r=>r.location===title);
@@ -32,6 +32,7 @@ export function Evidence({ selection, forecast, report, openReport }:
         : <p className="small">No baseline had a smaller mean error than the candidate here.</p>)}
       <button className="quiet" onClick={openReport}>Open report card</button>
     </details>}
+    <button onClick={startBrief}>Start a brief</button>
     </> : <p>No dated forecast for this selection.</p>}</aside>;
 }
 
