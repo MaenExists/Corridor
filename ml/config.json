@@ -1,0 +1,18 @@
+{
+  "outcome_maturity_days": 21,
+  "last_n_days": 56,
+  "min_covered_weeks": 26,
+  "min_recent_cases": 3,
+  "recent_support_days": 90,
+  "synthetic_min_coverage": 0.35,
+  "real_min_coverage_ratio": 0.05,
+  "corridor_min_cases": 30,
+  "minimum_quantity_grams": 0,
+  "calibration_weeks": 12,
+  "selection_weeks": 12,
+  "synthetic_holdout_weeks": 14,
+  "real_holdout_weeks": 20,
+  "min_release_group": 5,
+  "top_k": 3,
+  "nominal_interval": 0.8
+}
