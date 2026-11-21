@@ -1,0 +1,981 @@
+{
+  "attribution": "GeoNames India / CC BY 4.0. Selected and reduced to locality names, district and coordinates.",
+  "places": [
+    {
+      "name": "Kanhangad",
+      "local_name": null,
+      "alias": [
+        "Kankhangad",
+        "Kannangad",
+        "Kānnangād"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.30814,
+      "lon": 75.10632,
+      "source": 1268015
+    },
+    {
+      "name": "Kāsaragod",
+      "local_name": null,
+      "alias": [
+        "Kasaragod",
+        "Kasaragod Fort"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.49838,
+      "lon": 74.98959,
+      "source": 1267616
+    },
+    {
+      "name": "Ajānūr",
+      "local_name": null,
+      "alias": [
+        "Ajanur"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.33614,
+      "lon": 75.09297,
+      "source": 10877918
+    },
+    {
+      "name": "Kūdlu",
+      "local_name": null,
+      "alias": [
+        "Kudlu"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.52979,
+      "lon": 74.97881,
+      "source": 10846588
+    },
+    {
+      "name": "Nīlēshwar",
+      "local_name": null,
+      "alias": [
+        "Nileshwar",
+        "Nīleshwar"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.25953,
+      "lon": 75.1352,
+      "source": 1261394
+    },
+    {
+      "name": "Trikarpūr South",
+      "local_name": null,
+      "alias": [
+        "Trikarpur South",
+        "South Thrikkaripur"
+      ],
+      "district": "Kasaragod",
+      "lat": 12.11649,
+      "lon": 75.18517,
+      "source": 10878443
+    },
+    {
+      "name": "Tellicherry",
+      "local_name": "തലശ്ശേരി",
+      "alias": [
+        "Talasseri",
+        "Teliceri",
+        "Tellicherri"
+      ],
+      "district": "Kannur",
+      "lat": 11.74811,
+      "lon": 75.4929,
+      "source": 1254780
+    },
+    {
+      "name": "Taliparamba",
+      "local_name": "തളിപ്പറമ്പ്",
+      "alias": [
+        "Talipparamba",
+        "Tullipurmbu",
+        "ta li pa la mu ba"
+      ],
+      "district": "Kannur",
+      "lat": 12.04161,
+      "lon": 75.35927,
+      "source": 1255121
+    },
+    {
+      "name": "Payyanur",
+      "local_name": null,
+      "alias": [
+        "Payyannur",
+        "Payyannūr"
+      ],
+      "district": "Kannur",
+      "lat": 12.0935,
+      "lon": 75.20249,
+      "source": 1259994
+    },
+    {
+      "name": "Kannur",
+      "local_name": "kannuർ",
+      "alias": [
+        "CNN",
+        "Cananor",
+        "Cannanore"
+      ],
+      "district": "Kannur",
+      "lat": 11.86752,
+      "lon": 75.35763,
+      "source": 1274987
+    },
+    {
+      "name": "Mattanur",
+      "local_name": null,
+      "alias": [
+        "CNN",
+        "Mattannur"
+      ],
+      "district": "Kannur",
+      "lat": 11.93018,
+      "lon": 75.57152,
+      "source": 1263331
+    },
+    {
+      "name": "Chirakkal",
+      "local_name": null,
+      "alias": [],
+      "district": "Kannur",
+      "lat": 11.91257,
+      "lon": 75.36102,
+      "source": 10910176
+    },
+    {
+      "name": "Kalpatta",
+      "local_name": "കൽപറ്റ",
+      "alias": [
+        "Kalpetta",
+        "ka er pei te ta",
+        "kalapetta"
+      ],
+      "district": "Wayanad",
+      "lat": 11.60871,
+      "lon": 76.08343,
+      "source": 1268327
+    },
+    {
+      "name": "Perya",
+      "local_name": null,
+      "alias": [
+        "Periya"
+      ],
+      "district": "Wayanad",
+      "lat": 11.83334,
+      "lon": 75.85408,
+      "source": 1259880
+    },
+    {
+      "name": "Panamaram",
+      "local_name": null,
+      "alias": [],
+      "district": "Wayanad",
+      "lat": 11.74014,
+      "lon": 76.07369,
+      "source": 1260606
+    },
+    {
+      "name": "Achur",
+      "local_name": null,
+      "alias": [],
+      "district": "Wayanad",
+      "lat": 11.6017,
+      "lon": 76.04147,
+      "source": 11450411
+    },
+    {
+      "name": "Achur",
+      "local_name": null,
+      "alias": [],
+      "district": "Wayanad",
+      "lat": 11.60035,
+      "lon": 76.00711,
+      "source": 11450421
+    },
+    {
+      "name": "Adumāri",
+      "local_name": null,
+      "alias": [
+        "Adumari"
+      ],
+      "district": "Wayanad",
+      "lat": 11.83462,
+      "lon": 76.04717,
+      "source": 11450036
+    },
+    {
+      "name": "Kozhikode",
+      "local_name": "കോഴിക്കോട്",
+      "alias": [
+        "CCJ",
+        "Calecute",
+        "Calicut"
+      ],
+      "district": "Kozhikode",
+      "lat": 11.24802,
+      "lon": 75.7804,
+      "source": 1265873
+    },
+    {
+      "name": "Badagara",
+      "local_name": "വടകര",
+      "alias": [
+        "Vadakara",
+        "Vatakara",
+        "barakara"
+      ],
+      "district": "Kozhikode",
+      "lat": 11.59776,
+      "lon": 75.58142,
+      "source": 1278023
+    },
+    {
+      "name": "Koyilandy",
+      "local_name": "കൊയിലാണ്ടി",
+      "alias": [
+        "Kovilkandi",
+        "Koyilandi",
+        "Koyilāndi"
+      ],
+      "district": "Kozhikode",
+      "lat": 11.4381,
+      "lon": 75.69306,
+      "source": 1259093
+    },
+    {
+      "name": "Beypore",
+      "local_name": "ബേപ്പൂർ",
+      "alias": [
+        "Beipur",
+        "Beppur",
+        "Beypur"
+      ],
+      "district": "Kozhikode",
+      "lat": 11.17151,
+      "lon": 75.80611,
+      "source": 1276378
+    },
+    {
+      "name": "Cheruvannur",
+      "local_name": null,
+      "alias": [],
+      "district": "Kozhikode",
+      "lat": 11.19033,
+      "lon": 75.82833,
+      "source": 13353585
+    },
+    {
+      "name": "Kunnamangalam",
+      "local_name": null,
+      "alias": [],
+      "district": "Kozhikode",
+      "lat": 11.30459,
+      "lon": 75.87772,
+      "source": 1265580
+    },
+    {
+      "name": "Ponnāni",
+      "local_name": null,
+      "alias": [
+        "Ponnani",
+        "Ponani",
+        "Поннани"
+      ],
+      "district": "Malappuram",
+      "lat": 10.76695,
+      "lon": 75.92523,
+      "source": 1259411
+    },
+    {
+      "name": "Malappuram",
+      "local_name": "മലപ്പുറം",
+      "alias": [
+        "Malapouram",
+        "Malapurama",
+        "Malapuramas"
+      ],
+      "district": "Malappuram",
+      "lat": 11.04199,
+      "lon": 76.08154,
+      "source": 1264154
+    },
+    {
+      "name": "Manjeri",
+      "local_name": "മഞ്ചേരി",
+      "alias": [
+        "man jie li",
+        "manceri",
+        "manjeri"
+      ],
+      "district": "Malappuram",
+      "lat": 11.12018,
+      "lon": 76.11996,
+      "source": 1263694
+    },
+    {
+      "name": "Tirūrangādi",
+      "local_name": null,
+      "alias": [
+        "Tirurangadi"
+      ],
+      "district": "Malappuram",
+      "lat": 11.04316,
+      "lon": 75.92337,
+      "source": 1254345
+    },
+    {
+      "name": "Tennala",
+      "local_name": null,
+      "alias": [
+        "Thennala"
+      ],
+      "district": "Malappuram",
+      "lat": 10.99342,
+      "lon": 75.93504,
+      "source": 10929901
+    },
+    {
+      "name": "Tirur",
+      "local_name": "തിരൂർ",
+      "alias": [
+        "Tirur Station",
+        "Tirūr",
+        "di lu er"
+      ],
+      "district": "Malappuram",
+      "lat": 10.91368,
+      "lon": 75.92118,
+      "source": 1254346
+    },
+    {
+      "name": "Palakkad",
+      "local_name": "പാലക്കാട്",
+      "alias": [
+        "Palakad",
+        "Palakkat",
+        "Palghat"
+      ],
+      "district": "Palakkad",
+      "lat": 10.77319,
+      "lon": 76.65366,
+      "source": 1260728
+    },
+    {
+      "name": "Ottapalam",
+      "local_name": "ഒറ്റപ്പാലം",
+      "alias": [
+        "Ottappalam",
+        "Ottappālam",
+        "ao te ta pu pa la mu"
+      ],
+      "district": "Palakkad",
+      "lat": 10.7735,
+      "lon": 76.37758,
+      "source": 1261008
+    },
+    {
+      "name": "Mannārakkāt",
+      "local_name": null,
+      "alias": [
+        "Mannarakkat"
+      ],
+      "district": "Palakkad",
+      "lat": 10.99223,
+      "lon": 76.46418,
+      "source": 1263661
+    },
+    {
+      "name": "Shōranūr",
+      "local_name": null,
+      "alias": [
+        "Shoranur"
+      ],
+      "district": "Palakkad",
+      "lat": 10.76181,
+      "lon": 76.27078,
+      "source": 1256432
+    },
+    {
+      "name": "Pirāyiri",
+      "local_name": null,
+      "alias": [
+        "Pirayiri"
+      ],
+      "district": "Palakkad",
+      "lat": 10.76523,
+      "lon": 76.63178,
+      "source": 11477647
+    },
+    {
+      "name": "Chittūr",
+      "local_name": null,
+      "alias": [
+        "Chittur",
+        "Chittur-Cochin"
+      ],
+      "district": "Palakkad",
+      "lat": 10.69967,
+      "lon": 76.7471,
+      "source": 1274032
+    },
+    {
+      "name": "Thrissur",
+      "local_name": "trssuർ",
+      "alias": [
+        "Trichur",
+        "Trichura",
+        "tiruccur"
+      ],
+      "district": "Thrissur",
+      "lat": 10.51667,
+      "lon": 76.21667,
+      "source": 1254187
+    },
+    {
+      "name": "Kunnamkulam",
+      "local_name": "കുന്നംകുളം",
+      "alias": [
+        "Kunamkulam",
+        "kun na mu ku lan",
+        "kunnamakulama"
+      ],
+      "district": "Thrissur",
+      "lat": 10.64667,
+      "lon": 76.06695,
+      "source": 1265579
+    },
+    {
+      "name": "Kodungallūr",
+      "local_name": null,
+      "alias": [
+        "Kodungallur",
+        "Cranganore",
+        "Cranganur"
+      ],
+      "district": "Thrissur",
+      "lat": 10.23263,
+      "lon": 76.19513,
+      "source": 1266385
+    },
+    {
+      "name": "Kizhake Chālakudi",
+      "local_name": null,
+      "alias": [
+        "Kizhake Chalakudi",
+        "Chalakudi",
+        "Chālakudi"
+      ],
+      "district": "Thrissur",
+      "lat": 10.30067,
+      "lon": 76.33763,
+      "source": 1266452
+    },
+    {
+      "name": "Kārakkād",
+      "local_name": null,
+      "alias": [
+        "Karakkad",
+        "Chavakkad"
+      ],
+      "district": "Thrissur",
+      "lat": 10.58804,
+      "lon": 76.03884,
+      "source": 11462947
+    },
+    {
+      "name": "Chetwayi",
+      "local_name": null,
+      "alias": [
+        "Chaughat",
+        "Chavakkad",
+        "Chetwagi"
+      ],
+      "district": "Thrissur",
+      "lat": 10.52885,
+      "lon": 76.04793,
+      "source": 1274468
+    },
+    {
+      "name": "Kanayannur",
+      "local_name": null,
+      "alias": [
+        "Kanajannur",
+        "Канаяннур"
+      ],
+      "district": "Ernakulam",
+      "lat": 9.96667,
+      "lon": 76.26667,
+      "source": 12501153
+    },
+    {
+      "name": "Kochi",
+      "local_name": "കൊച്ചി",
+      "alias": [
+        "British Cochin",
+        "COK",
+        "Cochim"
+      ],
+      "district": "Ernakulam",
+      "lat": 9.93988,
+      "lon": 76.26022,
+      "source": 1273874
+    },
+    {
+      "name": "Edattala",
+      "local_name": null,
+      "alias": [
+        "Edathala"
+      ],
+      "district": "Ernakulam",
+      "lat": 10.05639,
+      "lon": 76.38451,
+      "source": 11463772
+    },
+    {
+      "name": "Kalamassery",
+      "local_name": null,
+      "alias": [],
+      "district": "Ernakulam",
+      "lat": 10.0614,
+      "lon": 76.32631,
+      "source": 10630431
+    },
+    {
+      "name": "Tripunittura",
+      "local_name": null,
+      "alias": [
+        "Thrippunithura",
+        "Tripunnittara"
+      ],
+      "district": "Ernakulam",
+      "lat": 9.94283,
+      "lon": 76.33331,
+      "source": 1254170
+    },
+    {
+      "name": "Vazhakkala",
+      "local_name": null,
+      "alias": [],
+      "district": "Ernakulam",
+      "lat": 10.01239,
+      "lon": 76.32633,
+      "source": 13353582
+    },
+    {
+      "name": "Munnar",
+      "local_name": "മൂന്നാർ",
+      "alias": [
+        "mu na er",
+        "mun'naru",
+        "munar"
+      ],
+      "district": "Idukki",
+      "lat": 10.08818,
+      "lon": 77.06239,
+      "source": 1262463
+    },
+    {
+      "name": "Thodupuzha",
+      "local_name": "തൊടുപുഴ",
+      "alias": [
+        "teatupula",
+        "thodupuyha",
+        "todupula"
+      ],
+      "district": "Idukki",
+      "lat": 9.89394,
+      "lon": 76.72216,
+      "source": 9072827
+    },
+    {
+      "name": "Marayur",
+      "local_name": null,
+      "alias": [
+        "Maraiyoor",
+        "Maraiyur",
+        "Maraiyūr"
+      ],
+      "district": "Idukki",
+      "lat": 10.27641,
+      "lon": 77.16205,
+      "source": 1263566
+    },
+    {
+      "name": "Idukki",
+      "local_name": null,
+      "alias": [
+        "Idiaki",
+        "Idikki"
+      ],
+      "district": "Idukki",
+      "lat": 9.85,
+      "lon": 76.96667,
+      "source": 1269811
+    },
+    {
+      "name": "Kumily",
+      "local_name": null,
+      "alias": [],
+      "district": "Idukki",
+      "lat": 9.62512,
+      "lon": 77.1272,
+      "source": 7290475
+    },
+    {
+      "name": "Aiyappan Kōvil",
+      "local_name": null,
+      "alias": [
+        "Aiyappan Kovil"
+      ],
+      "district": "Idukki",
+      "lat": 9.71298,
+      "lon": 77.03386,
+      "source": 11680033
+    },
+    {
+      "name": "Kottayam",
+      "local_name": "കോട്ടയം",
+      "alias": [
+        "Kotayam",
+        "Kottajam",
+        "kattayama"
+      ],
+      "district": "Kottayam",
+      "lat": 9.58692,
+      "lon": 76.52132,
+      "source": 1265911
+    },
+    {
+      "name": "Changanācheri",
+      "local_name": null,
+      "alias": [
+        "Changanacheri",
+        "Changanacherry",
+        "Changanasseri"
+      ],
+      "district": "Kottayam",
+      "lat": 9.44203,
+      "lon": 76.53604,
+      "source": 1274664
+    },
+    {
+      "name": "Panachikkad",
+      "local_name": null,
+      "alias": [],
+      "district": "Kottayam",
+      "lat": 9.52974,
+      "lon": 76.54062,
+      "source": 13353576
+    },
+    {
+      "name": "Perumbaikad",
+      "local_name": null,
+      "alias": [],
+      "district": "Kottayam",
+      "lat": 9.61827,
+      "lon": 76.53127,
+      "source": 13353573
+    },
+    {
+      "name": "Ettumānūr",
+      "local_name": null,
+      "alias": [
+        "Ettumanur",
+        "Athirampuzha"
+      ],
+      "district": "Kottayam",
+      "lat": 9.66898,
+      "lon": 76.55924,
+      "source": 1271982
+    },
+    {
+      "name": "Nattakam",
+      "local_name": null,
+      "alias": [],
+      "district": "Kottayam",
+      "lat": 9.54533,
+      "lon": 76.51414,
+      "source": 13353564
+    },
+    {
+      "name": "Alappuzha",
+      "local_name": "ആലപ്പുഴ",
+      "alias": [
+        "Alapalli",
+        "Alapolai",
+        "Alappula"
+      ],
+      "district": "Alappuzha",
+      "lat": 9.49004,
+      "lon": 76.3264,
+      "source": 1278985
+    },
+    {
+      "name": "Kayamkulam",
+      "local_name": null,
+      "alias": [
+        "Kayangulam",
+        "Kayankulam",
+        "Kāyankulam"
+      ],
+      "district": "Alappuzha",
+      "lat": 9.18173,
+      "lon": 76.50093,
+      "source": 1267360
+    },
+    {
+      "name": "Komalapuram",
+      "local_name": null,
+      "alias": [],
+      "district": "Alappuzha",
+      "lat": 9.54189,
+      "lon": 76.34236,
+      "source": 13353580
+    },
+    {
+      "name": "Cherthala",
+      "local_name": "ചേർത്തല",
+      "alias": [
+        "Chertala",
+        "Chertkhala",
+        "certala"
+      ],
+      "district": "Alappuzha",
+      "lat": 9.68444,
+      "lon": 76.33558,
+      "source": 10792588
+    },
+    {
+      "name": "Shertallai",
+      "local_name": null,
+      "alias": [
+        "Shertalla",
+        "Shertally"
+      ],
+      "district": "Alappuzha",
+      "lat": 9.68581,
+      "lon": 76.33996,
+      "source": 1256558
+    },
+    {
+      "name": "Aroor",
+      "local_name": "അരൂര്‍",
+      "alias": [
+        "Aror",
+        "a luo ao er",
+        "arur"
+      ],
+      "district": "Alappuzha",
+      "lat": 9.8694,
+      "lon": 76.30498,
+      "source": 10628607
+    },
+    {
+      "name": "Tiruvalla",
+      "local_name": null,
+      "alias": [
+        "Thiruvalla"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.3816,
+      "lon": 76.57489,
+      "source": 1254335
+    },
+    {
+      "name": "Pathanāmthitta",
+      "local_name": null,
+      "alias": [
+        "Pathanamthitta",
+        "Pattanamtitta"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.26667,
+      "lon": 76.78333,
+      "source": 1260138
+    },
+    {
+      "name": "Adūr",
+      "local_name": null,
+      "alias": [
+        "Adur"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.15595,
+      "lon": 76.73192,
+      "source": 1279323
+    },
+    {
+      "name": "Kozhancheri",
+      "local_name": null,
+      "alias": [
+        "Kozhencheri"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.35,
+      "lon": 76.7,
+      "source": 1265875
+    },
+    {
+      "name": "Aikkād",
+      "local_name": null,
+      "alias": [
+        "Aikkad"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.18134,
+      "lon": 76.76073,
+      "source": 11486596
+    },
+    {
+      "name": "Alirachū",
+      "local_name": null,
+      "alias": [
+        "Alirachu"
+      ],
+      "district": "Pathanamthitta",
+      "lat": 9.17501,
+      "lon": 76.85227,
+      "source": 11486588
+    },
+    {
+      "name": "Kollam",
+      "local_name": "കൊല്ലം",
+      "alias": [
+        "Coilum",
+        "Coulao",
+        "Coulão"
+      ],
+      "district": "Kollam",
+      "lat": 8.88113,
+      "lon": 76.58469,
+      "source": 1259091
+    },
+    {
+      "name": "Punalūr",
+      "local_name": null,
+      "alias": [
+        "Punalur"
+      ],
+      "district": "Kollam",
+      "lat": 9.01956,
+      "lon": 76.92261,
+      "source": 1259243
+    },
+    {
+      "name": "Kottangara",
+      "local_name": null,
+      "alias": [
+        "Kottamkara"
+      ],
+      "district": "Kollam",
+      "lat": 8.92412,
+      "lon": 76.64673,
+      "source": 11502085
+    },
+    {
+      "name": "Chavara",
+      "local_name": null,
+      "alias": [],
+      "district": "Kollam",
+      "lat": 8.96727,
+      "lon": 76.54188,
+      "source": 1274466
+    },
+    {
+      "name": "Trikonavattam",
+      "local_name": null,
+      "alias": [
+        "Thrikkovilvattom"
+      ],
+      "district": "Kollam",
+      "lat": 8.88987,
+      "lon": 76.66588,
+      "source": 11502168
+    },
+    {
+      "name": "Mayyanād",
+      "local_name": null,
+      "alias": [
+        "Mayyanad"
+      ],
+      "district": "Kollam",
+      "lat": 8.83726,
+      "lon": 76.64505,
+      "source": 11502105
+    },
+    {
+      "name": "Thiruvananthapuram",
+      "local_name": "തിരുവനന്തപുരം",
+      "alias": [
+        "City of Lord Anantha",
+        "TRV",
+        "TVM"
+      ],
+      "district": "Thiruvananthapuram",
+      "lat": 8.4855,
+      "lon": 76.94924,
+      "source": 1254163
+    },
+    {
+      "name": "Neyyāttinkara",
+      "local_name": null,
+      "alias": [
+        "Neyyattinkara",
+        "Neyattinkara"
+      ],
+      "district": "Thiruvananthapuram",
+      "lat": 8.39854,
+      "lon": 77.08586,
+      "source": 1261470
+    },
+    {
+      "name": "Nedumangād",
+      "local_name": null,
+      "alias": [
+        "Nedumangad"
+      ],
+      "district": "Thiruvananthapuram",
+      "lat": 8.60267,
+      "lon": 77.00139,
+      "source": 1261553
+    },
+    {
+      "name": "Pallichal",
+      "local_name": null,
+      "alias": [],
+      "district": "Thiruvananthapuram",
+      "lat": 8.44976,
+      "lon": 77.02573,
+      "source": 13353583
+    },
+    {
+      "name": "Vattiyūrkāvu",
+      "local_name": null,
+      "alias": [
+        "Vattiyurkavu",
+        "Vattiyoorkaavu",
+        "Vattiyoorkavu"
+      ],
+      "district": "Thiruvananthapuram",
+      "lat": 8.52469,
+      "lon": 76.98886,
+      "source": 11487540
+    },
+    {
+      "name": "Varkala",
+      "local_name": "വർക്കല",
+      "alias": [
+        "barakala",
+        "varkal",
+        "varkala"
+      ],
+      "district": "Thiruvananthapuram",
+      "lat": 8.7333,
+      "lon": 76.7167,
+      "source": 1253392
+    }
+  ]
+}
