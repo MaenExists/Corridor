@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh
+.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -20,5 +20,7 @@ typecheck:
 	$(PY) -c 'from shared.schema import Case, Forecast; print("Python contracts import")'
 test: typecheck
 	$(PY) -m pytest -q
-demo: typecheck
-	@echo "Demo components are delivered in order; see docs/progress/."
+demo: synthetic evaluate forecast
+	bash scripts/demo.sh
+api:
+	bash scripts/demo.sh --api-only
