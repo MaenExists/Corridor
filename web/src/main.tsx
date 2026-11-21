@@ -72,11 +72,11 @@ function App() {
         <Inbox reviewKey={reviewKey} setKey={setReviewKey} refresh={fetchForecast}/> :
         view==="leads" ? <Leads reviewKey={reviewKey} setKey={setReviewKey} role={role}/> :
         view==="briefs" ? <Briefs forecasts={forecasts} selection={selection} horizon={horizon} role={role}/> :
-        view==="coverage" ? <DataCoverage report={report}/> : <>
+        view==="coverage" ? <DataCoverage report={report} coverageThreshold={forecasts?.coverage_threshold}/> : <>
       <div className="workspace-header"><div><div className="section-kicker">Kerala case observatory</div><h1>Forecast atlas</h1>
         <p>Compare documented case patterns with the places where reporting is thin.</p></div>
         {forecasts && <div className="freshness"><span>Generated at <time dateTime={forecasts.generated_at}>{dateLabel(forecasts.generated_at)} {forecasts.generated_at.slice(11,16)} UTC</time></span>
-          <span>Information cutoff <time dateTime={forecasts.data_cutoff}>{dateLabel(forecasts.data_cutoff)}</time></span>
+          <span>Data cutoff <time dateTime={forecasts.data_cutoff}>{dateLabel(forecasts.data_cutoff)}</time></span>
           <span>Case snapshot <time dateTime={forecasts.case_snapshot_through}>{dateLabel(forecasts.case_snapshot_through)}</time></span></div>}
       </div>
       {fault && <div role="alert" className="notice">{fault}</div>}

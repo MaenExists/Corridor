@@ -5,8 +5,9 @@ from ml.features.build import Dataset, movement
 
 
 def fake_news():
-    return {**sanitise({"event_date": "2024-01-01", "publish_date": "2024-01-04", "district": "Kannur",
-                         "event_id": "fixture", "source_url": "https://example.invalid/a"}, "news", b"test"),
+    case = sanitise({"event_date": "2024-01-01", "publish_date": "2024-01-04", "district": "Kannur",
+                     "event_id": "fixture", "source_url": "https://example.invalid/a"}, "news", b"test")
+    return {**case, "source_type": "fixture", "source_ref": [{**s, "source_type": "fixture"} for s in case["source_ref"]],
             "synthetic": True}
 
 

@@ -48,6 +48,7 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
   const [evidence,setEvidence] = useState("");
   const [sources,setSources] = useState("");
   const cutoff = shift(date, -period + 1);
+  const coverageThreshold = forecasts.coverage_threshold ?? .35;
   useEffect(() => {
     localJSON<FeatureCollection>("/geography/kerala-districts.geojson").then(setBoundary).catch(() => {});
     localJSON<{places: Place[]}>("/geography/places.json").then(v => setPlaces(v.places)).catch(() => {});
@@ -98,7 +99,7 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
       style: f => {
         const name = areaOf(f?.properties?.name || "");
         const v = name ? byArea.get(name) : null;
-        const unknown = !name || (data.coverage[name] ?? 0) < .35;
+        const unknown = !name || (data.coverage[name] ?? 0) < coverageThreshold;
         const picked = !!name && hasPlace(selection,name);
         const color = picked ? "#e6f5e7" : unknown && layers.coverage ? "#d9ad79" : "#517477";
         return { color, weight:picked?2.3:1, fillColor:layers.coverage && unknown ? "#725b40" :
@@ -115,7 +116,7 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
     }).addTo(g);
     for(const name of DISTRICTS) {
       const center = CENTER[name], v = byArea.get(name), selected = hasPlace(selection,name);
-      const unknown = data.coverage[name] == null || data.coverage[name] < .35;
+      const unknown = data.coverage[name] == null || data.coverage[name] < coverageThreshold;
       if (layers.history && counts[name]) L.circleMarker(center,{ radius:Math.min(24,4+Math.sqrt(counts[name])*2),
         color:"#65bdbd", weight:1, fillOpacity:.25, interactive:false }).addTo(g);
       if (layers.coverage && unknown) L.circleMarker(center,{radius:10,color:"#efb878",fillOpacity:0,weight:1.5,dashArray:"2 4",interactive:false}).addTo(g);
@@ -142,7 +143,7 @@ export function Atlas({ data, forecasts, selection, select, horizon, setHorizon,
     }
     if(place) L.circleMarker([place.lat,place.lon], {radius:9,color:"#e8bc83",weight:2,fillOpacity:.15}).addTo(g)
       .bindTooltip(text(place.name),{permanent:true,direction:"right",className:"atlas-tooltip"});
-  },[boundary,layers,byArea,moves,selection,data,horizon,counts,observedConnections,place,select,connections]);
+  },[boundary,layers,byArea,moves,selection,data,horizon,counts,observedConnections,place,select,connections,coverageThreshold]);
   function choose(option: {name:string;district:string;profile:Place|null}) {
     setQuery(option.name); setSearchOpen(false); setPlace(option.profile); select({area:option.district});
     map.current?.flyTo(option.profile ? [option.profile.lat,option.profile.lon] : CENTER[option.district], 9, {animate:false});

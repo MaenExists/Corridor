@@ -46,7 +46,8 @@ def forecast_records(ds, bundles, cutoff):
                 transport_context=None if is_area else "Invented historical connection; no street path",
                 target="future documented seizure cases by district" if is_area else "future documented cases on a known directed connection",
                 estimate=round(estimate, 3) if estimate is not None else None, interval=list(interval) if interval is not None else None,
-                uncertainty_note="80% target; measured holdout coverage may fall short" if interval is not None else "uncertainty not yet established",
+                uncertainty_note=f"{ds.cfg['nominal_interval']:.0%} target; measured holdout coverage may fall short"
+                if interval is not None else "uncertainty not yet established",
                 supporting_patterns=notes, recent_verified_cues=[{"id": c["id"], "verified_at": c["verified_at"],
                     "event_date": c["event_date"], "synthetic": True} for c in f["cues"]],
                 source_availability=f"{f['source_total']} dated fictional source references visible in the last 30 days.",
@@ -82,7 +83,7 @@ def run(include_reviewed=False):
     forecasts = list(forecast_records(ds, bundles, cutoff))
     obj = {"synthetic": True, "label": "SYNTHETIC DATA", "generated_at": now.isoformat(),
            "data_cutoff": cutoff.isoformat(), "case_snapshot_through": ds.as_of.isoformat(),
-           "run_id": run_id, "forecasts": forecasts}
+           "coverage_threshold": ds.cfg["synthetic_min_coverage"], "run_id": run_id, "forecasts": forecasts}
     temp = WEB / "forecasts.pending.json"
     dump(temp, obj)
     temp.replace(WEB / "forecasts.json")

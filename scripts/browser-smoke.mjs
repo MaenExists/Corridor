@@ -15,6 +15,12 @@ try {
   });
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("http://127.0.0.1:5173");
+  const api = async path => (await page.request.get(`http://127.0.0.1:5173${path}`)).json();
+  const forecasts = await api("/api/forecasts/latest");
+  assert.equal(forecasts.synthetic,true);
+  assert.ok(forecasts.forecasts.every(r=>r.synthetic===true));
+  const cases = await api("/api/cases?district=Kannur");
+  assert.ok(cases.synthetic && cases.items.length && cases.items.every(r=>r.synthetic && r.district==="Kannur"));
   await page.locator(".leaflet-overlay-pane svg path").first().waitFor();
   await page.getByLabel("District profile").selectOption("Wayanad");
   await page.getByRole("heading", { name: "Wayanad" }).waitFor();
@@ -33,6 +39,12 @@ try {
     await page.getByRole("button", { name: "News inbox" }).click();
     await page.getByText("Possible duplicate", { exact: true }).waitFor();
     await page.getByLabel("Local analyst review key").fill(process.env.CORRIDOR_REVIEW_KEY);
+    const queue = await api("/api/review-queue");
+    const duplicate = queue.items.find(r=>r.status==="possible_duplicate");
+    assert.ok(duplicate);
+    const duplicateAttempt = await page.request.patch(`http://127.0.0.1:5173/api/review-queue/${duplicate.id}`, {
+      headers:{"X-Corridor-Review-Key":process.env.CORRIDOR_REVIEW_KEY}, data:{status:"verified"} });
+    assert.equal(duplicateAttempt.status(),409);
     const verify = page.locator("article").filter({hasText:"Ernakulam archive adds"}).getByRole("button", { name: "Verify fixture" });
     if (await verify.count()) {
       await verify.click();
@@ -40,6 +52,7 @@ try {
     }
     const current = await page.request.get("http://127.0.0.1:5173/api/cues/verified");
     assert.ok((await current.json()).items.some(r=>r.district==="Ernakulam"));
+    assert.ok((await api("/api/review-queue")).history.some(h=>h.reviewer_role==="analyst" && h.state==="verified"));
     const before = await page.request.get("http://127.0.0.1:5173/api/cues/verified?before=2026-11-20T00:00:00Z");
     assert.deepEqual((await before.json()).items, []);
     const blocked = await page.request.get("http://127.0.0.1:5173/api/leads");
@@ -66,6 +79,10 @@ try {
     assert.equal(output.subject, "Thrissur → Ernakulam");
     assert.equal(output.assessment, "Baseline disagreement");
     assert.ok(output.forecast_at_export.model_version.startsWith("synthetic-"));
+    const gotHtml = page.waitForEvent("download");
+    await page.getByRole("button", {name:"Export HTML"}).first().click();
+    const document = await readFile(await (await gotHtml).path(), "utf8");
+    assert.ok(document.includes("SYNTHETIC DATA") && document.includes("Aggregate forecast at export") && !document.includes("case_id"));
   }
   await page.getByRole("button", {name:"Data & coverage", exact:true}).click();
   await page.getByRole("heading", {name:"Monthly source volume"}).waitFor();
@@ -98,7 +115,8 @@ try {
   assert.ok(await page.evaluate(()=>document.body.scrollWidth <= window.innerWidth+2));
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);
-  console.log("Browser: map, coverage, search, evidence, local report import and replay passed without external requests.");
+  console.log("Browser: API, atlas, direct place search, replay, coverage, roles and real suppression passed without external requests.");
+  if (process.env.CORRIDOR_REVIEW_KEY) console.log("Browser: inbox, private lead review and aggregate brief export passed.");
 } finally {
   await browser.close();
 }

@@ -181,16 +181,24 @@ def monthly_sources(cases):
     return dict(sorted(result.items()))
 
 
-def audit_chart(volume):
+def audit_chart(volume, campaigns=()):
     months = [(m, v) for m, v in volume.items() if m >= "2023-11"]
     lines = ["```text", "MONTH    news articles (one block ≈ 5)                   judgments"]
     past = []
     for m, v in months:
         share = v.get("court", 0) / max(1, sum(v.values()))
-        flag = " · source-mix change" if past and abs(share - past[-1]) >= .15 else ""
-        past.append(share)
-        lines.append(f"{m}  {'█' * ((v.get('news', 0) + 2) // 5):<43} {v.get('news', 0):>3} / {v.get('court', 0)}{flag}")
-    lines += ["```", "Chart counts distinct dated primary references (not all linked articles). Secondary links without their own publication dates are not backdated. A change of ≥15 percentage points in the court share is flagged."]
+        flags = []
+        if past and abs(share - past[-1][0]) >= .15:
+            flags.append("source-mix change")
+        if past and sum(v.values()) >= max(10, 2 * past[-1][1]):
+            flags.append("possible reporting break")
+        if any((iso(r.get("start")) or "9999")[:7] <= m <= (iso(r.get("end")) or "")[:7] and r.get("source_note")
+               for r in campaigns):
+            flags.append("owner-supplied campaign")
+        past.append((share, sum(v.values())))
+        lines.append(f"{m}  {'█' * ((v.get('news', 0) + 2) // 5):<43} {v.get('news', 0):>3} / {v.get('court', 0)}"
+                     + (" · " + ", ".join(flags) if flags else ""))
+    lines += ["```", "Chart counts distinct dated primary references (not all linked articles). Secondary links without publication dates are not backdated. A ≥15 percentage point court-share change or a doubling in monthly source volume can indicate a reporting change, not actual activity."]
     return "\n".join(lines)
 
 
@@ -217,6 +225,9 @@ def run():
     unknown_time = sum(not (c["event_date"] and c["first_available_date"]) for c in cases)
     unknown_district = sum(not c["district"] for c in cases)
     shifted = sum(bool(c["event_date"] and c["first_available_date"] and c["first_available_date"] > c["event_date"]) for c, _ in pairs["court"])
+    equal = sum(c["date_basis"] == "offence field equals judgment" for c, _ in pairs["court"])
+    reversed_dates = sum(bool(iso(r.get("event_date")) and iso(r.get("judgment_date")) and
+                              r["event_date"] > r["judgment_date"]) for r in inputs["court"])
     route = sum(bool(c["movement_available_date"]) for c in cases)
     private_write(PRIVATE / "cases.json", json.dumps({"synthetic": False, "as_of": asof,
         "exclude_on_or_after": trim_from.isoformat(), "cases": cases}))
@@ -233,6 +244,7 @@ def run():
     campaigns = PRIVATE / "campaigns.csv"
     if not campaigns.exists():
         private_write(campaigns, "start,end,scope,source_note\n")
+    campaign_entries = read_csv(campaigns)
     audit_header = AUDIT.read_text().split("\n<!-- cleaning -->", 1)[0] if AUDIT.exists() else (
         "# REAL DATA (publicly reported cases): aggregate results only\n\nNot all cases. Not operational accuracy. "
         "Private audit of publicly reported seizures (news + High Court judgments).\n")
@@ -240,13 +252,13 @@ def run():
     audit = f"""
 <!-- cleaning -->
 
-- {len(cases):,} retained canonical cases after {merged} conservative news–court matches; 1,249 source rows before matching. Unmatched reports may still overlap. Match: same district, exact supplied place, same allowlisted substance and grams (to 0.01 g), within two days, unique in both directions, news available first. Same-source exact IDs were already distinct.
-- {unknown_time} cases cannot be used in time modelling (unknown event or availability); {unknown_district} have unknown district. {shifted} court rows explicitly become visible later than their event; 36 equal dates are retained as supplied, not proof of independent offence dating. One reversed pair is excluded from time modelling. No missing judgment date is imputed.
+- {len(cases):,} retained canonical cases after {merged} conservative news–court matches; {sum(map(len, pairs.values())):,} source rows before matching. Unmatched reports may still overlap. Match: same district, exact supplied place, same allowlisted substance and grams (to 0.01 g), within two days, unique in both directions, news available first.
+- {unknown_time} cases cannot be used in time modelling (unknown event or availability); {unknown_district} have unknown district. {shifted} court rows explicitly become visible later than their event; {equal} equal dates are retained as supplied, not proof of independent offence dating. {reversed_dates} reversed pairs are excluded from time modelling. No missing judgment date is imputed.
 - {sum(c['date_basis'] == 'publication fallback' for c in cases)} dates fall back to news publication. {sum(c['quantity'] is None for c in cases)} cases have unknown usable weight; corpus grams are used as supplied, original unit retained only when safely recognisable. Names, texts, identifiers, coordinates and URLs are not retained; source references are keyed local fingerprints.
 - Two trailing event weeks from {trim_from} ({rows_in_trim} rows) excluded, plus evaluation accounts for reporting maturity. {route} cases have allowlisted distinct court endpoints and valid dates. News-only locations do not establish movement. {len(edges)} possible infrastructure edges remain separate; never model inputs.
-- No validated official denominators or campaign notes supplied for this run. Coverage is unknown; this is not a finding of safety.
+- {len(campaign_entries)} local campaign rows supplied; invalid or undocumented entries are ignored by the modelling pipeline. Coverage requires valid comparable denominators; unknown is not a finding of safety.
 
-{audit_chart(counts)}
+{audit_chart(counts, campaign_entries)}
 """
     AUDIT.parent.mkdir(parents=True, exist_ok=True)
     private_write(AUDIT, audit_header.rstrip() + "\n" + audit)

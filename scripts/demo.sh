@@ -2,19 +2,19 @@
 set -euo pipefail
 export WRANGLER_SEND_METRICS=false
 export WRANGLER_HIDE_BANNER=true
-export CLOUDFLARE_ENV=local
+unset CLOUDFLARE_ENV
 export CORRIDOR_REVIEW_KEY="${CORRIDOR_REVIEW_KEY:-$(.venv/bin/python -c 'import secrets; print(secrets.token_urlsafe(12))')}"
 wrangler=("./node_modules/.bin/wrangler" "--config" "worker/wrangler.jsonc")
-"${wrangler[@]}" d1 migrations apply corridor-demo --local
-"${wrangler[@]}" dev --local --var "DEMO_REVIEW_KEY:$CORRIDOR_REVIEW_KEY" &
+state_dir="${CORRIDOR_STATE_DIR:-worker/.wrangler/demo-state}"
+"${wrangler[@]}" d1 migrations apply corridor-demo --local --persist-to "$state_dir" </dev/null
+"${wrangler[@]}" dev --local --persist-to "$state_dir" --var "DEMO_REVIEW_KEY:$CORRIDOR_REVIEW_KEY" &
 worker=$!
 cleanup() {
   kill "$worker" 2>/dev/null || true
   if [[ -n "${web:-}" ]]; then kill "$web" 2>/dev/null || true; fi
 }
 trap cleanup EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
+trap 'exit 0' INT TERM
 for ((i=0;i<80;i++)); do
   if curl --silent --fail http://127.0.0.1:8787/api/health > /dev/null; then break; fi
   kill -0 "$worker"

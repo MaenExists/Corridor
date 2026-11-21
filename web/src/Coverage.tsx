@@ -57,12 +57,12 @@ function SourceChart({ months }: {months:Month[]}) {
   const high=Math.max(1,...months.map(m=>m.articles??0));
   return <>
     <div className="source-chart" role="img" aria-label="Monthly dated source volume chart; exact values in the following table">
-      {months.map(m=><div key={m.month} className={"source-bar "+(m.campaign?"campaign ":"")+(m.mix_change||m.possible_break?"change":"")}
+      {months.map(m=><div key={m.month} className={"source-bar "+(m.articles===null?"missing ":"")+(m.campaign?"campaign ":"")+(m.mix_change||m.possible_break?"change":"")}
         title={`${m.month}: ${m.articles ?? "unknown or suppressed"}${m.mix_change ? " · source mix change" : ""}${m.possible_break ? " · possible structural break" : ""}${m.campaign ? " · campaign" : ""}`}
         style={{height:`${m.articles==null ? 4 : Math.max(4,m.articles/high*100)}%`}}/>)}
     </div>
     <div className="chart-axis"><span>{months[0].month}</span><span>{months.at(-1)?.month}</span></div>
-    <p className="small">Mint = dated source volume. Amber = possible change in the mix or volume of reports, not confirmed change in underlying activity. A lilac marker denotes a supplied campaign.</p>
+    <p className="small">Mint = dated source volume. Amber = possible reporting change, not confirmed change in activity. A dotted mark means unavailable, not zero. Lilac denotes a supplied campaign.</p>
     <details><summary>Monthly totals and flags</summary><div className="table-scroll"><table><thead>
       <tr><th>Month</th><th>Dated source references</th><th>Flags</th></tr></thead><tbody>{months.map(m=><tr key={m.month}>
         <th>{m.month}</th><td>{m.articles ?? "Unknown / suppressed"}</td>
@@ -74,7 +74,7 @@ function SourceChart({ months }: {months:Month[]}) {
 const legend = <p className="notice">Coverage unknown means reporting could be thin or unmeasured. Zero means no documented cases in that specific sample, not that no activity occurred.</p>;
 const proxy = "Coverage ratio = publicly reported cases divided by comparable official police and excise counts. This rough proxy can miss activity and official counts include small possession cases. Incomplete or unvalidated denominators stay unknown.";
 
-export function DataCoverage({report}:{report:Evaluation|null}) {
+export function DataCoverage({report, coverageThreshold=.35}:{report:Evaluation|null;coverageThreshold?:number}) {
   const c=report?.coverage;
   return <><div className="workspace-header"><div><div className="section-kicker">Synthetic reporting audit</div><h1>Data &amp; coverage</h1>
     <p>See what enters the pipeline and where absence of evidence is easy to misread.</p></div></div>
@@ -88,7 +88,7 @@ export function DataCoverage({report}:{report:Evaluation|null}) {
       <section className="paper"><h2>District coverage</h2><p>{proxy} The synthetic track shows illustrative simulation coverage only.</p>
         <div className="table-scroll"><table><thead><tr><th>District</th><th>Sample cases</th><th>Simulation coverage</th></tr></thead>
           <tbody>{c.districts.map(r=><tr key={r.location}><th>{r.location}</th><td>{r.cases ?? "Unknown"}</td>
-            <td>{r.coverage==null || r.coverage<.35?"Coverage unknown / thin":pct(r.coverage)}</td></tr>)}</tbody></table></div>
+            <td>{r.coverage==null || r.coverage<coverageThreshold?"Coverage unknown / thin":pct(r.coverage)}</td></tr>)}</tbody></table></div>
       </section></>}
     <section className="paper"><h2>Feedback-loop audit</h2><p>{report?.feedback ?? "More attention can find more cases, making already-watched districts look busier. Independent coverage and outcome checks are needed."}</p>
       <p>Do not interpret a change in reported cases as a change in harm without checking observation effort, sources and definitions. No causal effect or operational performance has been measured.</p></section>

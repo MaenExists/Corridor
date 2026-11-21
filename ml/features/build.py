@@ -94,6 +94,11 @@ class Dataset:
     def __init__(self, payload, synthetic, cues=(), official=None, campaigns=None, cfg=None):
         if payload.get("synthetic") is not synthetic or any(r.get("synthetic") is not synthetic for r in payload["cases"]):
             raise ValueError("Track isolation guard: unexpected record provenance")
+        from shared.schema import Case
+        family = {"fixture"} if synthetic else {"news", "court"}
+        if any(set(r) != Case.__required_keys__ or r["source_type"] not in family
+               or any(s.get("source_type") not in family for s in r["source_ref"]) for r in payload["cases"]):
+            raise ValueError("Only canonical documented case inputs can enter features")
         self.synthetic = synthetic
         self.cfg = cfg or CFG
         self.as_of = d(payload["as_of"])

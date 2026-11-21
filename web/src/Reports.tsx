@@ -74,7 +74,7 @@ export function Reports({ current }: { current: Evaluation | null }) {
     {report && task && <>
       <div className="paper">
         <h2>Final holdout</h2><p className="small">Generated at {dateLabel(report.generated_at)} · data cutoff {dateLabel(report.data_cutoff)} · {report.splits.final.length} weekly origins · outcomes mature after {report.outcome_maturity_days} days.</p>
-        <p>The holdout is the final period reserved to check the model. A baseline is a simple forecast used for comparison.</p>
+        <p>The holdout is the final period reserved to check the model. A baseline is a simple forecast used for comparison. Poisson boosting learns patterns for nonnegative counts.</p>
         <div className="stats-strip"><div><span>Chosen earlier</span><strong>{methodName(task.selected_method)}</strong></div>
           <div><span>Best final error</span><strong>{methodName(task.winner)}</strong></div>
           <div><span>Measured range coverage</span><strong>{pct(task.interval.coverage)} of outcomes</strong><small>{pct(report.nominal_interval)} target</small></div>

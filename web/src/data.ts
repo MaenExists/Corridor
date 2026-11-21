@@ -15,7 +15,7 @@ export interface Cases {
 }
 export interface Forecasts {
   synthetic: true; forecasts: Forecast[]; generated_at: string; data_cutoff: string;
-  case_snapshot_through: string; run_id: string;
+  case_snapshot_through: string; run_id: string; coverage_threshold?: number;
 }
 export type Selection = { area: string } | { connection: [string, string] };
 export interface Place {

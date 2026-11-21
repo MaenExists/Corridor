@@ -4,6 +4,7 @@
 /docs/progress/DATA_AUDIT_REAL.md
 /artifacts/
 *_real*
+*_[Rr][Ee][Aa][Ll]*
 *.sqlite
 *.sqlite-*
 *.db
