@@ -9,10 +9,11 @@ import os
 import re
 from xml.etree import ElementTree
 from ml.data.real_input import DISTRICTS
+from ml.local_api import local_api
 
 ATOM = "{http://www.w3.org/2005/Atom}"
 COR = "{urn:corridor:fixture}"
-BASE = "http://127.0.0.1:8787/api/review-queue"
+BASE_PATH = "/api/review-queue"
 FIXTURES = (Path("ml/collector/fixtures/demo.rss"), Path("ml/collector/fixtures/demo.atom"))
 
 
@@ -75,7 +76,8 @@ def run():
     key = os.environ.get("CORRIDOR_REVIEW_KEY")
     if not key:
         raise SystemExit("Set CORRIDOR_REVIEW_KEY to the local key printed by make demo.")
-    with urlopen(BASE, timeout=5) as f:
+    base = local_api(BASE_PATH)
+    with urlopen(base, timeout=5) as f:
         current = json.load(f)["items"]
     known = {r["id"] for r in current}
     new = []
@@ -83,7 +85,7 @@ def run():
         if row["id"] in known:
             continue
         row["duplicate_of"] = find_duplicate(row, current + new)
-        request = Request(BASE, data=json.dumps(row).encode(), method="POST",
+        request = Request(base, data=json.dumps(row).encode(), method="POST",
                           headers={"X-Corridor-Review-Key": key, "Content-Type": "application/json"})
         with urlopen(request, timeout=5) as f:
             result = json.load(f)

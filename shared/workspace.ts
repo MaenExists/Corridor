@@ -1,6 +1,7 @@
 export const LEAD_CATEGORIES = ["Outreach planning", "Service availability", "Data quality concern"] as const;
 export const ASSESSMENTS = ["Documented-count signal only", "Insufficient coverage", "Baseline disagreement", "No operational conclusion"] as const;
 export const NEXT_STEPS = ["Request independent aggregate data", "Check reporting coverage", "Review uncertainty with an analyst", "No further action"] as const;
+export const WORKSPACE_NOTES = ["Review scope agreed", "Coverage gap noted", "Awaiting corroboration", "Brief ready for second review"] as const;
 export type Role = "analyst" | "planner";
 export type QueueState = "new" | "possible_duplicate" | "verified" | "rejected";
 export interface QueueItem {
@@ -16,4 +17,8 @@ export interface Lead {
 export interface Brief {
   id: string; district: string; horizon_days: 7 | 28; assessment: string;
   next_step: string; updated_at: string; role: Role; connection: string | null; synthetic: true;
+}
+export interface WorkspaceNote {
+  id: string; district: string; note: typeof WORKSPACE_NOTES[number]; created_at: string;
+  role: "analyst"; synthetic: true;
 }

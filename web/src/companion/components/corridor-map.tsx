@@ -11,6 +11,7 @@ import {
   Crosshair,
 } from "lucide-react";
 import type * as Leaflet from "leaflet";
+import * as L from "leaflet";
 import type { GeoJsonObject } from "geojson";
 import { CENTER, NODES } from "../../data";
 import type { Selection } from "../../data";
@@ -106,7 +107,6 @@ export default function CorridorMap({
       observer: ResizeObserver | undefined;
     async function initialize() {
       try {
-        const L = await import("leaflet");
         if (cancelled || !container.current) return;
         const map = L.map(container.current, {
           zoomControl: false,

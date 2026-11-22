@@ -1,7 +1,7 @@
 # Corridor operating notes
 
 - Scope: unchanged `project.md` (the local file uses lowercase). The kickoff instructions were supplied in chat; no `KICKOFF.md` was present.
-- Work offline except dependency installs. Never commit, export, log, or serve private rows, URLs, point locations, identifiers, or private model artifacts. Use `docs/progress/` for checkpoints.
+- Work offline except dependency installs and the explicitly requested public map imagery. By default the app loads a bundled NASA backdrop; online NASA/OSM tile layers are opt-in. Never commit, export, log, or serve private rows, URLs, point locations, identifiers, or private model artifacts. Use `docs/progress/` for checkpoints.
 - Keep tracks segregated. The local REAL audit and aggregate reports are gitignored pending owner disclosure review. Never interpret a coverage gap as safety. Never treat infrastructure as documented movement. No individual scoring, automatic action or operational accuracy claims.
 - Never drop chronological evaluation, baselines, the leakage test, abstention, limitations or track/freshness notices.
 
@@ -18,8 +18,10 @@
 - Private outputs suppress small cells (default five); distinct cases, not repeated overlapping windows, determine support. The browser rechecks and asks for review. These measures don't prove anonymity. The web server denies private filesystem paths and its public artifacts require synthetic provenance.
 - Companion workspace review adopted the useful replay, baseline-challenger rule and monitoring ideas, plus licensed simplified boundaries and a reduced GeoNames gazetteer. We excluded exported real rows, online connectors, source assertions, route planners and next-hop hypotheses. Infrastructure remains a separate local file and a fictional visual example, never a model label.
 - Local role/key handling is demo-only. Practice leads are structured, with no contact, allegation or free text. Brief exports contain structured edits and aggregates as of export, not case records. RSS and Atom fixtures only; cue usefulness is unvalidated and the batch does not retrain.
-- The active web frontend is the companion workspace port in `web/src/companion/`. It retains the companion stylesheet, map controls, and place profiles while using Corridor's synthetic artifacts and local Worker. Only public geographic reference files were copied; no companion case/model data packs, hosted authentication, online tiles, external geocoding or AI connectors were imported. Ask the Atlas is an offline lookup.
+- The active entry is `web/src/dashboard/`, matching the two dashboard references without inventing live operations or confidence. It reuses the forecast lab, place profiles and evidence library from `web/src/companion/`. No companion case/model data packs, hosted authentication, external geocoding or AI connectors were imported. Ask the Atlas is an offline lookup.
 - `make replay` reconstructs per-place predictions for the saved synthetic holdout using the same frozen fit, without re-scoring or modifying the evaluation. The real track has no individual replay rows.
+- The overview summarizes the supplied synthetic archive as of its cutoff; the final month in the chart is flagged when partial. Forecast support is the share of district forecasts issued, not accuracy or operational readiness. A reporting-change flag is a ≥25% and ≥3 count increase across two 28-day slices, not a verified trend. Scenario outputs are arithmetic on reporting or local review, not causal effects.
+- The second layout has structured, local practice reporting, receipt-only state checks, and key-gated structured analyst notes. It does not accept narratives, contacts or media, promise anonymity, or contact authorities.
 
 ## Run
 

@@ -1,8 +1,8 @@
 import geography from "../../shared/geography.json";
-import { ASSESSMENTS, LEAD_CATEGORIES, NEXT_STEPS } from "../../shared/workspace";
+import { ASSESSMENTS, LEAD_CATEGORIES, NEXT_STEPS, WORKSPACE_NOTES } from "../../shared/workspace";
 import type { Case } from "../../shared/schema";
 
-interface Env { DB: D1Database; ASSETS: Fetcher; DEMO_REVIEW_KEY?: string }
+interface Env { DB: D1Database; ASSETS: Fetcher; DEMO_REVIEW_KEY?: string; DEMO_WEB_ORIGIN?: string }
 type Doc = Record<string, unknown>;
 const now = () => new Date().toISOString();
 const uuid = () => crypto.randomUUID();
@@ -47,7 +47,7 @@ async function api(req: Request, env: Env): Promise<Response> {
   const path = u.pathname.replace(/\/$/, "");
   const method = req.method;
   const origin = req.headers.get("Origin");
-  if (origin && !["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8787", "http://localhost:8787"].includes(origin))
+  if (origin && !["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8787", "http://localhost:8787", env.DEMO_WEB_ORIGIN].includes(origin))
     return problem("This demo only accepts local requests.", 403);
   if (path === "/api/health" && method === "GET") return json({ service: "Corridor local demo", status: "ok" });
   if (path === "/api/forecasts/latest" && method === "GET") return json(await assets(env, u, "forecasts.json"));
@@ -122,6 +122,14 @@ async function api(req: Request, env: Env): Promise<Response> {
     await db.prepare("INSERT INTO leads VALUES (?,?,?,?,'new')").bind(id,now(),v.district,v.category).run();
     return json({ receipt: id }, 201);
   }
+  if (path === "/api/lead-status" && method === "POST") {
+    const v=await body(req);
+    if (!only(v,["receipt"]) || typeof v.receipt!=="string" || !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(v.receipt))
+      return problem("Enter the full receipt for a practice report.",400);
+    // Receipt holders only learn the state. No case data, topic, district, or identity is returned.
+    const row=await db.prepare("SELECT status FROM leads WHERE id=?").bind(v.receipt).first<{status:string}>();
+    return row ? json({status:row.status}) : problem("No practice report matches that receipt.",404);
+  }
   if (path === "/api/leads" && method === "GET") {
     if (!analyst(req, env)) return problem("Local review key required.", 403);
     return json({ items: await all(db, "SELECT * FROM leads ORDER BY created_at DESC LIMIT 250") });
@@ -139,6 +147,17 @@ async function api(req: Request, env: Env): Promise<Response> {
     return result[0].meta.changes ? json({ status: v.status }) : problem("Lead not found or already in a final state.", 409);
   }
   if (path === "/api/briefs" && method === "GET") return json({ items: await all(db,"SELECT * FROM briefs ORDER BY updated_at DESC LIMIT 250") });
+  if (path === "/api/workspace-notes" && (method === "GET" || method === "POST")) {
+    if (!analyst(req,env)) return problem("Local review key required.",403);
+    if (method==="GET") return json({items:await all(db,"SELECT id,district,note,created_at,role FROM workspace_notes ORDER BY created_at DESC LIMIT 80")});
+    const v=await body(req);
+    if (!only(v,["district","note"]) || !isDistrict(v.district) || !includes(WORKSPACE_NOTES,v.note))
+      return problem("Choose a district and a practice review note.",400);
+    const item={id:uuid(),district:v.district,note:v.note,created_at:now(),role:"analyst"};
+    await db.prepare("INSERT INTO workspace_notes (id,district,note,created_at,role) VALUES (?,?,?,?,?)")
+      .bind(item.id,item.district,item.note,item.created_at,item.role).run();
+    return json({item:tag(item)},201);
+  }
   const brief = path.match(/^\/api\/briefs\/([a-zA-Z0-9_-]{1,100})$/);
   if ((path === "/api/briefs" && method === "POST") || (brief && method === "PUT")) {
     const v = await body(req);

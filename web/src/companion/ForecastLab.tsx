@@ -86,10 +86,11 @@ function Issued({ rows, onAtlas }: {rows:Forecast[];onAtlas:(s:Selection,horizon
     <p className="companion-notice">{NOTICE}</p></section>;
 }
 
-export function ForecastLab({report,forecasts,planner,onAtlas}:{report:Evaluation|null;forecasts:Forecasts|null;planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void}) {
+export function ForecastLab({report,forecasts,planner,onAtlas,initialHorizon=28}:{report:Evaluation|null;forecasts:Forecasts|null;
+  planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void;initialHorizon?:7|28}) {
   const [view,setView]=useState<"replay"|"issued"|"report">("replay");
   const [scope,setScope]=useState<"area"|"corridor">("area");
-  const [horizon,setHorizon]=useState<7|28>(28);
+  const [horizon,setHorizon]=useState<7|28>(initialHorizon);
   const [data,setData]=useState<Replay|null>(null);
   useEffect(()=>{
     localJSON<Replay>("/generated/replay.json").then(value=>{

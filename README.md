@@ -10,14 +10,15 @@ On Linux, use Node.js 22.12 or newer, `npm`, `uv`, GNU Make, Git and `curl`. In 
 make setup && make demo
 ```
 
-The first run downloads development packages during setup, then generates the fictional history, trains, and tests it locally. Allow several minutes for the first training run. Open **http://127.0.0.1:5173** and leave the terminal running. Press Ctrl+C to stop. No Cloudflare account, API key, online maps or live feeds are needed.
+The first run downloads development packages during setup, then generates the fictional history, trains, and tests it locally. Allow several minutes for the first training run. Open **http://127.0.0.1:5173** and leave the terminal running. Press Ctrl+C to stop. No Cloudflare account, API key, or live feeds are needed.
 
-- **Corridor atlas:** Pick a district or invented connection and 7 or 28 days. Wayanad shows how abstention works. Open **Layers** for coverage, documented connections, and the separately labeled infrastructure hypotheses. Place profiles and the timeline work offline.
-- **Forecast lab:** Replay predicted versus observed counts week by week, inspect issued forecasts, and compare with simpler forecasts. **Report details** shows where the model loses and supports loading a synthetic report locally. You can also open `web/public/generated/eval_report.html`.
-- **Evidence library and Ask the Atlas:** Inspect fictional sources, or use the offline guide to look up a district or method. No external AI or geocoding is used.
-- **News inbox:** Paste the local review key printed by `make demo` into the browser. Review a fixture; in a second terminal run `make refresh`, then click **Reload forecasts**. This adds eligible cues to evidence without retraining.
-- **Community leads and Planning briefs:** Submit a practice topic only, review it with the local key, then create, edit and download a synthetic brief. **Switch role** hides case-connection and private review controls for the Planner; this is a demo, not an authorization system.
-- **Sources & methods:** See the source-volume chart, unknown-versus-zero legend, and reporting-bias audit.
+- **Overview and Map:** Explore Kerala on bundled NASA satellite imagery. Pick a district to see its forecast, observed counts and coverage. Wayanad shows abstention. **Layers** adds optional online NASA detail or OpenStreetMap streets. These options request geographic tile coordinates from the provider; local forecasts, case data and searches are never sent. **Map → Detailed atlas** retains place profiles and the historical timeline.
+- **Patterns:** Replay predicted versus observed counts week by week, inspect issued forecasts, and compare simple baselines. **Report details** shows where the model loses and accepts a synthetic report file locally. The printable report is `web/public/generated/eval_report.html`.
+- **Review desk:** Open the separate reporting-and-review layout. Practice reports are structured and stored locally; a receipt reveals only review status. Analyst activity notes require the local review key and use predefined text. No official agency chat, uploads or live operational feed exists.
+- **Evidence:** Open the library, news inbox, practice leads and planning briefs. In the inbox, paste the local key, verify a fixture, run `make refresh` in a second terminal, then click **Reload forecasts**. Briefs export aggregates only.
+- **Scenarios and Methodology:** Run local reporting what-ifs without retraining or implying causal effects. Review reporting bias, source volume and unknown coverage, or use **Ask the Atlas** for offline help.
+
+Use **Workspace settings** to switch the forecast horizon, track or demo role. If the default ports are in use, an isolated run can use `CORRIDOR_WEB_PORT=5231 CORRIDOR_API_PORT=8911 make demo`; use the same API port for `make refresh`.
 
 ## Checks and private analysis
 
@@ -29,6 +30,6 @@ The first run downloads development packages during setup, then generates the fi
 | `make real` | **Private only.** Skips when `training_dataset/` is absent. Writes an audit to `docs/progress/DATA_AUDIT_REAL.md`, sanitized files to `ml/data/real/`, and aggregate HTML/JSON to `reports/real/`. Nothing is served or uploaded. |
 | `make release-real` | Rebuilds the disclosure-limited real picker file from the existing private report without re-scoring the holdout. |
 
-The real track covers **publicly reported seizures (news + High Court judgments)**, a selective sample, not all cases. Official coverage and campaign dates require owner-supplied, documented values. After owner disclosure review, use **Data track → Real (aggregates)** and open `reports/real/ui_aggregate.json`. Never pick the raw dataset or publish an unreviewed aggregate.
+The real track covers **publicly reported seizures (news + High Court judgments)**, a selective sample, not all cases. Official coverage and campaign dates require owner-supplied, documented values. After owner disclosure review, use **Workspace settings → Data track → Real (aggregates)** and open `reports/real/ui_aggregate.json`. Never pick the raw dataset or publish an unreviewed aggregate.
 
 Read the [demo script](docs/DEMO_SCRIPT.md), [owner report](docs/FINAL_REPORT.md), [data-collection guide](ml/docs/data-collection-guide.md), or the unchanged [`project.md`](project.md).

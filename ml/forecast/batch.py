@@ -9,6 +9,7 @@ from ml.data.synthetic import WEB, dump
 from ml.evaluate.metrics import calibrated_interval
 from ml.evaluate.run import model_dir
 from ml.features.build import d, load_dataset
+from ml.local_api import local_api
 from ml.train.models import predict
 from shared.schema import Forecast
 
@@ -59,7 +60,7 @@ def forecast_records(ds, bundles, cutoff):
 
 def reviewed_cues(as_of):
     try:
-        with urlopen("http://127.0.0.1:8787/api/cues/verified", timeout=5) as response:
+        with urlopen(local_api("/api/cues/verified"), timeout=5) as response:
             obj = json.load(response)
     except (URLError, ValueError) as exc:
         raise SystemExit("Start `make demo` before refreshing with reviewed cues.") from exc
