@@ -1,0 +1,114 @@
+/* The companion UI supplies the layout and tokens. These rules style Corridor-only controls. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.companion-sticky{position:sticky;top:0;z-index:18;background:#000}
+.companion-shell .sidebar nav{overflow-y:auto;min-height:0}
+.companion-shell .header-right{min-width:0}
+.companion-shell .header-right select{padding:6px 20px 6px 8px;font-size:11px}
+.companion-shell .snapshot-times{display:grid;gap:3px;text-align:right;white-space:nowrap}
+.companion-shell .demo-banner{min-height:35px;line-height:1.45}
+.companion-shell .demo-banner .real-universe-inline{display:block;margin-top:3px;color:#e1c9f6}
+.companion-shell .demo-banner.real-banner{background:#1c1424}
+.companion-shell .demo-pill.real-chip{color:#e1c9f6;border-color:#75588f;white-space:normal}
+.companion-shell .real-chip>span{background:#ceabed}
+.companion-shell .mobile-freshness,.companion-shell .compact-role{display:none}
+.companion-role-note,.companion-footer-role,.companion-notice{color:#b1b1b1;font-size:11px;padding:9px 16px}
+.companion-role-note{margin:7px 16px 0;padding-left:0}
+.companion-footer-role{text-align:center}
+.companion-notice{margin:10px 0;border-left:2px solid #a89046;background:#18150e;color:#e6d6a7;line-height:1.55}
+.companion-shell .primary{background:#ededed;color:#111;border-color:#ededed}
+.companion-shell .primary:hover{background:white;color:#111}
+.companion-shell .leaflet-atlas{background:#141414}
+.companion-shell .detailed-map .map-legend small{white-space:normal}
+.companion-shell .detailed-map .map-legend{line-height:1.25}
+.companion-shell .map-legend-signals .forecast-line{border-color:#c084fc}
+.companion-shell .coverage-warning{color:#f5d55e}
+.companion-subject-controls{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:7px;margin-top:8px}
+.companion-subject-controls label{display:grid;gap:4px;color:var(--muted);font-size:10px;min-width:0}
+.companion-subject-controls select{width:100%;min-width:0;padding:6px 7px;font-size:10px}
+.inspector-forecast{border:1px solid #3b314c;background:#131019;padding:11px;margin:13px 0;text-align:left}
+.inspector-forecast .section-line{margin:0 0 6px;color:#d2baf1}
+.inspector-estimate{font-size:19px;color:#e2cffb}
+.inspector-forecast p,.inspector-forecast small,.inspector-forecast details,.inspector-forecast dd,.inspector-forecast dt{font-size:11px;margin:0;line-height:1.5}
+.inspector-forecast p,.inspector-forecast small,.inspector-forecast dt{color:var(--muted)}
+.inspector-forecast details{margin:8px 0;border-top:1px solid #3b314c;padding:7px 0 0}
+.inspector-forecast details summary{cursor:pointer}
+.inspector-forecast .detail-grid{gap:7px;overflow-wrap:anywhere}
+.inspector-forecast ul{padding-left:15px}
+.inspector-forecast .source-link{font-size:10px;margin-top:6px}
+.companion-shell .timeline .fineprint{margin:6px 0 0}
+.companion-forecast-tabs{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:6px 0 21px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.companion-forecast-tabs button[aria-pressed=true]{background:#1d1d1d;border-color:#a2a2a2}
+.companion-forecast-tabs select{font-size:11px}
+.news-model-legend button{margin-left:auto;font-size:11px;padding:4px 8px}
+.news-model-bar{--news-predicted:#b4a2f5}
+.news-model-bar.observed span{background:#71c9bd}
+.forecast-note{border-left:2px solid #a89046;padding:4px 7px}
+.companion-guide .guide-examples{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}
+.companion-guide .searchbox{max-width:700px;margin:12px 0}
+.companion-guide .guide-answer{background:#15121b;border:1px solid #493b5b;margin:12px 0;padding:12px}
+.companion-guide .guide-answer p{margin:6px 0}
+.companion-guide .fineprint{padding:0 0 10px}
+
+/* Reuse the local-only review and disclosure screens in the companion's black theme. */
+.companion-support{min-width:0}
+.companion-support .workspace-header{margin:0 0 19px;padding:0}
+.companion-support .workspace-header h1{margin:0 0 6px}
+.companion-support .workspace-header p{color:var(--muted)}
+.companion-support .section-kicker{color:#b4b4b4;font-size:11px;letter-spacing:.025em;margin:0 0 9px}
+.companion-support .section-kicker.real-text{color:#e1c9f6}
+.companion-support .paper{border:1px solid var(--line);background:#0d0d0d;padding:15px;margin:0 0 13px;min-width:0}
+.companion-support .paper h2,.companion-support .paper h3{margin:0 0 9px}
+.companion-support p{margin:.5rem 0 .72rem;max-width:78ch}
+.companion-support .small,.companion-support small{color:var(--muted);font-size:11px}
+.companion-support .paper label{display:grid;gap:4px;color:var(--muted);font-size:11px;min-width:0}
+.companion-support .form-row,.companion-support .queue-head,.companion-support .report-controls,.companion-support .timeline{
+  display:flex;gap:8px 12px;align-items:end;flex-wrap:wrap;margin:8px 0;min-width:0}
+.companion-support .queue-head{justify-content:space-between;align-items:center}
+.companion-support .queue-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,23rem),1fr));gap:12px}
+.companion-support .queue-list .paper{overflow-wrap:anywhere}
+.companion-support .state-label{font-size:11px;color:#c4b7d8;border:1px solid #605075;padding:3px 6px;border-radius:3px}
+.companion-support .notice{border-left:2px solid #a98c47;background:#19160f;color:#e8d9b4;padding:7px 10px;margin:9px 0}
+.companion-support .fact-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:7px;margin:9px 0}
+.companion-support .fact-list div{border-top:1px solid var(--line);padding-top:5px;min-width:0}
+.companion-support .fact-list dt{color:var(--muted);font-size:10px}
+.companion-support .fact-list dd{margin:0;font-size:11px;overflow-wrap:anywhere}
+.companion-support .table-scroll{overflow:auto;min-width:0}
+.companion-support .table-scroll table{width:100%;border-collapse:collapse}
+.companion-support .table-scroll :is(th,td){padding:8px;border-bottom:1px solid var(--line);text-align:left}
+.companion-support .stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:13px;margin:14px 0}
+.companion-support .stats-strip>div{display:grid;gap:3px;border-top:1px solid var(--line);padding-top:7px}
+.companion-support .stats-strip span{color:var(--muted);font-size:11px}
+.companion-support .saved-brief{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:7px;border-top:1px solid var(--line);padding-top:6px}
+.companion-support .source-chart{display:flex;align-items:end;gap:3px;height:135px;border-bottom:1px solid var(--line);padding:0 2px;margin:15px 0 3px}
+.companion-support .source-bar{min-width:1px;flex:1;background:#71c9bd}
+.companion-support .source-bar.change{background:#d8b654}
+.companion-support .source-bar.missing{background:none;border-top:1px dashed #999}
+.companion-support .source-bar.campaign{border-top:4px solid #c084fc}
+.companion-support .chart-axis{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}
+.companion-support .paper .inline-check{display:flex;align-items:center;gap:8px;margin:7px 0 15px}
+.companion-support .paper input[type=file]{padding:7px;max-width:100%;width:max-content}
+.companion-support summary{cursor:pointer}
+.companion-support .timeline input{flex:1;min-width:70px}
+.companion-support .timeline{border:0;padding:0}
+.companion-support .case-links{display:flex;gap:6px;flex-wrap:wrap}
+.companion-support .evidence-observation .close{float:right}
+.companion-support .report-controls p{flex-basis:100%}
+.companion-support .queue-list .review-key input{max-width:210px}
+
+@media(max-width:1000px){
+  .companion-shell .compact-role{display:inline-flex}
+  .companion-shell .header-right{gap:8px}
+}
+@media(max-width:760px){
+  .companion-sticky{top:55px}
+  .companion-shell .snapshot-times{display:none}
+  .companion-shell .topbar{height:auto;min-height:49px;gap:8px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+  .companion-shell .header-right{flex-wrap:wrap}
+  .companion-shell .header-right select{font-size:10px}
+  .companion-shell .compact-role{padding:5px;font-size:10px}
+  .companion-shell .mobile-freshness{display:block;color:#a4a4a4;margin-top:3px}
+  .companion-subject-controls{grid-column:1/-1}
+  .companion-forecast-tabs select{font-size:10px}
+  .companion-guide .searchbox{padding:0 7px}
+}
+@media(prefers-reduced-motion:reduce){.companion-shell *{scroll-behavior:auto!important;transition:none!important}}

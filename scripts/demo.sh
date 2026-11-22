@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
+ports=(8787)
+if [[ "${1:-}" != "--api-only" ]]; then ports+=(5173); fi
+.venv/bin/python - "${ports[@]}" <<'PY'
+import socket
+import sys
+
+for value in sys.argv[1:]:
+    with socket.socket() as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            probe.bind(("127.0.0.1", int(value)))
+        except OSError:
+            raise SystemExit(f"Corridor needs local port {value}. Stop the existing server on it before running this demo.")
+PY
 export WRANGLER_SEND_METRICS=false
 export WRANGLER_HIDE_BANNER=true
 unset CLOUDFLARE_ENV

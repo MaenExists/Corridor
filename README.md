@@ -12,11 +12,12 @@ make setup && make demo
 
 The first run downloads development packages during setup, then generates the fictional history, trains, and tests it locally. Allow several minutes for the first training run. Open **http://127.0.0.1:5173** and leave the terminal running. Press Ctrl+C to stop. No Cloudflare account, API key, online maps or live feeds are needed.
 
-- **Map workspace:** Pick a district and 7 or 28 days. Wayanad shows how abstention works. Toggle History, Coverage, Documented connections, or the separately labeled fictional infrastructure hypotheses.
-- **Model report:** See simple forecasts the candidate was tested against, geographic losses, and the held-out replay. Open `web/public/generated/eval_report.html` for a printable report or load its sibling JSON via the file picker.
+- **Corridor atlas:** Pick a district or invented connection and 7 or 28 days. Wayanad shows how abstention works. Open **Layers** for coverage, documented connections, and the separately labeled infrastructure hypotheses. Place profiles and the timeline work offline.
+- **Forecast lab:** Replay predicted versus observed counts week by week, inspect issued forecasts, and compare with simpler forecasts. **Report details** shows where the model loses and supports loading a synthetic report locally. You can also open `web/public/generated/eval_report.html`.
+- **Evidence library and Ask the Atlas:** Inspect fictional sources, or use the offline guide to look up a district or method. No external AI or geocoding is used.
 - **News inbox:** Paste the local review key printed by `make demo` into the browser. Review a fixture; in a second terminal run `make refresh`, then click **Reload forecasts**. This adds eligible cues to evidence without retraining.
-- **Leads and Briefs:** Submit a practice topic only, review it with the local key, then create, edit and download a synthetic brief. Switching to Planner hides case-connection and private review controls; this is a demo, not an authorization system.
-- **Data & coverage:** See the source-volume chart, unknown-versus-zero legend, and reporting-bias audit.
+- **Community leads and Planning briefs:** Submit a practice topic only, review it with the local key, then create, edit and download a synthetic brief. **Switch role** hides case-connection and private review controls for the Planner; this is a demo, not an authorization system.
+- **Sources & methods:** See the source-volume chart, unknown-versus-zero legend, and reporting-bias audit.
 
 ## Checks and private analysis
 

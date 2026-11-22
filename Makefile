@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api feed release-real browser-test
+.PHONY: setup test demo typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -8,6 +8,8 @@ synthetic:
 	$(PY) -m ml.data.synthetic
 evaluate:
 	$(PY) -m ml.evaluate.run synthetic
+replay:
+	$(PY) -m ml.evaluate.replay
 real:
 	$(PY) -m ml.data.real_input
 	$(PY) -m ml.evaluate.run real
@@ -27,6 +29,7 @@ test: typecheck
 demo:
 	$(MAKE) synthetic
 	$(MAKE) evaluate
+	$(MAKE) replay
 	$(MAKE) forecast
 	bash scripts/demo.sh
 api:

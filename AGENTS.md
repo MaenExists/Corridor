@@ -18,6 +18,8 @@
 - Private outputs suppress small cells (default five); distinct cases, not repeated overlapping windows, determine support. The browser rechecks and asks for review. These measures don't prove anonymity. The web server denies private filesystem paths and its public artifacts require synthetic provenance.
 - Companion workspace review adopted the useful replay, baseline-challenger rule and monitoring ideas, plus licensed simplified boundaries and a reduced GeoNames gazetteer. We excluded exported real rows, online connectors, source assertions, route planners and next-hop hypotheses. Infrastructure remains a separate local file and a fictional visual example, never a model label.
 - Local role/key handling is demo-only. Practice leads are structured, with no contact, allegation or free text. Brief exports contain structured edits and aggregates as of export, not case records. RSS and Atom fixtures only; cue usefulness is unvalidated and the batch does not retrain.
+- The active web frontend is the companion workspace port in `web/src/companion/`. It retains the companion stylesheet, map controls, and place profiles while using Corridor's synthetic artifacts and local Worker. Only public geographic reference files were copied; no companion case/model data packs, hosted authentication, online tiles, external geocoding or AI connectors were imported. Ask the Atlas is an offline lookup.
+- `make replay` reconstructs per-place predictions for the saved synthetic holdout using the same frozen fit, without re-scoring or modifying the evaluation. The real track has no individual replay rows.
 
 ## Run
 

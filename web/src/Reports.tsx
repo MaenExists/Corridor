@@ -46,12 +46,13 @@ function Replay({ task }: { task: EvaluationTask }) {
   </section>;
 }
 
-export function Reports({ current }: { current: Evaluation | null }) {
+export function Reports({ current,allowConnections=true }: { current: Evaluation | null;allowConnections?:boolean }) {
   const [imported,setImported] = useState<Evaluation|null>(null);
   const [error,setError] = useState("");
   const [subject,setSubject] = useState("area:28");
+  const selectedSubject=allowConnections?subject:subject.replace("corridor","area");
   const report = imported || current;
-  const task = report?.tasks.find(t=>`${t.scope}:${t.horizon_days}`===subject);
+  const task = report?.tasks.find(t=>`${t.scope}:${t.horizon_days}`===selectedSubject);
   return <>
     <div className="workspace-header"><div><div className="section-kicker">Synthetic evaluated results</div><h1>Forecast report card</h1>
       <p>Later outcomes, simple comparisons, and the places where the model got it wrong.</p></div></div>
@@ -61,9 +62,9 @@ export function Reports({ current }: { current: Evaluation | null }) {
         try{if(file.size>8_000_000)throw new Error("Choose a report under 8 MB.");setImported(readSyntheticReport(JSON.parse(await file.text())));setError("");}
         catch(err){setError(err instanceof Error ? err.message : "Could not read report.");}
       }}/></label>
-      <label>Forecast target<select value={subject} onChange={e=>setSubject(e.target.value)}>
+      <label>Forecast target<select value={selectedSubject} onChange={e=>setSubject(e.target.value)}>
         <option value="area:28">District · 28 days</option><option value="area:7">District · 7 days</option>
-        <option value="corridor:28">Connection · 28 days</option><option value="corridor:7">Connection · 7 days</option>
+        {allowConnections&&<><option value="corridor:28">Connection · 28 days</option><option value="corridor:7">Connection · 7 days</option></>}
       </select></label>
       {imported && <button onClick={()=>setImported(null)}>Use built-in report</button>}
       <a href="/generated/eval_report.html">Open printable synthetic report</a>
@@ -83,7 +84,7 @@ export function Reports({ current }: { current: Evaluation | null }) {
         <p className="small">Mean absolute error (MAE) is the average miss in cases. Poisson deviance is a count-error score that penalizes severe underestimates. Lower is better for both.</p>
         <ScoreTable scores={task.metrics}/>
       </div>
-      <Replay task={task} key={subject + report.run_id}/>
+      <Replay task={task} key={selectedSubject + report.run_id}/>
       <section className="paper"><h3>What the rankings missed</h3>
         <p className="small">Top {task.top_k} eligible {task.scope === "area" ? "districts in Kerala" : "invented known connections"} per week, not probabilities. Adjacent 28-day windows can count an event more than once.</p>
         <div className="table-scroll"><table><thead><tr><th>Method</th><th>Records captured</th><th>Records missed</th><th>Selections with no record</th><th>Capture</th></tr></thead><tbody>
