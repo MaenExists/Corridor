@@ -1,6 +1,8 @@
 import geography from "../../shared/geography.json";
 import type { Case, Forecast } from "../../shared/schema";
 
+export const OSM_STREET_TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
 export const DISTRICTS = Object.keys(geography.districts);
 const coordinates = (data: Record<string, number[]>): Record<string, [number, number]> =>
   Object.fromEntries(Object.entries(data).map(([k, [lat, lon]]) => [k, [lat, lon]]));

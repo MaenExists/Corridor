@@ -54,7 +54,7 @@ export function Dashboard() {
   const [advanced,setAdvanced]=useState(false);
   const [range,setRange]=useState<Range>(90);
   const [horizon,setHorizon]=useState<Horizon>(28);
-  const [mode,setMode]=useState<MapMode>("satellite");
+  const [mode,setMode]=useState<MapMode>("street");
   const [scenario,setScenario]=useState<ScenarioPreset>("Reporting volume");
   const [methodView,setMethodView]=useState<"data"|"guide">("data");
   const [cases,setCases]=useState<Cases|null>(null);
@@ -130,7 +130,7 @@ export function Dashboard() {
     <div>
       <h2>Workspace settings</h2>
       <label>Data track<select value={track} onChange={e=>{
-        setTrack(e.target.value as typeof track);setReviewKey("");setRecord(null);setMode("satellite");
+        setTrack(e.target.value as typeof track);setReviewKey("");setRecord(null);setMode("street");
       }}><option value="synthetic">Synthetic (demo)</option><option value="real">Real (aggregates)</option></select></label>
       {!real&&<><label>Forecast horizon<select value={horizon} onChange={e=>setHorizon(Number(e.target.value) as Horizon)}>
         <option value={7}>7 days</option><option value={28}>28 days</option></select></label>
@@ -160,7 +160,6 @@ export function Dashboard() {
       {real?<div className="console-nav"><span className="console-real-section"><ShieldCheck size={19}/> Real results</span></div>:nav}
       {!real&&<div className="console-side-extra"><button onClick={switchLayout}><PanelsTopLeft size={18}/> Review desk <ArrowRight size={13}/></button></div>}
       <div className="console-side-art" aria-hidden/>
-      <div className="console-sidebar-foot"><span>See what’s documented.<br/>Know what’s missing.</span><i/></div>
     </aside>}
     <div className="console-shell">
       <div className="console-chrome">
@@ -213,7 +212,8 @@ export function Dashboard() {
               <button className="console-button outline" onClick={()=>setAdvanced(!advanced)}><SlidersHorizontal size={15}/>{advanced?"Satellite workspace":"Detailed atlas"}</button></header>
             {advanced?<div className="console-legacy"><Atlas data={cases} forecasts={forecast} report={report} selection={selection}
               select={s=>{setSelection(s);setDistrict("area" in s?s.area:s.connection[1]);}} horizon={horizon} setHorizon={setHorizon}
-              planner={planner} onCase={openRecord} onLibrary={q=>toEvidence("library",q)} onReport={()=>go("patterns")} onBrief={()=>toEvidence("briefs")}/></div>:
+              planner={planner} onCase={openRecord} onLibrary={q=>toEvidence("library",q)} onReport={()=>go("patterns")}
+              onBrief={()=>toEvidence("briefs")} streetMap={mode==="street"}/></div>:
               satellite(true)}
           </div>}
           {page==="patterns"&&<div className="console-page console-legacy console-patterns">

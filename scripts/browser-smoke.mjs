@@ -8,14 +8,15 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 950 } });
   const unexpected = [];
   const requestedTiles = [];
-  let allowTileRequest = false;
+  let failTiles = false;
   const errors = [];
   await page.route("**/*", route => {
     const target = new URL(route.request().url());
     if (target.hostname === "127.0.0.1" || target.protocol === "data:") return route.continue();
-    if (allowTileRequest && ["gibs.earthdata.nasa.gov","tile.openstreetmap.org"].includes(target.hostname)) {
+    if (["gibs.earthdata.nasa.gov","tile.openstreetmap.org"].includes(target.hostname)) {
       requestedTiles.push(target.href);
-      return route.abort();
+      return failTiles ? route.abort() : route.fulfill({contentType:"image/svg+xml",headers:{"cache-control":"no-store"},
+        body:'<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#ede8dd"/></svg>'});
     }
     unexpected.push(target.hostname);
     return route.abort();
@@ -30,8 +31,32 @@ try {
   assert.ok(cases.synthetic && cases.items.length && cases.items.every(r=>r.synthetic && r.district==="Kannur"));
   const nav = page.getByRole("navigation", {name:"Main navigation"});
   await page.getByRole("heading", {name:"Network activity",exact:true}).waitFor();
-  await page.locator(".console-leaflet img.console-base-satellite").waitFor();
-  assert.equal(await page.locator(".console-leaflet img.console-base-satellite").evaluate(img=>img.complete && img.naturalWidth>100),true);
+  const streetTiles=page.locator(".console-street-tiles img.leaflet-tile-loaded");
+  await streetTiles.first().waitFor();
+  assert.equal(await page.locator("img.console-base-satellite").count(),0);
+  assert.ok(requestedTiles.every(u=>/^https:\/\/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/.test(u)));
+  const shellBg=await page.locator(".console").evaluate(el=>getComputedStyle(el).backgroundColor);
+  assert.equal(shellBg,"rgb(8, 8, 8)");
+  await page.setViewportSize({width:1342,height:635});
+  const frame=page.locator(".console-map-frame"), panel=page.locator(".console-inspector");
+  const [canvasBox,panelBox]=await Promise.all([frame.boundingBox(),panel.boundingBox()]);
+  assert.ok(canvasBox && panelBox && canvasBox.x+canvasBox.width <= panelBox.x+1);
+  const [mapCard,rail,chart,chartFooter]=await Promise.all(
+    [".console-map-panel",".console-rail",".console-chart-plate svg",".console-chart-footer"].map(s=>page.locator(s).boundingBox()));
+  assert.ok(mapCard && rail && Math.abs(mapCard.height-rail.height)<2);
+  assert.ok(chart && chartFooter && chart.y+chart.height<=chartFooter.y+1);
+  const sidebar=await page.locator(".console-side-extra button").boundingBox();
+  assert.ok(sidebar && sidebar.y+sidebar.height < 635);
+  const initialTile=await streetTiles.first().getAttribute("src");
+  const initialZoom=Number(new URL(initialTile).pathname.split("/")[1]);
+  const start=requestedTiles.length;
+  await page.getByRole("button",{name:"Zoom in",exact:true}).click();
+  await streetTiles.first().waitFor();
+  assert.ok(requestedTiles.slice(start).some(u=>Number(new URL(u).pathname.split("/")[1])>initialZoom));
+  await page.getByRole("button",{name:"Fit Kerala",exact:true}).click();
+  await page.getByRole("button",{name:"Close district inspector",exact:true}).click();
+  await page.getByRole("button",{name:"Show Malappuram forecast",exact:true}).click();
+  await page.setViewportSize({width:1280,height:950});
   await page.locator(".console-leaflet svg path").first().waitFor();
   await page.locator(".console-layer-menu summary").click();
   await page.getByLabel("Infrastructure hypotheses").check();
@@ -46,6 +71,7 @@ try {
   await page.getByText(/Abstained: coverage/).waitFor();
   await nav.getByRole("button", {name:"Map",exact:true}).click();
   await page.getByRole("button",{name:"Detailed atlas",exact:true}).click();
+  await page.locator(".leaflet-atlas img.leaflet-tile-loaded").first().waitFor();
   await page.getByLabel("Find a Kerala place").fill("Kozhikode");
   await page.getByRole("listbox", {name:"Map search results"}).getByRole("option").first().click();
   await page.getByRole("region",{name:"Place profile: Kozhikode"}).waitFor();
@@ -165,20 +191,26 @@ try {
   await page.getByRole("heading",{name:"Kerala forecast workspace"}).waitFor();
   await page.locator(".console-layer-menu summary").click();
   assert.equal(await page.getByLabel("Documented connections").count(), 0);
-  allowTileRequest=true;
+  failTiles=true;
+  await page.getByLabel("Satellite archive · offline").check();
   await page.getByLabel("OpenStreetMap streets · online").check();
-  await page.getByText(/Online imagery unavailable/).waitFor();
-  assert.ok(requestedTiles.some(u=>/^https:\/\/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/.test(u)));
-  await page.getByRole("button",{name:"Use archive",exact:true}).click();
+  await page.getByText(/OpenStreetMap unavailable/).waitFor();
+  await page.locator("img.console-base-satellite").waitFor();
+  failTiles=false;
+  await page.getByRole("button",{name:"Retry map",exact:true}).click();
+  await streetTiles.first().waitFor();
+  await page.getByText(/OpenStreetMap unavailable/).waitFor({state:"hidden"});
+  failTiles=true;
   await page.getByLabel("NASA satellite detail · online").check();
-  await page.getByText(/Online imagery unavailable/).waitFor();
+  await page.getByText(/NASA detail tiles unavailable/).waitFor();
   assert.ok(requestedTiles.some(u=>/^https:\/\/gibs\.earthdata\.nasa\.gov\/wmts\//.test(u)));
   assert.ok(requestedTiles.every(u=>!new URL(u).search));
   await page.getByRole("button",{name:"Use archive",exact:true}).click();
-  allowTileRequest=false;
+  failTiles=false;
   await page.getByLabel("Workspace settings").click();
   await page.getByLabel("Data track").selectOption("real");
   await page.getByRole("heading", {name:"Real-data results"}).waitFor();
+  const tilesAtRealEntry=requestedTiles.length;
   assert.equal(await page.locator(".console-leaflet").count(),0);
   assert.ok(await page.getByLabel("Open reviewed real aggregate").isDisabled());
   await page.getByLabel("I have reviewed this aggregate for disclosure.").check();
@@ -195,13 +227,16 @@ try {
   await page.getByRole("row", {name:/Wayanad Suppressed/}).waitFor();
   await page.getByRole("row", {name:/Ernakulam 30 1.23/}).waitFor();
   assert.ok(await page.getByText("Coverage unknown", {exact:true}).count() >= 2);
+  assert.equal(requestedTiles.length,tilesAtRealEntry);
   await page.getByLabel("Data track").selectOption("synthetic");
   await page.getByRole("heading", {name:"Network activity"}).waitFor();
   await page.setViewportSize({width:390,height:850});
   assert.ok(await page.evaluate(()=>document.body.scrollWidth <= window.innerWidth+2));
+  const [mobileCanvas,mobilePanel]=await Promise.all([frame.boundingBox(),panel.boundingBox()]);
+  assert.ok(mobileCanvas && mobilePanel && mobileCanvas.y+mobileCanvas.height<=mobilePanel.y+1);
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);
-  console.log("Browser: satellite overview, offline defaults, opt-in tile fallback, model, scenarios, evidence and real suppression passed.");
+  console.log("Browser: black layout, OpenStreetMap defaults, zoom/reset, tile retry and fallback, model, scenarios, evidence and real suppression passed.");
   if (process.env.CORRIDOR_REVIEW_KEY) console.log("Browser: practice reporting receipt, analyst activity, private lead review and aggregate brief export passed.");
 } finally {
   await browser.close();

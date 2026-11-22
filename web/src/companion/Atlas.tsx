@@ -45,10 +45,10 @@ function ForecastEvidence({forecast,report,title,onReport}:{forecast?:Forecast;r
   </div>;
 }
 
-export function Atlas({ data, forecasts, report, selection, select, horizon, setHorizon, planner, onCase, onLibrary, onReport, onBrief }:{
+export function Atlas({ data, forecasts, report, selection, select, horizon, setHorizon, planner, onCase, onLibrary, onReport, onBrief, streetMap }:{
   data:Cases; forecasts:Forecasts; report:Evaluation|null; selection:Selection; select:(s:Selection)=>void; horizon:7|28;
   setHorizon:(h:7|28)=>void; planner:boolean; onCase:(row:MapRecord,cutoff:string)=>void; onLibrary:(query:string)=>void;
-  onReport:()=>void; onBrief:()=>void;
+  onReport:()=>void; onBrief:()=>void; streetMap?:boolean;
 }) {
   const year=data.as_of.slice(0,4);
   const maxMonth=Number(data.as_of.slice(5,7));
@@ -132,7 +132,8 @@ export function Atlas({ data, forecasts, report, selection, select, horizon, set
             <span className="switch"/> Forecast layer <span className="experimental">Experimental</span></button></div>
         <CorridorMap records={filtered} selected={selection} onSelect={select} forecast={current} connections={connections}
           showForecast={showForecast} coverage={data.coverage} coverageThreshold={coverageThreshold} showPoints={points}
-          setShowPoints={setPoints} focusedDistrict={district} searchText={query} onSearchTextChange={setQuery} searchRequest={searchRequest}/>
+          setShowPoints={setPoints} focusedDistrict={district} searchText={query} onSearchTextChange={setQuery} searchRequest={searchRequest}
+          streetMap={streetMap}/>
         <div className="timeline">
           <div className="timeline-top"><div><Clock size={14}/> Explore over time <span>{year} · known through {dateLabel(cutoff)}</span></div>
             <button aria-label={playing?"Pause timeline":"Play timeline"} onClick={()=>{

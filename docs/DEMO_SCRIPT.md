@@ -11,7 +11,7 @@ Say these three sentences first:
 | Time | Show and say |
 |---|---|
 | 0:30 | In **Overview**, use map search to select Ernakulam. Show the count, range and cutoff, then select Wayanad: “Unknown coverage is not safety. Here the system abstains.” |
-| 1:20 | Open map **Layers** for **Documented connections** and **Infrastructure hypotheses**. The background is real archived imagery; case counts and connections are fictional. A possible transport link is not movement evidence. |
+| 1:20 | Zoom into Kerala to show OpenStreetMap roads and labels. Open **Layers** to switch to the offline satellite archive or see **Documented connections** and **Infrastructure hypotheses**. Case counts and connections are fictional. A possible transport link is not movement evidence. |
 | 2:00 | Open **Review desk** for the practice reporting layout, then **Evidence → News inbox**. Point out the duplicate. Verify a non-duplicate fictional fixture; run `make refresh` and click **Reload forecasts**. This does not prove the cue improves the model. |
 | 3:00 | Open **Patterns** and play the held-out replay. Compare 28-day results with a simple forecast. **Report details** shows district losses. Say the synthetic ranges contained only about 68–72% against an 80% target. |
 | 4:00 | Open **Methodology** and explain the feedback loop: attention can create more documented cases, not necessarily more underlying activity. Try a **Scenario**, then go to **Evidence → Planning briefs** and export. Nothing is sent to any agency. |

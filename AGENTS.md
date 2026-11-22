@@ -1,7 +1,7 @@
 # Corridor operating notes
 
 - Scope: unchanged `project.md` (the local file uses lowercase). The kickoff instructions were supplied in chat; no `KICKOFF.md` was present.
-- Work offline except dependency installs and the explicitly requested public map imagery. By default the app loads a bundled NASA backdrop; online NASA/OSM tile layers are opt-in. Never commit, export, log, or serve private rows, URLs, point locations, identifiers, or private model artifacts. Use `docs/progress/` for checkpoints.
+- Work offline except dependency installs and the explicitly requested public basemap. The synthetic workspace uses OpenStreetMap streets by default, with a bundled NASA archive fallback; online NASA detail is opt-in. The private aggregate view makes no tile requests. Never commit, export, log, or serve private rows, URLs, point locations, identifiers, or private model artifacts. Use `docs/progress/` for checkpoints.
 - Keep tracks segregated. The local REAL audit and aggregate reports are gitignored pending owner disclosure review. Never interpret a coverage gap as safety. Never treat infrastructure as documented movement. No individual scoring, automatic action or operational accuracy claims.
 - Never drop chronological evaluation, baselines, the leakage test, abstention, limitations or track/freshness notices.
 

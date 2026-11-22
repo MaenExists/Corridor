@@ -13,7 +13,7 @@ import {
 import type * as Leaflet from "leaflet";
 import * as L from "leaflet";
 import type { GeoJsonObject } from "geojson";
-import { CENTER, NODES } from "../../data";
+import { CENTER, NODES, OSM_STREET_TILES } from "../../data";
 import type { Selection } from "../../data";
 import type { Forecast } from "../../../../shared/schema";
 import { districtName, districtPoints, isIssued, pairId, pairLabel } from "../model";
@@ -68,6 +68,7 @@ export default function CorridorMap({
   searchText,
   onSearchTextChange,
   searchRequest,
+  streetMap=false,
 }: {
   records: MapRecord[];
   selected: Selection;
@@ -83,18 +84,20 @@ export default function CorridorMap({
   searchText: string;
   onSearchTextChange: (value: string) => void;
   searchRequest: number;
+  streetMap?: boolean;
 }) {
   const container = useRef<HTMLDivElement>(null),
     engine = useRef<Engine | null>(null);
   const [ready, setReady] = useState(false),
     [mapError, setMapError] = useState("");
+  const [streetError,setStreetError]=useState(false);
   const [showCoverage, setShowCoverage] = useState(true),
     [infrastructure, setInfrastructure] = useState(false),
     [showConnections,setShowConnections] = useState(true),
     [districts, setDistricts] = useState(true),
     [localPoints, setLocalPoints] = useState(true),
     [expanded, setExpanded] = useState(false),
-    [focusKerala, setFocusKerala] = useState(true),
+    [focusKerala, setFocusKerala] = useState(!streetMap),
     [colorBy, setColorBy] = useState<"substance" | "evidence">("evidence");
   const [transport, setTransport] = useState<Location[]>([]);
   const [locations, setLocations] = useState<Location[]>(fallbackLocations),
@@ -102,6 +105,18 @@ export default function CorridorMap({
   const [view, setView] = useState({ zoom: 7, lat: 10.5, lon: 76.3, tick: 0 });
   const previousSelected = useRef(selected),
     previousDistrict = useRef(focusedDistrict);
+  useEffect(() => {
+    if(!ready || !streetMap || !engine.current)return;
+    const layer=L.tileLayer(OSM_STREET_TILES,{keepBuffer:1,noWrap:true,maxNativeZoom:19,
+      referrerPolicy:"strict-origin-when-cross-origin"});
+    let errors=0,loaded=0;
+    layer.on("loading",()=>{errors=0;loaded=0;});
+    layer.on("tileload",()=>{loaded++;setStreetError(false);});
+    layer.on("tileerror",()=>{errors++;});
+    layer.on("load",()=>{if(errors && !loaded)setStreetError(true);});
+    layer.addTo(engine.current.map);
+    return ()=>{layer.off();layer.remove();};
+  },[ready,streetMap]);
   useEffect(() => {
     let cancelled = false,
       observer: ResizeObserver | undefined;
@@ -535,7 +550,7 @@ export default function CorridorMap({
     });
     setChosen(null);
     onSearchTextChange("");
-    setFocusKerala(true);
+    setFocusKerala(!streetMap);
   }
   return (
     <div className={`map-stage detailed-map ${expanded ? "map-expanded" : ""}`}>
@@ -543,14 +558,14 @@ export default function CorridorMap({
         ref={container}
         className="atlas leaflet-atlas"
         role="region"
-        aria-label="Interactive offline map of Kerala"
+        aria-label="Interactive detailed map of Kerala"
         tabIndex={0}
       />
       <div className="map-heading">
         <span>
           <Crosshair size={13} /> Kerala geographic workspace
         </span>
-        <small>Offline geography · evidence stays at district resolution</small>
+        <small>{streetMap&&!streetError?"OpenStreetMap streets":"Offline geography"} · evidence stays at district resolution</small>
       </div>
       <MapFeatureSearch
         places={locations}
