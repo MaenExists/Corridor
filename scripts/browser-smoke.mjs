@@ -234,9 +234,46 @@ try {
   assert.ok(await page.evaluate(()=>document.body.scrollWidth <= window.innerWidth+2));
   const [mobileCanvas,mobilePanel]=await Promise.all([frame.boundingBox(),panel.boundingBox()]);
   assert.ok(mobileCanvas && mobilePanel && mobileCanvas.y+mobileCanvas.height<=mobilePanel.y+1);
+
+  // Start a fresh page so the online session's in-flight tiles are not counted.
+  const rehearsal=await browser.newPage({viewport:{width:1280,height:950}});
+  const rehearsalExternal=[];
+  await rehearsal.route("**/*",route=>{
+    const target=new URL(route.request().url());
+    if(target.hostname==="127.0.0.1" || target.protocol==="data:")return route.continue();
+    rehearsalExternal.push(target.hostname);
+    return route.abort();
+  });
+  rehearsal.on("pageerror",error=>errors.push(error.stack || error.message));
+  await rehearsal.goto(`${base}/?offline=1`);
+  const loadedArchive=()=>rehearsal.waitForFunction(()=>[...document.querySelectorAll("img.console-base-satellite")]
+    .some(img=>img.complete && img.naturalWidth>0));
+  await loadedArchive();
+  const rehearsalLayers=rehearsal.locator(".console-layer-menu summary");
+  await rehearsalLayers.click();
+  await rehearsal.getByText(/Offline rehearsal · bundled satellite archive/).waitFor();
+  assert.equal(await rehearsal.getByLabel("OpenStreetMap streets · online").count(),0);
+  assert.equal(await rehearsal.getByLabel("NASA satellite detail · online").count(),0);
+  await rehearsalLayers.click();
+  await rehearsal.getByRole("button",{name:"Zoom in",exact:true}).click();
+  await rehearsal.getByRole("navigation",{name:"Main navigation"}).getByRole("button",{name:"Map",exact:true}).click();
+  await loadedArchive();
+  await rehearsal.getByRole("button",{name:"Detailed atlas",exact:true}).click();
+  await rehearsal.getByLabel("Find a Kerala place").fill("Kozhikode");
+  await rehearsal.getByRole("listbox",{name:"Map search results"}).getByRole("option").first().click();
+  await rehearsal.getByRole("region",{name:"Place profile: Kozhikode"}).waitFor();
+  await rehearsal.locator(".console-side-extra").getByRole("button",{name:"Review desk"}).click();
+  await loadedArchive();
+  await rehearsal.getByLabel("Workspace settings").click();
+  await rehearsal.getByLabel("Data track").selectOption("real");
+  await rehearsal.getByRole("heading",{name:"Real-data results"}).waitFor();
+  await rehearsal.getByLabel("Data track").selectOption("synthetic");
+  await loadedArchive();
+  assert.deepEqual(rehearsalExternal,[],"Offline rehearsal made an external request");
   assert.deepEqual(unexpected, []);
   assert.deepEqual(errors, []);
   console.log("Browser: black layout, OpenStreetMap defaults, zoom/reset, tile retry and fallback, model, scenarios, evidence and real suppression passed.");
+  console.log("Browser: offline rehearsal used local maps across both layouts and the detailed atlas without online tile requests.");
   if (process.env.CORRIDOR_REVIEW_KEY) console.log("Browser: practice reporting receipt, analyst activity, private lead review and aggregate brief export passed.");
 } finally {
   await browser.close();

@@ -19,6 +19,7 @@ import { Alerts, Insights, KeralaMark, RegionOverview, ScenarioPreview, StatCard
 import type { ScenarioPreset } from "./Panels";
 import { AnalystHub, Reporting, ReviewSummary } from "./ReviewDesk";
 import { SatelliteMap } from "./SatelliteMap";
+import type { BasemapMode } from "./SatelliteMap";
 import { Scenarios } from "./Scenarios";
 import { datasetForecast, history, overview } from "./metrics";
 import type { Horizon, Range } from "./metrics";
@@ -30,7 +31,6 @@ const pages = [
 ] as const;
 type Page = typeof pages[number]["id"];
 type EvidencePage = "library"|"inbox"|"leads"|"briefs";
-type MapMode = "satellite"|"detail"|"street";
 type Layout = "overview"|"desk";
 const evidencePages=[{id:"library",label:"Evidence library",icon:Files},{id:"inbox",label:"News inbox",icon:Bell},
   {id:"leads",label:"Community leads",icon:ClipboardList},{id:"briefs",label:"Planning briefs",icon:FileText}] as const;
@@ -41,6 +41,7 @@ const initialPage=():Page=>{
   return location.pathname==="/demo" || new URLSearchParams(location.search).get("demo")==="model"?"patterns":"overview";
 };
 const initialLayout=():Layout=>location.pathname==="/report" || new URLSearchParams(location.search).get("layout")==="desk"?"desk":"overview";
+const offlineBasemap=()=>new URLSearchParams(location.search).get("offline")==="1";
 
 export function Dashboard() {
   const [layout,setLayout]=useState<Layout>(initialLayout);
@@ -54,7 +55,9 @@ export function Dashboard() {
   const [advanced,setAdvanced]=useState(false);
   const [range,setRange]=useState<Range>(90);
   const [horizon,setHorizon]=useState<Horizon>(28);
-  const [mode,setMode]=useState<MapMode>("street");
+  const [offlineMaps]=useState(offlineBasemap);
+  const [preferredMode,setMode]=useState<BasemapMode>("street");
+  const mode=offlineMaps?"satellite":preferredMode;
   const [scenario,setScenario]=useState<ScenarioPreset>("Reporting volume");
   const [methodView,setMethodView]=useState<"data"|"guide">("data");
   const [cases,setCases]=useState<Cases|null>(null);
@@ -147,7 +150,7 @@ export function Dashboard() {
   </nav>;
   const satellite=(expanded=false)=>cases&&stats?<SatelliteMap key={expanded?"expanded":"overview"} data={cases} forecasts={forecast}
     stats={stats} range={range} changeRange={setRange} district={district} select={choose} horizon={horizon} onDetails={()=>go("patterns")} onConnection={openConnection}
-    planner={planner} expanded={expanded} mode={mode} setMode={setMode}/>:null;
+    planner={planner} expanded={expanded} mode={mode} setMode={setMode} offlineMaps={offlineMaps}/>:null;
   const quickActions=<section className="console-card console-quick"><header className="console-card-head">
     <div><Activity size={18} className="tone-teal"/><h2>Quick actions</h2></div></header>
     <button onClick={()=>toEvidence("briefs")}><FileText size={15}/> Prepare a brief <ArrowRight size={13}/></button>

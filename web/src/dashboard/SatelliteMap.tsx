@@ -16,7 +16,7 @@ const WORLD: L.LatLngBoundsLiteral = [[-85,-180],[85,180]];
 const SOURCE: L.LatLngBoundsLiteral = [[6.3,68.0],[15.1,83.2]];
 const ONLINE_DETAIL: L.LatLngBoundsLiteral = [[7.55,73.85],[13.35,78.70]];
 const WELD = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual/default/2000-12-01/GoogleMapsCompatible_Level12/{z}/{y}/{x}.jpeg";
-type Mode = "satellite" | "detail" | "street";
+export type BasemapMode = "satellite" | "detail" | "street";
 type TileStatus = "loading" | "ready" | "unavailable";
 type Layers = { history:boolean; connections:boolean; coverage:boolean; forecasts:boolean; hypotheses:boolean };
 const infrastructure: [string,string][]=[["Wayanad","Palakkad"],["Idukki","Kollam"],["Kannur","Malappuram"]];
@@ -77,9 +77,10 @@ function DistrictInspector({data,stats,district,forecast,close,onDetails}:{data:
   </aside>;
 }
 
-export function SatelliteMap({ data, forecasts, stats, range, changeRange, district, select, horizon, onDetails, onConnection, planner=false, expanded=false, mode, setMode }:{
+export function SatelliteMap({ data, forecasts, stats, range, changeRange, district, select, horizon, onDetails, onConnection, planner=false, expanded=false, mode, setMode, offlineMaps }:{
   data:Cases;forecasts:Forecasts|null;stats:Overview;range:Range;changeRange:(r:Range)=>void;district:string;select:(d:string)=>void;
-  horizon:Horizon;onDetails:()=>void;onConnection:(p:[string,string])=>void;planner?:boolean;expanded?:boolean;mode:Mode;setMode:(m:Mode)=>void;
+  horizon:Horizon;onDetails:()=>void;onConnection:(p:[string,string])=>void;planner?:boolean;expanded?:boolean;
+  mode:BasemapMode;setMode:(m:BasemapMode)=>void;offlineMaps:boolean;
 }) {
   const mapNode=useRef<HTMLDivElement>(null);
   const keepFit=useRef(true);
@@ -253,10 +254,12 @@ export function SatelliteMap({ data, forecasts, stats, range, changeRange, distr
           <summary><Layers3 size={16}/><span>Layers</span></summary>
           <div className="console-layer-options">
           <fieldset><legend>Basemap</legend>
-            <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="street"} onChange={()=>setMode("street")}/> OpenStreetMap streets · online</label>
-            <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="detail"} onChange={()=>setMode("detail")}/> NASA satellite detail · online</label>
-            <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="satellite"} onChange={()=>setMode("satellite")}/> Satellite archive · offline</label>
-            <p className="console-muted">Online maps send map tile coordinates to the provider, not case data or searches.</p></fieldset>
+            {offlineMaps?<p className="console-muted">Offline rehearsal · bundled satellite archive. Online basemaps are disabled.</p>:<>
+              <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="street"} onChange={()=>setMode("street")}/> OpenStreetMap streets · online</label>
+              <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="detail"} onChange={()=>setMode("detail")}/> NASA satellite detail · online</label>
+              <label><input type="radio" name={expanded?"expanded-basemap":"overview-basemap"} checked={mode==="satellite"} onChange={()=>setMode("satellite")}/> Satellite archive · offline</label>
+              <p className="console-muted">Online maps send map tile coordinates to the provider, not case data or searches.</p>
+            </>}</fieldset>
           <fieldset><legend>Overlays</legend>
             <label><input type="checkbox" checked={layers.history} onChange={()=>flip("history")}/> Reported history</label>
             {!planner&&<label><input type="checkbox" checked={layers.connections} onChange={()=>flip("connections")}/> Documented connections</label>}
