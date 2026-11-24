@@ -8,6 +8,8 @@ The map separates forecast availability, reporting coverage, and history. Status
 
 The evidence view reads the saved forecast and matching evaluation, not a chatbot or a new prediction. It compares the method chosen before the test with the best comparable simple forecast, both overall and locally. For the supplied 28-day district snapshot, the statewide comparison favors the issued method (5.00 vs 5.32 average missed cases); the local comparison in Ernakulam does not (11.68 vs 6.00). Measured range coverage for the task was 68% against an 80% target. No match means no validation claim.
 
+The estimated count and range share a count ruler; the overall and local errors share a separate zero-based scale. Measured range coverage has its own panel with a target mark. No estimate band appears when a forecast is withheld, and missing local measurements are not drawn as zero.
+
 The brief remains structured, local, and aggregate-only. The exported HTML is suitable for showing or printing. Cue review and practice reports still cannot create case labels. No real records were used, and training, inference, and evaluation code were unchanged.
 
 Verified: 17 automated tests and the production build passed. Chromium exercised the built app against the local API, including the map, district and connection validation, brief exports, review and receipt workflows, missing artifacts, unmatched validation, and private aggregate suppression. Offline rehearsal made no external requests. Desktop and phone layouts were reviewed in the browser; `make serve` restarted without changing the saved snapshot.

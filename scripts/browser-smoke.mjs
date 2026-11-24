@@ -78,13 +78,21 @@ try {
   assert.equal(await page.getByLabel("Model subject").inputValue(),"Wayanad");
   const validation=page.getByRole("region",{name:"Baseline comparison"});
   await validation.getByText(/No eligible district or connection scores/).waitFor();
+  const coverage=validation.getByRole("region",{name:"Measured range coverage"});
+  await coverage.getByText("Not measured",{exact:true}).waitFor();
+  assert.equal(await page.locator(".forecast-band").count(),0,"Withheld forecasts must not draw an interval");
   await page.getByLabel("Model subject").selectOption("Ernakulam");
   const area28=report.tasks.find(t=>t.scope==="area" && t.horizon_days===28);
   const ernakulam=area28.locations.find(r=>r.location==="Ernakulam");
   await validation.getByText(area28.metrics[area28.selected_method].mae.toFixed(2),{exact:true}).waitFor();
   await validation.getByText(ernakulam.metrics[area28.selected_method].mae.toFixed(2),{exact:true}).waitFor();
-  await validation.getByText(/Issued method missed by .* fewer cases/).waitFor();
-  await validation.getByText(/Simple baseline missed by .* fewer cases/).waitFor();
+  await validation.getByText(/Issued method missed .* fewer cases/).waitFor();
+  await validation.getByText(/Simple baseline missed .* fewer cases/).waitFor();
+  await validation.getByText(/Bars share a 0–\d+ case scale/).waitFor();
+  for(const value of [report.nominal_interval,area28.interval.coverage,ernakulam.interval.coverage])
+    await coverage.getByText(`${Math.round(value*100)}%${value===report.nominal_interval?" target":""}`,{exact:true}).waitFor();
+  assert.equal(await validation.locator(".range-coverage-track i[data-below-target=true]").count(),2);
+  await page.locator(".forecast-band").waitFor();
   await validation.getByText(/This is not a probability for this forecast/).waitFor();
   await page.getByRole("button",{name:"7 days",exact:true}).click();
   const outputPanel=page.getByRole("region",{name:"Selected forecast"});

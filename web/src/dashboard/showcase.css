@@ -60,6 +60,13 @@
 .forecast-estimate span{color:var(--muted);font-size:12px}
 .forecast-estimate p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
 .forecast-estimate p b{font-size:15px;color:var(--teal);font-variant-numeric:tabular-nums}
+.forecast-estimate .forecast-band{display:grid;gap:4px;align-items:stretch;margin:9px 4px 0}
+.forecast-band-track{position:relative;height:4px;margin:5px 0;background:#365047;border-radius:3px}
+.forecast-band-interval{position:absolute;top:-3px;height:10px;border-radius:4px;background:#569c87}
+.forecast-band-point{position:absolute;top:50%;width:11px;height:11px;border:2px solid var(--surface);border-radius:50%;
+  background:#d4ffed;transform:translate(-50%,-50%)}
+.ruler-endpoints{display:flex;justify-content:space-between}
+.ruler-endpoints span{font-size:10px}
 .forecast-estimate.withheld{padding:11px;border:1px dashed #97744b;border-radius:8px;background:#30271d}
 .forecast-estimate.withheld strong{color:#f4ca91;font-size:25px;letter-spacing:-.035em}
 .forecast-estimate.withheld span{color:#f0d1a7}
@@ -89,18 +96,33 @@
 .evidence-meta div{display:grid;gap:1px}
 .evidence-meta dt{color:var(--muted);font-size:11px}
 .evidence-meta dd{margin:0;overflow-wrap:anywhere}
-.evidence-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:10px}
-.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.evidence-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;padding-top:6px}
+.evidence-validation .comparison-scale{margin-top:6px;font-size:11px}
+.comparison-scale b{color:var(--ink)}
+.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:6px 0 12px}
 .evidence-comparison{padding:11px;background:var(--side);border:1px solid var(--line);border-radius:8px}
 .evidence-comparison h3{color:var(--ink);font-size:13px}
 .evidence-comparison dl{margin:6px 0}
-.evidence-comparison dl>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--line)}
+.evidence-comparison dl>div{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:6px;padding:3px 0 10px}
 .evidence-comparison dt{color:var(--muted);font-size:12px}
 .evidence-comparison dd{margin:0;font-weight:680;font-variant-numeric:tabular-nums;font-size:17px}
+.error-track,.range-coverage-track{position:absolute;inset:auto 0 3px;height:4px;background:#2a3e35;border-radius:3px}
+.error-track i,.range-coverage-track i:first-child{display:block;height:100%;background:#79c5ad;border-radius:inherit}
+.error-track.baseline i{background:#a1aeb0}
 .evidence-comparison p{font-size:12px;margin-top:5px}
-.range-observed{padding:8px 10px;background:#263026;border-left:2px solid #a6b773;border-radius:3px}
-.range-observed svg{vertical-align:-3px;margin-right:5px;color:#d1db9d}
-.range-observed b{color:var(--ink)}
+.range-observed{padding:10px 11px;background:#1d2922;border:1px solid #3a4b40;border-radius:8px}
+.range-observed header{display:flex;justify-content:space-between;align-items:baseline;gap:5px 12px;flex-wrap:wrap}
+.range-observed h3,.range-observed header span{display:flex;align-items:center;gap:6px}
+.range-observed h3 svg{color:#a5c6b6}
+.range-observed header span{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.range-observed header i{height:11px;border-left:2px dotted #e7e2cf}
+.range-observed dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 17px;margin:6px 0}
+.range-coverage-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:6px;padding-bottom:10px}
+.range-coverage-row dt{color:var(--muted);font-size:12px}
+.range-coverage-row dd{margin:0;color:var(--ink);font-size:13px;font-weight:660;font-variant-numeric:tabular-nums}
+.range-coverage-track i[data-below-target=true]{background:#d6ab70}
+.range-coverage-target{position:absolute;top:-3px;height:10px;border-left:2px dotted #e7e2cf;transform:translateX(-1px)}
+.range-observed p{font-size:11px}
 .evidence-validation .evidence-test-period{margin-top:7px;font-size:11px}
 .evidence-inputs{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 30px}
 .evidence-inputs h2{font-size:18px}
@@ -138,8 +160,13 @@
   .showcase-hero{margin-bottom:9px}
   .showcase-snapshot,.showcase-secondary,.brief-grid{gap:8px}
   .evidence-inputs,.comparison-grid,.brief-grid{grid-template-columns:minmax(0,1fr)}
-  .model-filters{padding:10px}
-  .model-filters label:nth-child(2){min-width:min(100%,190px);flex:1}
+  .model-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);padding:10px;gap:8px}
+  .model-filters label,.model-filters label:nth-child(2){min-width:0}
+  .model-filters .horizon-control{grid-column:1/-1}
+  .console-patterns .companion-forecast-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .console-patterns .companion-forecast-tabs button{justify-content:flex-start}
+  .evidence-output .evidence-meta{width:100%;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px}
+  .evidence-output .forecast-estimate{margin:11px 0}
   .forecast-estimate strong{font-size:38px}
   .console-map-tools,.console-map-views,.console-map-key{padding-inline:9px}
   .console-map-views button{font-size:11px;padding-inline:6px}
@@ -149,7 +176,7 @@
 }
 @media(max-width:375px){
   .brief-form{grid-template-columns:minmax(0,1fr)}
-  .model-filters label{min-width:0;flex:1 1 130px}
+  .range-observed dl{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:450px){
   .console-mobile-nav .console-nav svg{display:none}
