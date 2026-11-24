@@ -1,16 +1,18 @@
-import { Activity, BrainCircuit, FileText, Pause, Play } from "lucide-react";
+import { Activity, BrainCircuit, FileText, Layers3, Pause, Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Forecast } from "../../../shared/schema";
 import { dateLabel, localJSON, METHODS, methodName, NOTICE, pct } from "../data";
 import type { Evaluation, EvaluationTask, Forecasts, Selection } from "../data";
 import { Reports } from "../Reports";
+import { HorizonControl, ModelEvidence } from "../ForecastReadout";
+import { findForecast, subjectLabel } from "../forecastEvidence";
 import { isIssued } from "./model";
 
 type Frame = { origin:string; rows:{location:string; observed:number; predicted:Record<string,number|null>; abstain_reason:string|null}[] };
 type Replay = { synthetic:true; run_id:string; tasks:{scope:EvaluationTask["scope"];horizon_days:7|28; windows:Frame[]}[] };
 const fmt = (v:number|null|undefined) => v == null ? "—" : v.toFixed(2);
 
-function Holdout({report,task,windows}:{report:Evaluation;task:EvaluationTask;windows:Frame[]}) {
+function Holdout({report,task,windows,selected}:{report:Evaluation;task:EvaluationTask;windows:Frame[];selected?:string}) {
   const [method,setMethod]=useState(task.selected_method ?? "poisson_gbm");
   const [step,setStep]=useState(Math.max(0,windows.length-1));
   const [playing,setPlaying]=useState(false);
@@ -40,7 +42,7 @@ function Holdout({report,task,windows}:{report:Evaluation;task:EvaluationTask;wi
           <div className="news-model-legend"><span><i/> Predicted count</span><span><i/> Observed in sample</span>
             <button onClick={()=>setPlaying(!playing)}>{playing?<Pause size={13}/>:<Play size={13}/>} {playing?"Pause replay":"Play replay"}</button></div>
           <div className="table-wrap"><table className="news-model-districts"><thead><tr><th>{task.scope==="area"?"District":"Invented connection"}</th>
-            <th>Predicted</th><th>Observed</th></tr></thead><tbody>{rows.map(r=><tr key={r.location}><th>{r.location}</th>
+            <th>Predicted</th><th>Observed</th></tr></thead><tbody>{rows.map(r=><tr key={r.location} data-focus={r.location===selected||undefined}><th>{r.location}</th>
               <td>{r.predicted[method]==null ? <small>{r.abstain_reason?"Abstained":"Not scored"}</small> :
                 <div className="news-model-bar"><b>{fmt(r.predicted[method])}</b><span style={{width:`${r.predicted[method]!/max*100}%`}}/></div>}</td>
               <td><div className="news-model-bar observed"><b>{r.observed}</b><span style={{width:`${r.observed/max*100}%`}}/></div></td>
@@ -73,7 +75,7 @@ function Holdout({report,task,windows}:{report:Evaluation;task:EvaluationTask;wi
 
 function Issued({ rows, onAtlas }: {rows:Forecast[];onAtlas:(s:Selection,horizon:7|28)=>void}) {
   const max=Math.max(1,...rows.flatMap(r=>r.interval??(r.estimate==null?[]:[r.estimate])));
-  return <section className="panel"><div className="panel-heading"><div><h2>Learned forecast</h2><small>Expected documented counts, not probabilities.</small></div><span className="model-range-key"><i/> Estimated range</span></div>
+  return <section className="panel"><div className="panel-heading"><div><h2>Forecast inventory</h2><small>Expected documented counts, not probabilities. Includes abstentions.</small></div><span className="model-range-key"><i/> Estimated range</span></div>
     <div className="table-wrap"><table className="learned-forecast-table"><thead><tr><th>Forecast target</th><th>Expected count</th><th>Range / abstention</th><th>Window</th></tr></thead><tbody>
       {rows.map(r=>{
         const key=r.area??r.connection?.join(" → ")??"Unspecified";
@@ -86,35 +88,61 @@ function Issued({ rows, onAtlas }: {rows:Forecast[];onAtlas:(s:Selection,horizon
     <p className="companion-notice">{NOTICE}</p></section>;
 }
 
-export function ForecastLab({report,forecasts,planner,onAtlas,initialHorizon=28}:{report:Evaluation|null;forecasts:Forecasts|null;
-  planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void;initialHorizon?:7|28}) {
-  const [view,setView]=useState<"replay"|"issued"|"report">("replay");
+type Focus = { selection:Selection; select:(target:Selection)=>void; horizon:7|28; changeHorizon:(h:7|28)=>void; onBrief:()=>void };
+
+export function ForecastLab({report,forecasts,planner,onAtlas,initialHorizon=28,focus}:{report:Evaluation|null;forecasts:Forecasts|null;
+  planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void;initialHorizon?:7|28;focus?:Focus}) {
+  const [view,setView]=useState<"evidence"|"replay"|"issued"|"report">(focus?"evidence":"replay");
   const [scope,setScope]=useState<"area"|"corridor">("area");
-  const [horizon,setHorizon]=useState<7|28>(initialHorizon);
+  const [localHorizon,setLocalHorizon]=useState<7|28>(initialHorizon);
+  const horizon=focus?.horizon??localHorizon;
+  const changeHorizon=focus?.changeHorizon??setLocalHorizon;
   const [data,setData]=useState<Replay|null>(null);
   useEffect(()=>{
+    let active=true;
     localJSON<Replay>("/generated/replay.json").then(value=>{
-      if(value.synthetic===true && value.run_id===report?.run_id) setData(value);
+      if(active && value.synthetic===true && value.run_id===report?.run_id) setData(value);
     }).catch(()=>{});
+    return ()=>{active=false;};
   },[report?.run_id]);
-  const target=planner?"area":scope;
+  const target=planner?"area":focus?("area" in focus.selection?"area":"corridor"):scope;
   const task=report?.tasks.find(t=>t.scope===target && t.horizon_days===horizon);
-  const windows=data?.tasks.find(t=>t.scope===target && t.horizon_days===horizon)?.windows??[];
+  const windows=data?.run_id===report?.run_id?(data?.tasks.find(t=>t.scope===target && t.horizon_days===horizon)?.windows??[]):[];
+  const rows=forecasts?.forecasts.filter(r=>r.horizon_days===horizon)??[];
+  const subjects=(kind:typeof target):Selection[]=>rows.flatMap<Selection>(r=>kind==="area"&&r.area?[{area:r.area}]:
+    kind==="corridor"&&r.connection?[{connection:r.connection}]:[]);
+  const title=focus?subjectLabel(focus.selection):undefined;
+  const setTarget=(s:typeof target)=>{
+    if(!focus){setScope(s);return;}
+    if(s!==target && subjects(s)[0])focus.select(subjects(s)[0]);
+  };
   return <>
-    <div className="page-heading"><div><div className="location-kicker"><Activity size={14}/> Transparent forecasting</div>
-      <h1>{target==="area"?"Kerala district model":"Known-connection model"}</h1>
-      <p>Compare predictions for documented case counts with later synthetic outcomes.</p></div><span className="experimental">Experimental · human review</span></div>
-    <div className="forecast-tabs companion-forecast-tabs">
+    <header className={focus?"showcase-heading":"page-heading"}><div><div className="console-eyebrow"><Activity size={15}/> Forecasting model</div>
+      <h1>{focus?"Model & validation":target==="area"?"Kerala district model":"Known-connection model"}</h1>
+      <p>Inspect a saved forecast and see how it performed on later, unseen synthetic data.</p></div></header>
+    {focus&&view!=="report"&&<div className="console-card model-filters">
+      <label>Geography<select aria-label="Forecast geography" value={target} disabled={planner} onChange={e=>setTarget(e.target.value as typeof target)}>
+        <option value="area">District</option><option value="corridor" disabled={!subjects("corridor").length}>Invented connection</option></select></label>
+      <label>{target==="area"?"District":"Invented connection"}<select aria-label="Model subject" value={title} onChange={e=>{
+        const selected=subjects(target).find(s=>subjectLabel(s)===e.target.value);if(selected)focus.select(selected);
+      }}>{!subjects(target).some(s=>subjectLabel(s)===title)&&<option>{title}</option>}
+        {subjects(target).map(s=><option key={subjectLabel(s)}>{subjectLabel(s)}</option>)}</select></label>
+      <HorizonControl value={horizon} onChange={changeHorizon}/>
+    </div>}
+    <div className="forecast-tabs companion-forecast-tabs" aria-label="Model views">
+      {focus&&<button aria-pressed={view==="evidence"} onClick={()=>setView("evidence")}><Layers3 size={15}/> Model evidence</button>}
       <button aria-pressed={view==="replay"} onClick={()=>setView("replay")}><Play size={14}/> Held-out replay</button>
-      <button aria-pressed={view==="issued"} onClick={()=>setView("issued")}><BrainCircuit size={14}/> Issued forecasts</button>
+      <button aria-pressed={view==="issued"} onClick={()=>setView("issued")}><BrainCircuit size={14}/> All forecasts</button>
       <button aria-pressed={view==="report"} onClick={()=>setView("report")}><FileText size={14}/> Report details</button>
-      {view!=="report"&&<><label><span className="sr-only">Forecast geography</span><select value={target} disabled={planner} onChange={e=>setScope(e.target.value as typeof scope)}>
+      {!focus&&view!=="report"&&<><label><span className="sr-only">Forecast geography</span><select value={target} disabled={planner} onChange={e=>setTarget(e.target.value as typeof target)}>
         <option value="area">District</option><option value="corridor">Known connection</option></select></label>
-        <label><span className="sr-only">Model horizon</span><select value={horizon} onChange={e=>setHorizon(Number(e.target.value) as 7|28)}><option value={7}>7 days</option><option value={28}>28 days</option></select></label></>}
+        <label><span className="sr-only">Model horizon</span><select value={horizon} onChange={e=>changeHorizon(Number(e.target.value) as 7|28)}><option value={7}>7 days</option><option value={28}>28 days</option></select></label></>}
     </div>
-    {view==="replay" && (report && task ? <Holdout key={`${target}:${horizon}:${windows.length}`} report={report} task={task} windows={windows}/>
+    {view==="evidence" && focus && <ModelEvidence forecast={findForecast(forecasts,focus.selection,horizon)} report={report} title={subjectLabel(focus.selection)}
+      onMap={()=>onAtlas(focus.selection,horizon)} onBrief={focus.onBrief}/>}
+    {view==="replay" && (report && task ? <Holdout key={`${target}:${horizon}:${windows.length}`} report={report} task={task} windows={windows} selected={title}/>
       : <div className="panel"><p role="status">No synthetic evaluation loaded. Start with <code>make demo</code>.</p></div>)}
-    {view==="issued" && <Issued rows={forecasts?.forecasts.filter(r=>r.horizon_days===horizon && (target==="area" ? !!r.area : !!r.connection))??[]} onAtlas={onAtlas}/>}
-    {view==="report" && <div className="companion-support"><Reports current={report} allowConnections={!planner}/></div>}
+    {view==="issued" && <Issued rows={rows.filter(r=>target==="area"?!!r.area:!!r.connection)} onAtlas={onAtlas}/>}
+    {view==="report" && <div className="companion-support"><Reports current={report} allowConnections={!planner} initialSubject={`${target}:${horizon}`} embedded/></div>}
   </>;
 }

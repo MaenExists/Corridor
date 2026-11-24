@@ -40,15 +40,15 @@ function ForecastEvidence({forecast,report,title,onReport}:{forecast?:Forecast;r
       {sameRun && task && <p className="confidence-footnote">Held-out range coverage {pct(task.interval.coverage)}.
         {local?.baseline_beats_candidate.length ? ` Simpler methods with lower error here: ${local.baseline_beats_candidate.map(methodName).join(", ")}.` : ""}
       </p>}
-      <button className="source-link" onClick={onReport}>Open report card <ChevronRight size={13}/></button>
+      <button className="source-link" onClick={onReport}>Open model validation <ChevronRight size={13}/></button>
     </>}
   </div>;
 }
 
-export function Atlas({ data, forecasts, report, selection, select, horizon, setHorizon, planner, onCase, onLibrary, onReport, onBrief, streetMap }:{
+export function Atlas({ data, forecasts, report, selection, select, horizon, setHorizon, planner, onCase, onLibrary, onReport, onBrief, streetMap, embedded=false }:{
   data:Cases; forecasts:Forecasts; report:Evaluation|null; selection:Selection; select:(s:Selection)=>void; horizon:7|28;
   setHorizon:(h:7|28)=>void; planner:boolean; onCase:(row:MapRecord,cutoff:string)=>void; onLibrary:(query:string)=>void;
-  onReport:()=>void; onBrief:()=>void; streetMap?:boolean;
+  onReport:()=>void; onBrief:()=>void; streetMap?:boolean;embedded?:boolean;
 }) {
   const year=data.as_of.slice(0,4);
   const maxMonth=Number(data.as_of.slice(5,7));
@@ -103,8 +103,9 @@ export function Atlas({ data, forecasts, report, selection, select, horizon, set
   const coverageGap=knownCoverage==null || knownCoverage<coverageThreshold;
   const chooseMonth=(i:number)=>{setPlaying(false);setMonth(i);setPeriod("year");};
   return <>
-    <div className="page-heading"><div><div className="location-kicker"><span className="flag-mark"/> Kerala, India <span>/</span> Regional analysis</div>
-      <h1>Follow the evidence.</h1><p>Documented connections. Every fictional source within reach.</p></div>
+    <div className={embedded?"atlas-local-actions":"page-heading"}>
+      {!embedded&&<div><div className="location-kicker"><span className="flag-mark"/> Kerala, India <span>/</span> Regional analysis</div>
+        <h1>Follow the evidence.</h1><p>Documented connections. Every fictional source within reach.</p></div>}
       <div className="heading-actions"><button onClick={onReport}><ChartNoAxesCombined size={15}/> See model results</button>
         <button className="primary" onClick={onBrief}><FileText size={15}/> Prepare brief</button></div>
     </div>

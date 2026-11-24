@@ -1,6 +1,6 @@
 # Corridor — owner summary
 
-**Run:** `make setup && make demo`, then open **http://127.0.0.1:5173**. The first run takes several minutes. The demo has an offline Kerala map, forecast evidence, a measured report replay, a fictional news inbox, practice leads, editable briefs, and coverage and planner views. It is not an official system.
+**Run:** `make setup && make demo`, then open **http://127.0.0.1:5173/?offline=1** for the presentation. The first run takes several minutes; `make serve` reopens the prepared snapshot. Start on **Forecasts**, open **Model evidence**, then **Draft a brief**. The demo also has a measured replay, a fictional inbox, practice leads, and coverage and planner views. This build is for local presentation, not official or operational use.
 
 **Synthetic:** The candidate had the lowest average count error overall on both 7- and 28-day district and known-connection tasks. At 28 days, district forecasts missed by **5.00 cases on average**, versus **5.32** for the best simple comparison. Some places still did better with a simple forecast. The system kept the method chosen on earlier data for the 7-day demo, even though it lost in the final test. Wayanad and Pathanamthitta abstained. The ranges captured **68–72%** against an **80%** target; don't call them dependable.
 

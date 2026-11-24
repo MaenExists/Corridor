@@ -46,15 +46,17 @@ function Replay({ task }: { task: EvaluationTask }) {
   </section>;
 }
 
-export function Reports({ current,allowConnections=true }: { current: Evaluation | null;allowConnections?:boolean }) {
+export function Reports({ current,allowConnections=true,initialSubject="area:28",embedded=false }: { current: Evaluation | null;
+  allowConnections?:boolean;initialSubject?:string;embedded?:boolean }) {
   const [imported,setImported] = useState<Evaluation|null>(null);
   const [error,setError] = useState("");
-  const [subject,setSubject] = useState("area:28");
+  const [subject,setSubject] = useState(initialSubject);
   const selectedSubject=allowConnections?subject:subject.replace("corridor","area");
   const report = imported || current;
   const task = report?.tasks.find(t=>`${t.scope}:${t.horizon_days}`===selectedSubject);
+  const Heading=embedded?"h2":"h1";
   return <>
-    <div className="workspace-header"><div><div className="section-kicker">Synthetic evaluated results</div><h1>Forecast report card</h1>
+    <div className="workspace-header"><div><div className="section-kicker">Synthetic evaluated results</div><Heading>Forecast report card</Heading>
       <p>Later outcomes, simple comparisons, and the places where the model got it wrong.</p></div></div>
     <div className="paper report-controls">
       <label>Open a local synthetic report <input type="file" accept=".json,application/json" onChange={async e=>{
@@ -96,7 +98,7 @@ export function Reports({ current,allowConnections=true }: { current: Evaluation
       <section className="paper"><h3>Where the candidate loses</h3><div className="table-scroll"><table><thead>
         <tr><th>Place</th><th>Candidate mean error</th><th>Baselines with lower error</th><th>Range coverage</th></tr></thead><tbody>
         {task.locations.map(r=><tr key={r.location}><th>{r.location}</th><td>{display(r.metrics.poisson_gbm?.mae)}</td>
-          <td>{r.baseline_beats_candidate.map(methodName).join(", ") || "None"}</td><td>{pct(r.interval.coverage)}</td></tr>)}</tbody></table></div>
+          <td>{r.metrics.poisson_gbm?.mae==null?"Not scored":r.baseline_beats_candidate.map(methodName).join(", ") || "None"}</td><td>{pct(r.interval.coverage)}</td></tr>)}</tbody></table></div>
       </section>
       <section className="paper"><h3>Feedback-loop audit</h3><p>{report.feedback}</p></section>
     </>}

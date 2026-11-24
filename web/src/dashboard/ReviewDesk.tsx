@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Bell, CalendarDays, ClipboardList, CloudUpload, ExternalLink, FileText, Info, LockKeyhole,
+import { Activity, ArrowRight, Bell, CalendarDays, ClipboardList, ExternalLink, FileText, Info, LockKeyhole,
   MapPin, MessageCircle, Search, Send, ShieldCheck, UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LEAD_CATEGORIES, WORKSPACE_NOTES } from "../../../shared/workspace";
@@ -48,8 +48,7 @@ export function Reporting({district}:{district:string}) {
       <label>Report category<select required value={category} onChange={e=>setCategory(e.target.value)}>
         <option value="" disabled>Select a practice category</option>{opts(LEAD_CATEGORIES)}</select></label>
       <label>District<select value={place} onChange={e=>setPlace(e.target.value)}>{opts(DISTRICTS)}</select></label>
-      <div className="console-uploads"><CloudUpload size={23}/><span>No photos, addresses or personal details accepted</span></div>
-      <p className="console-form-note"><LockKeyhole size={13}/> Stored locally, not sent to an agency. Not an anonymous reporting service.</p>
+      <p className="console-form-note"><LockKeyhole size={13}/> No photos, addresses or personal details. Stored locally and not sent to an agency. Not an anonymous reporting service.</p>
       <button type="submit" className="console-button solid" disabled={!category||busy}>Submit practice report <ArrowRight size={14}/></button>
     </form>:<form className="console-fields" onSubmit={e=>{e.preventDefault();void track();}}>
       <label>Full receipt code<input value={receipt} onChange={e=>{setReceipt(e.target.value);setState("");}} autoComplete="off" placeholder="Paste your practice receipt" maxLength={36}/></label>

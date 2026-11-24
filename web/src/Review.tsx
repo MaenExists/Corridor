@@ -7,7 +7,7 @@ export function reviewHeaders(key: string): HeadersInit {
 }
 export function ReviewKey({ value, change }: { value:string;change:(v:string)=>void }) {
   return <label className="review-key">Local analyst review key<input type="password" value={value}
-      placeholder="Printed by make demo" autoComplete="off" onChange={e=>change(e.target.value)}/></label>;
+      placeholder="Printed in the demo terminal" autoComplete="off" onChange={e=>change(e.target.value)}/></label>;
 }
 type History = { id:string; subject_id:string; state:string; recorded_at:string; reviewer_role:string };
 const stateLabel = { new:"Awaiting review", possible_duplicate:"Possible duplicate", verified:"Verified fixture", rejected:"Rejected" };

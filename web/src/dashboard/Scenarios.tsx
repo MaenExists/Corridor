@@ -12,7 +12,7 @@ import type { ScenarioPreset } from "./Panels";
 type Result={base:number|null; projected:number|null; description:string; unit:string; district:string};
 type Inputs={preset:ScenarioPreset;district:string;amount:number};
 
-export function calculateScenario(input:Inputs, data:Cases, archive:MapRecord[], forecasts:Forecasts|null, horizon:Horizon, pending:number):Result {
+export function calculateScenario(input:Inputs, data:Cases, archive:MapRecord[], forecasts:Forecasts|null, horizon:Horizon, pending:number|null):Result {
   const {preset,district,amount}=input;
   if(preset==="Reporting volume") {
     const estimate=datasetForecast(forecasts,district,horizon);
@@ -27,23 +27,24 @@ export function calculateScenario(input:Inputs, data:Cases, archive:MapRecord[],
     return {base:recent.length,projected,unit:"reports visible by archive cutoff",district,
       description:"Counts how many fictional reports from the last 28 days would still be visible if every publication were later."};
   }
-  return {base:pending,projected:Math.max(0,pending-amount),unit:"items remaining in the local fixture queue",district:"Workspace",
-    description:"Starts from the current fixture queue and subtracts the chosen number of completed reviews, with no new intake."};
+  return {base:pending,projected:pending===null?null:Math.max(0,pending-amount),unit:"items remaining in the local fixture queue",district:"Workspace",
+    description:pending===null?"The local review queue could not be loaded. Its backlog is unknown.":
+      "Starts from the current fixture queue and subtracts the chosen number of completed reviews, with no new intake."};
 }
 export function Scenarios({initial,selected,data,archive,forecasts,horizon,pending}:{initial:ScenarioPreset;selected:string;data:Cases;archive:MapRecord[];
-  forecasts:Forecasts|null;horizon:Horizon;pending:number}) {
+  forecasts:Forecasts|null;horizon:Horizon;pending:number|null}) {
   const [preset,setPreset]=useState(initial);
   const [district,setDistrict]=useState(selected);
   const [amount,setAmount]=useState(initial==="Reporting volume"?15:initial==="Reporting delay"?7:2);
   const [result,setResult]=useState<Result|null>(null);
   const controls=preset==="Reporting volume"?{title:"Change in documented reporting",unit:"%",min:-50,max:75,step:5}:
     preset==="Reporting delay"?{title:"Added publication delay",unit:" days",min:0,max:28,step:1}:
-    {title:"Completed reviews",unit:" items",min:0,max:Math.max(4,pending),step:1};
+    {title:"Completed reviews",unit:" items",min:0,max:Math.max(4,pending??0),step:1};
   const pick=(s:ScenarioPreset)=>{setPreset(s);setAmount(s==="Reporting volume"?15:s==="Reporting delay"?7:2);setResult(null);};
   const fmt=(n:number|null)=>n===null?"—":Number.isInteger(n)?compactCount(n):n.toFixed(1);
   return <div className="console-page">
-    <header className="console-page-heading"><div><p><FlaskConical size={15}/> Synthetic scenario lab</p><h1>Scenario planning</h1>
-      <span>Change an assumption and compare it with the current documented-case baseline.</span></div><span className="console-tag">What-if only</span></header>
+    <header className="showcase-heading"><div><p className="console-eyebrow"><FlaskConical size={15}/> Synthetic scenario lab</p><h1>Reporting what-ifs</h1>
+      <p>See how a change in reporting or review alters the numbers. This does not run or retrain the forecast model.</p></div><span className="console-tag">What-if only</span></header>
     <div className="console-scenarios-layout">
       <section className="console-card console-scenario-form">
         <header className="console-card-head"><div><Layers2 size={18} className="tone-teal"/><h2>Scenario settings</h2></div></header>
