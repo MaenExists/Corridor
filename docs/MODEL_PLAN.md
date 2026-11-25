@@ -34,6 +34,23 @@ The same command fits a lagged Poisson challenger independently for each window.
 
 Court orders support incident evidence alone. Use court decision dates for order identity and documented archive coverage, and leave incident dates unset until the underlying passage has been reviewed. Use an exact court case number plus decision date to group orders and an evidenced crime number, station and year to propose incident linkage. Review fuzzy matches before merging. Keep reported drug classes and original units, with log-transformed quantities available for review. Large quantities warrant a transit or context check. Classify movement only from explicit supporting evidence. Use official case counts as the model outcome. Treat NCRB personal-possession and trafficking-possession as separate enforcement-recorded proxies. They do not substitute for independent treatment demand or verified movement.
 
+## District-month model (recovered Excise statements)
+
+Kerala Excise published a district statement every month from 2015 to September 2024. `make excise-history` recovers those uploads from the Internet Archive and keeps a month only when its 14 district NDPS counts sum to the printed statewide total. The verified panel runs from January 2016 to September 2024 (105 months). Its yearly sums match the State Planning Board district series exactly for 2020 and within eight cases elsewhere. Raids are reported only until early 2021, so the model is not effort-adjusted.
+
+The model splits each forecast into a statewide level and a district share. Expected count = smoothed district share x latest statewide total x exp(calendar-month effect). Shares use exponential smoothing with weight 0.3. The calendar-month effect is the mean log change into that month over earlier years, shrunk by n / (n + 4). Intervals are 80% negative binomial ranges whose dispersion comes from the previous 24 months of errors at the same horizon. Every quantity uses only months complete at the forecast origin.
+
+**Pre-registration, 25 November 2026.** Development targets are January 2019 to December 2022 at horizons of one, two and three months. The settings above were chosen on development only, from share weights 0.2 to 0.5 and shrinkage of 1, 2, 4 or none. The test covers January 2023 to September 2024 and is scored once with the frozen settings. A horizon passes when all of the following hold on test:
+
+| Gate | Threshold |
+| --- | --- |
+| Skill | MAE at least 5% below the best of last month, three-month mean, 12-month mean and same month last year |
+| Bias | Total error within 5% of recorded volume |
+| Calibration | 80% interval coverage between 72% and 88% |
+| Ranking | Mean monthly rank correlation across districts of at least 0.7 |
+
+Statement upload dates are recorded, so a separate replay can show what the public website allowed at each date. Many statements were uploaded months late, so the public record alone could rarely have supported a one- to three-month horizon. The tested horizons assume the monthly count is available to an authorized analyst shortly after month end. A forecast is withheld when the latest complete month is more than three months before the target month.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
