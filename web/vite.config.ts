@@ -14,5 +14,7 @@ export default defineConfig({
       "**/training_dataset/**", "**/ml/data/real/**", "**/reports/real/**", "**/artifacts/**", "**/*_real*",
       "**/DATA_AUDIT_REAL.md", "**/*.sqlite*", "**/*.db", "**/*.joblib", "**/*.pkl"] },
     proxy: { "/api": `http://127.0.0.1:${portOr(process.env.CORRIDOR_API_PORT,8787)}` } },
-  build: { rollupOptions: { output: { manualChunks: { leaflet: ["leaflet"] } } } }
+  build: { rollupOptions: { input: { main: fileURLToPath(new URL("index.html", import.meta.url)),
+    recovery: fileURLToPath(new URL("recovery.html", import.meta.url)) },
+    output: { manualChunks: { leaflet: ["leaflet"] } } } }
 });

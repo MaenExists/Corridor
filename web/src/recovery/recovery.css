@@ -1,0 +1,48 @@
+:root { --ink: #172031; --muted: #5b6677; --line: #d9dde4; --paper: #f7f6f2; --card: #ffffff; --accent: #0b5d57; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Inter Variable", system-ui, sans-serif; }
+.recovery { max-width: 1440px; margin: 0 auto; padding: 24px clamp(16px, 3vw, 32px) 48px; }
+.recovery-head { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; }
+.eyebrow { margin: 0 0 6px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+h1 { margin: 0 0 8px; font-size: clamp(22px, 2.6vw, 32px); line-height: 1.15; }
+h2 { font-size: 16px; margin: 0 0 6px; }
+.lede { max-width: 72ch; margin: 0; color: var(--muted); line-height: 1.5; }
+.fresh { display: grid; grid-template-columns: repeat(2, minmax(140px, auto)); gap: 8px 18px; margin: 0; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.fresh dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.fresh dd { margin: 2px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.notice { padding: 12px; background: #fff4e5; border: 1px solid #f1c27d; border-radius: 8px; }
+.recovery-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; }
+@media (max-width: 960px) { .recovery-body { grid-template-columns: 1fr; } }
+.map-panel, .side, .districts, .limits { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.controls button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.controls button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.controls label { font-size: 13px; color: var(--muted); margin-left: auto; }
+.map { height: min(72vh, 760px); min-height: 420px; border-radius: 8px; background: #e8ecef; }
+.recovery-grid { image-rendering: pixelated; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--muted); align-items: center; }
+.legend strong { color: var(--ink); margin-right: 4px; }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.12); }
+.legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend .gov { background: #2bb3a3; border: 2px solid #0b5d57; }
+.legend .reg { background: #fff; border: 1px solid #1f2a44; }
+.side { max-height: calc(72vh + 80px); overflow: auto; }
+.muted { color: var(--muted); font-size: 13px; line-height: 1.45; }
+.priority { list-style: none; counter-reset: rank; padding: 0; margin: 8px 0 0; }
+.priority li { counter-increment: rank; }
+.priority button { display: grid; grid-template-columns: 26px 1fr; gap: 0 6px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 9px 4px; font: inherit; cursor: pointer; }
+.priority button::before { content: counter(rank); grid-row: span 3; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.priority button[aria-pressed="true"], .priority button:hover { background: #f2f5f4; }
+.priority .place { font-weight: 600; }
+.priority .where, .priority .stat { font-size: 12px; color: var(--muted); }
+.districts { margin-top: 18px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th:first-child, tbody th { text-align: left; }
+thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); font-weight: 600; white-space: normal; vertical-align: bottom; }
+.spark { display: inline-flex; gap: 2px; align-items: flex-end; height: 28px; }
+.spark i { display: block; width: 5px; background: #8a94a6; border-radius: 1px; }
+.limits { margin-top: 18px; }
+.limits ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.leaflet-tooltip .muted { font-size: 11px; }
