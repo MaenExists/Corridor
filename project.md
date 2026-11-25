@@ -2,7 +2,7 @@
 
 Corridor is an AI forecasting and recovery-planning system for Kerala, built for Hackfinity 2026. It learns from official records of drug cases to serve two audiences:
 
-1. **Enforcement.** Each month, it forecasts how many NDPS cases each of Kerala's 14 districts is likely to record next month, with an 80% range and a district ranking. Analysts can see where recorded activity is expected to concentrate and how confident the forecast is.
+1. **Where next.** Each month, it forecasts where in Kerala recorded NDPS cases are likely to concentrate next month. For each of the 14 districts it gives expected cases with an 80% range, the probability of being a top-four district, and the probability of running hot, meaning above its own normal share. The two hottest-probability districts become the month's alerts. Analysts see where activity is expected and how confident each call is.
 2. **Public and recovery services.** It maps district hotspots of need so that rehabilitation centres, counselling and health services can focus capacity on the areas that need it most. Each hotspot shows which evidence supports it and where data is missing.
 
 ## Hackfinity
@@ -20,13 +20,15 @@ The forecasting model is trained on 105 months (January 2016 to September 2024) 
 | 80% range coverage | 82% | — |
 | District ranking correlation | 0.81 | 0.77 |
 
+The where-next layer simulates the count model jointly and passed its own pre-registered test. The two monthly hot-district alerts were right 38% of the time against an 18% base rate (AUC 0.76 vs 0.72 for persistence). Top-four probabilities had Brier skill +0.41. The ranking itself is mostly fixed structure: the predicted top four held 39.3% of cases against 41.7% with perfect foresight. The finer "where" of a range office, drug type or route needs data the public series lacks. See [the model plan](docs/MODEL_PLAN.md#where-next-hotspot-forecast).
+
 The validated horizon is one month, and the gain over simple methods is modest. About a third of district forecasts miss by more than 20%. After the cutoff, the statewide seasonal adjustment did worse than a three-month average. Forecasts two or three months ahead lose to the 12-month average and are withheld. Issuance needs the latest month and, after any break in the series, six consecutive months. Public uploads lapsed between October 2024 and September 2026, so the live forecast restarts as monthly homepage snapshots accumulate, or sooner with an official export. See [the model plan](docs/MODEL_PLAN.md).
 
 ## Product principles
 
 | Audience | Product |
 | --- | --- |
-| Authorized enforcement analysts | District-month forecasts of recorded NDPS cases with ranges, ranking, evaluation history and withheld states |
+| Authorized enforcement analysts | Monthly where-next brief: district expected cases, ranges, top-four and hot probabilities, two alerts, evaluation history and withheld states |
 | Health and prevention planners | District need view: verified services, staffed capacity, treatment demand when aggregate care data is available, and the enforcement forecast as separate context |
 | Public | Verified treatment and counselling directory and approved district-level indicators |
 
@@ -40,9 +42,10 @@ The knowledge cutoff for the historical snapshot is **30 June 2026, end of day I
 ## Build order
 
 1. ✅ Recover and verify the monthly district series. Build and pre-register the district model, then pass the held-out test.
-2. Keep the series current with `make excise-snapshot` every month. Request the October 2024 – September 2026 statements and future monthly exports from Excise. See [data requests](docs/DATA_REQUESTS.md).
-3. Serve the real replay (forecast vs recorded outcome, 2023–2024) and live status in the interface, next to the synthetic showcase.
-4. Build the recovery view: the verified directory, then district care demand and capacity once Vimukthi and DHS aggregates arrive.
-5. Evaluate documented movement between districts only where coverage and baseline gates pass.
+2. ✅ Build and pass the where-next hotspot forecast. Next, finer "where": request aggregate monthly NDPS counts by Excise range or circle office, and a drug-type series in the same format.
+3. Keep the series current with `make excise-snapshot` every month. Request the October 2024 – September 2026 statements and future monthly exports from Excise. See [data requests](docs/DATA_REQUESTS.md).
+4. Serve the where-next brief and the real replay (forecast vs recorded outcome, 2023–2024) and live status in the interface, next to the synthetic showcase.
+5. Build the recovery view: the verified directory, then district care demand and capacity once Vimukthi and DHS aggregates arrive.
+6. Evaluate documented movement between districts only where coverage and baseline gates pass.
 
 See [implementation status](docs/FINAL_REPORT.md), [run instructions](README.md) and [data sources](docs/DATA_SOURCES.md).
