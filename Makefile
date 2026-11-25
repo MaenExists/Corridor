@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -32,6 +32,8 @@ train-boosting:
 	$(PY) -m ml.train.count_boosting
 eval-counts:
 	$(PY) -m ml.evaluate.compare_counts
+excise-history:
+	$(PY) -m ml.data.excise_enforcement
 monthly-forecast:
 	$(PY) -m ml.forecast.monthly_counts
 forecast:
