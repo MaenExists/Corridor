@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -36,6 +36,8 @@ excise-history:
 	$(PY) -m ml.data.excise_enforcement
 excise-snapshot:
 	$(PY) -m ml.data.excise_enforcement --snapshot
+cutoff-check:
+	$(PY) -m ml.evaluate.cutoff_check
 district-dev:
 	$(PY) -m ml.train.district_monthly --stage development
 district-test:
