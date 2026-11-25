@@ -64,6 +64,20 @@ Statement upload dates are recorded, so a separate replay can show what the publ
 
 Revision candidate for future scoring only: a damped or removed statewide seasonal effect, or a three-month statewide level. Score it on months from November 2026 onward before any change. Do not rescore it on the months above.
 
+## Where-next hotspot forecast
+
+The question is where recorded cases will concentrate next month. `ml/train/district_where.py` turns the frozen count model into a joint forecast by simulation. Each of 4,000 draws scales statewide volume by a factor sampled from the previous 24 statewide one-month errors, then draws every district from its negative binomial. For each district it reports expected cases, an 80% range, the probability of being a top-four district, the probability of running hot (a share of statewide cases at least 20% above its 12-month share), the probability of a surge (a count at least 25% above its 12-month mean) and an expected rank. Probabilities are scored against base rates known at each origin, and alerts are compared with a persistence rule that flags last month's hottest districts.
+
+Development findings that shaped this design:
+
+- District ranking is mostly fixed structure. The model's top four districts captured 41.6% of next month's cases, against 40.8% for 12-month shares and 44.9% with perfect foresight. A multinomial share model with momentum, neighbouring-district spillover, last-year and seasonal terms did not improve log-loss (2.5651 vs 2.5650), so it is not used.
+- Relative hot spots are only modestly predictable. The two alerted districts per month ran hot 48% of the time, against a 25% base rate. Persistence alone reached 46%.
+- Most "surge" skill is statewide timing, because statewide waves lift every district.
+- Ganja and MDMA quantities verify against printed totals in only 15–16 of 36 recent months. MDMA is itemized only from late 2021. Quantities are dominated by rare large seizures. Drug-type forecasts therefore wait for a cleaner series.
+- District is the finest unit public aggregate data supports. Monthly aggregate NDPS counts by Excise range or circle office, obtained through RTI, would allow a finer map. Record-level FIR data is out of scope.
+
+**Pre-registration, 25 November 2026.** The settings above were chosen on 2019–2022 development, including full district dispersion over subtracting the statewide part. The test covers January 2023 to September 2024 and is scored once. These targets were not examined on that window before. Gates: hot-alert AUC at least 0.6, positive Brier skill for hot probabilities and for top-four probabilities, and hot-alert precision at least 1.5 times the base rate. Whether alerts beat persistence is reported but is not a gate.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
