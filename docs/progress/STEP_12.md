@@ -1,4 +1,6 @@
 # 12 — Handoff and verification
+
+> Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
 Start with `README.md`; run `make setup && make demo`, then open http://127.0.0.1:5173.
 Run `make test` for schema, cutoff, deduplication, metrics, chronology, abstention, privacy, track isolation and release checks.
 `make browser-test` exercises the running app with real browser controls; give it the local review key to include inbox, leads and exports.

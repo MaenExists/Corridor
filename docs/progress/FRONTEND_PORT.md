@@ -1,4 +1,6 @@
 # Companion frontend
+
+> Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
 Run `make demo` and open http://127.0.0.1:5173. The black sidebar, atlas, connection inspector, timeline, place profiles and forecast lab now follow the companion workspace.
 The lab replays Corridor's frozen synthetic predictions versus later counts for both horizons. It also shows issued forecasts and links to their map evidence.
 The evidence library, guided demo and offline Ask the Atlas use Corridor's data; the news inbox, leads and briefs still use local review workflows.

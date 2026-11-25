@@ -1,13 +1,17 @@
-# Corridor — owner summary
+# Corridor rebuild status
 
-**Run:** `make setup && make demo`, then open **http://127.0.0.1:5173/?offline=1** for the presentation. The first run takes several minutes; `make serve` reopens the prepared snapshot. Start on **Forecasts**, open **Model evidence**, then **Draft a brief**. The demo also has a measured replay, a fictional inbox, practice leads, and coverage and planner views. This build is for local presentation, not official or operational use.
+Hackfinity is on 28 November 2026. The current demo runs a synthetic historical forecast on Kerala geography and reveals the later fictional outcome. It supports district forecasts, baseline comparison, validation, forecast abstention and aggregate review. Use [the demo script](DEMO_SCRIPT.md).
 
-**Synthetic:** The candidate had the lowest average count error overall on both 7- and 28-day district and known-connection tasks. At 28 days, district forecasts missed by **5.00 cases on average**, versus **5.32** for the best simple comparison. Some places still did better with a simple forecast. The system kept the method chosen on earlier data for the 7-day demo, even though it lost in the final test. Wayanad and Pathanamthitta abstained. The ranges captured **68–72%** against an **80%** target; don't call them dependable.
+| Deliverable | Status |
+| --- | --- |
+| Project scope and model plan | Rewritten for a Kerala district forecast, documented flow research and a separate recovery workspace. The proposed historical information cutoff is 30 June 2026 IST. |
+| Source and acquisition research | Catalogued official statistics, open court archives, bilingual news sources and care directories. The local collection contains supplementary evidence for review. Collection and coverage reports are Git-ignored. |
+| Aggregate intake | Offline CSV validator and as-of selection handle release revisions, complete zero, partial and suppressed periods. Verification uses fixtures. |
+| Legacy demonstration | Synthetic replay, report and evidence UI are available. The private public-report diagnostic is a selected archive and abstains when comparable coverage is unknown. |
+| Real June-cutoff forecast | Pending continuous district labels with release timing. Weekly model integration and validation are outstanding. |
+| Recovery workspace | Official directory snapshot collected across all 14 districts. Public rebuild and monthly treatment-demand data are outstanding. |
+| Movement forecasts | Await explicit historical endpoints, comparable coverage and validation on later outcomes. |
 
-**Real (private aggregate; publicly reported cases only):** This is a small, selective news and High Court sample, not all cases or operational accuracy. Over 20 final weekly forecast dates, the 7-day candidate missed by **0.58 cases on average**, against **0.57** for the best simple comparison. At 28 days it missed by **1.14**, against **1.26** for the best simple comparison; the method chosen earlier did not win. Removing short-history districts didn't change those winners. Missing coverage totals and campaign dates blocked the other sensitivity checks. **Every district abstained** for unknown coverage, and no real connection had enough dated support. These are historical comparisons, not issued predictions.
+The fastest improvement is a representative weekly export from Kerala Police SCRB or Kerala Excise, followed by the historical backfill. A monthly export enables monthly modelling. Annual tables can reconcile totals and coverage. The next parallel request is monthly treatment utilization and staffed capacity from Vimukthi and DHS/NHM.
 
-**Assumptions and limits:** Case rows are not a census; publication proxies some dates, court records arrive late, and conservative matching can miss overlap. The score counts reports known within 21 days of a window ending; overlapping 28-day forecasts can count an outcome again. Reporting, enforcement effort and case definitions can change. We did not measure interception, harm reduction, cue benefit or fairness. The offline map is illustrative, and roles and privacy controls are local demo features. The full assumption list is in `AGENTS.md`; no current build blocker.
-
-**Before presenting:** Rehearse `docs/DEMO_SCRIPT.md`. Supply comparable official counts and verified campaign dates if available. Review any real aggregate separately; don't show private source files or unreviewed results. Seek authorized independent evaluation before discussing operational use.
-
-**Say first:** “This is a team proposal, and we're demonstrating it with synthetic data.” “The system estimates documented cases, not all drug movement or whether an interception would succeed.” “Any operational use would first require an agency-led evaluation on authorized data and later independent outcomes.”
+[Model plan](MODEL_PLAN.md) · [Sources](DATA_SOURCES.md) · [Draft requests and access needs](DATA_REQUESTS.md)

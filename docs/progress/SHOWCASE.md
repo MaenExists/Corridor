@@ -1,5 +1,7 @@
 # Hackathon showcase
 
+> Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
+
 Run `make serve` on the prepared machine and open http://127.0.0.1:5173/?offline=1. If the snapshot has not been prepared, start with `make setup && make demo`. See [the five-minute script](../DEMO_SCRIPT.md).
 
 The first browser walkthrough found that reporting cards overshadowed the forecast, the inspector sent people to a replay without explaining the selected district, and preparing a brief required navigating through the evidence tools. The new path is **Forecasts → View model evidence → Draft a brief**. The district or invented connection and the forecast window carry into the draft.

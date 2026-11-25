@@ -1,4 +1,6 @@
 # 02 — Synthetic dataset
+
+> Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
 Run `make synthetic`. Open `web/public/generated/summary.json` for the inventory and missing fields.
 The fixed-seed run made 5,576 fictional cases and merged 408 duplicate copies; no real records were used.
 A hidden simulator produces activity; coverage, effort and publication delays decide what gets reported.

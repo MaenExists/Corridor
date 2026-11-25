@@ -1,5 +1,7 @@
 # Offline demo rehearsal
 
+> Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
+
 After setup, run `make demo` and open http://127.0.0.1:5173/?offline=1 on the same machine. The overview, main map and review desk start on the bundled satellite archive. The detailed atlas keeps its local boundaries and place search. The offline session disables both online tile providers, including when switching out of and back into the synthetic track.
 
 Open http://127.0.0.1:5173 without the query flag for the existing OpenStreetMap default. Offline rehearsal still needs the local demo server; it does not download tiles or cache the website for later use. Attribution links are still available to open manually.

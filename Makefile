@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -10,6 +10,8 @@ evaluate:
 	$(PY) -m ml.evaluate.run synthetic
 replay:
 	$(PY) -m ml.evaluate.replay
+challenge:
+	$(PY) -m ml.forecast.challenge
 real:
 	$(PY) -m ml.data.real_input
 	$(PY) -m ml.evaluate.run real
@@ -34,11 +36,13 @@ demo:
 	$(MAKE) evaluate
 	$(MAKE) replay
 	$(MAKE) forecast
+	$(MAKE) challenge
 	$(MAKE) serve
 serve:
 	@for name in cases_synthetic forecasts eval_report replay; do \
 		test -s "web/public/generated/$$name.json" || { echo "Missing synthetic snapshot. Run make demo first."; exit 1; }; \
 	done
+	@if ! test -s web/public/generated/challenge.json; then $(MAKE) challenge; fi
 	bash scripts/demo.sh
 api:
 	bash scripts/demo.sh --api-only

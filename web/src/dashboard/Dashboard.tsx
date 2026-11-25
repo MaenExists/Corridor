@@ -1,8 +1,8 @@
 import {
-  Activity, ArrowRight, Bell, BookOpen, ChartNoAxesCombined, ChevronDown, CircleHelp, CircleUserRound, ClipboardList,
-  FileText, Files, FlaskConical, LayoutDashboard, MapPin, PanelLeft, PanelsTopLeft, RotateCw, Settings, ShieldCheck, SlidersHorizontal,
+  Activity, ArrowRight, Bell, BookOpen, ChartNoAxesCombined, ChevronDown, CircleHelp, CircleUserRound, ClipboardList, FlaskConical,
+  FileText, Files, LayoutDashboard, MapPin, PanelLeft, PanelsTopLeft, Play, RotateCw, Settings, ShieldCheck, SlidersHorizontal,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { QueueItem, Role } from "../../../shared/workspace";
 import { AskAtlas } from "../companion/AskAtlas";
 import { Atlas } from "../companion/Atlas";
@@ -24,8 +24,11 @@ import { Scenarios } from "./Scenarios";
 import { ExploreHeading, ForecastStats } from "./Showcase";
 import { datasetForecast, history, overview } from "./metrics";
 import type { Horizon, Range } from "./metrics";
+import { Challenge } from "./Challenge";
+import "./challenge.css";
 
 const pages = [
+  {id:"challenge", label:"Challenge", icon:Play},
   {id:"overview", label:"Forecasts", icon:LayoutDashboard}, {id:"map", label:"Map", icon:MapPin},
   {id:"patterns", label:"Model", icon:ChartNoAxesCombined}, {id:"evidence", label:"Evidence", icon:Files},
   {id:"scenarios", label:"Scenarios", icon:FlaskConical}, {id:"methodology", label:"Methodology", icon:BookOpen},
@@ -39,7 +42,8 @@ const evidencePages=[{id:"library",label:"Evidence library",icon:Files},{id:"inb
 const initialPage=():Page=>{
   const hash=location.hash.slice(1);
   if(pages.some(p=>p.id===hash))return hash as Page;
-  return location.pathname==="/demo" || new URLSearchParams(location.search).get("demo")==="model"?"patterns":"overview";
+  if(initialLayout()==="desk")return "overview";
+  return location.pathname==="/demo" || new URLSearchParams(location.search).get("demo")==="model"?"patterns":"challenge";
 };
 const initialLayout=():Layout=>location.pathname==="/report" || new URLSearchParams(location.search).get("layout")==="desk"?"desk":"overview";
 const offlineBasemap=()=>new URLSearchParams(location.search).get("offline")==="1";
@@ -47,6 +51,8 @@ const offlineBasemap=()=>new URLSearchParams(location.search).get("offline")==="
 export function Dashboard() {
   const [layout,setLayout]=useState<Layout>(initialLayout);
   const [page,setPage]=useState<Page>(initialPage);
+  const [challengeVisited,setChallengeVisited]=useState(()=>page==="challenge");
+  const [modelView,setModelView]=useState<"evidence"|"report">("evidence");
   const [evidencePage,setEvidencePage]=useState<EvidencePage>("library");
   const [libraryQuery,setLibraryQuery]=useState("");
   const [track,setTrack]=useState<"synthetic"|"real">("synthetic");
@@ -77,6 +83,7 @@ export function Dashboard() {
   const activeForecast=datasetForecast(forecast,district,horizon);
   const navLabel=real?"Real results":pages.find(p=>p.id===page)?.label;
   const [refreshing,setRefreshing]=useState(false);
+  const loadedWorkspace=useRef(false);
 
   const fetchForecast=useCallback(async()=>{
     const f=await localJSON<Forecasts>("/generated/forecasts.json");
@@ -108,12 +115,32 @@ export function Dashboard() {
     setSnapshotErrors(missing);
     setRefreshing(false);
   },[fetchForecast,fetchQueue]);
-  useEffect(()=>{void refresh();},[refresh]);
+  useEffect(()=>{
+    if(real)return;
+    if(page!=="challenge"){
+      if(!loadedWorkspace.current){loadedWorkspace.current=true;void refresh();}
+      return;
+    }
+    if(loadedWorkspace.current)return;
+    let active=true;
+    localJSON("/generated/eval_report.json").then(readSyntheticReport).then(r=>{if(active)setReport(r);}).catch(()=>{});
+    return ()=>{active=false;};
+  },[page,real,refresh]);
   useEffect(()=>{if(!real&&(page==="overview"||page==="evidence"))void fetchQueue();},[page,real,fetchQueue]);
-  const go=useCallback((p:Page)=>{
+  const go=useCallback((p:Page,view:"evidence"|"report"="evidence")=>{
+    if(p==="challenge")setChallengeVisited(true);
+    setModelView(view);
     setPage(p);setRecord(null);
     window.scrollTo({top:0,behavior:"instant"});
   },[]);
+  useEffect(()=>{
+    const hashChanged=()=>{
+      const p=pages.find(p=>`#${p.id}`===location.hash);
+      if(p)go(p.id);
+    };
+    window.addEventListener("hashchange",hashChanged);
+    return ()=>window.removeEventListener("hashchange",hashChanged);
+  },[go]);
   const toEvidence=(target:EvidencePage,query="")=>{
     setEvidencePage(target);setLibraryQuery(query);go("evidence");
   };
@@ -146,10 +173,10 @@ export function Dashboard() {
       <p>Demo only. Not a production authorization system.</p>
     </div>
   </details>;
-  const brand=<button className="console-brand" onClick={()=>{if(!real){setLayout("overview");go("overview");}}} aria-label="Corridor home">
+  const brand=<button className="console-brand" onClick={()=>{if(!real){setLayout("overview");go("challenge");}}} aria-label="Corridor home">
     <KeralaMark className="console-brand-mark"/><span><strong>CORRIDOR</strong><small>Kerala Forecasting Lab</small></span></button>;
   const nav=<nav className="console-nav" aria-label="Main navigation">
-    {pages.map(({id,label,icon:Icon})=>{
+    {pages.filter(p=>!desk||p.id!=="challenge").map(({id,label,icon:Icon})=>{
       const title=desk&&id==="overview"?"Review desk":label;
       return <button key={id} aria-current={page===id?"page":undefined} onClick={()=>go(id)} aria-label={title}>
         <Icon size={20}/><span>{title}</span></button>;
@@ -165,7 +192,7 @@ export function Dashboard() {
     <button onClick={()=>toEvidence("leads")}><ClipboardList size={15}/> Practice leads <ArrowRight size={13}/></button>
     <button onClick={()=>go("patterns")}><ChartNoAxesCombined size={15}/> View model report <ArrowRight size={13}/></button>
   </section>;
-  return <div className={`console ${desk?"console-desk-layout":""} ${real?"console-real-layout":""}`}>
+  return <div className={`console ${desk?"console-desk-layout":""} ${real?"console-real-layout":""} ${page==="challenge"&&!real?"console-challenge":""}`}>
     <a className="console-skip" href="#workspace-main" onClick={e=>{e.preventDefault();document.getElementById("workspace-main")?.focus();}}>Skip to workspace</a>
     {!desk&&<aside className="console-sidebar">
       {brand}<div className="console-brand-rule"/>
@@ -181,10 +208,10 @@ export function Dashboard() {
         {desk&&nav}
         <div className="console-header-state">
           {real?<span className="console-mode-tag real">{REAL_LABEL}</span>:<div className="console-freshness">
-            <span><i/> <strong>SYNTHETIC DATA</strong></span><small>{forecast?`Data cutoff ${dateLabel(forecast.data_cutoff)}`:"Snapshot not loaded"}</small>
+             <span><i/> <strong>SYNTHETIC DATA</strong></span><small>{page==="challenge"?"Historical model test":forecast?`Data cutoff ${dateLabel(forecast.data_cutoff)}`:"Snapshot not loaded"}</small>
           </div>}
           {!real&&desk&&<button title="Overview layout" aria-label="Overview layout" className="console-icon" onClick={switchLayout}><PanelLeft size={18}/></button>}
-          {!real&&<button title="Reload local snapshot" aria-label="Reload local snapshot" className="console-icon console-reload" disabled={refreshing} onClick={()=>void refresh()}><RotateCw size={16}/></button>}
+           {!real&&page!=="challenge"&&<button title="Reload local snapshot" aria-label="Reload local snapshot" className="console-icon console-reload" disabled={refreshing} onClick={()=>void refresh()}><RotateCw size={16}/></button>}
           {settings}
           <button className="console-profile" aria-label="Switch demo role" title={`Demo role: ${role}`} disabled={real}
             onClick={()=>changeRole(planner?"analyst":"planner")}><CircleUserRound size={20}/></button>
@@ -192,14 +219,15 @@ export function Dashboard() {
       </header>
       {!real&&!desk&&<div className="console-mobile-nav">{nav}</div>}
       <div className={`console-notice-bar ${real?"real":""}`}><ShieldCheck size={14}/><div>{BANNER}{real&&<strong>{REAL_UNIVERSE}</strong>}</div>
-        {!real&&forecast&&<small>Batch generated {dateLabel(forecast.generated_at)} · {forecast.generated_at.slice(11,16)} UTC</small>}</div>
+         {!real&&page!=="challenge"&&forecast&&<small>Batch generated {dateLabel(forecast.generated_at)} · {forecast.generated_at.slice(11,16)} UTC</small>}</div>
       </div>
       <main className="console-main" id="workspace-main" tabIndex={-1}>
         {real?<div className="console-page companion-support"><RealResults/></div>:<>
-          {!!snapshotErrors.length&&<div className="console-caution snapshot-error" role="alert">
+           {page!=="challenge"&&!!snapshotErrors.length&&<div className="console-caution snapshot-error" role="alert">
             <span><b>Couldn’t load:</b> {snapshotErrors.join(", ")}. Start <code>make demo</code> to prepare missing files.</span>
             <button className="console-button quiet-action" disabled={refreshing} onClick={()=>void refresh()}>Retry loading</button>
-          </div>}
+           </div>}
+           {challengeVisited&&<div hidden={page!=="challenge"}><Challenge report={report} onEvidence={(d,h)=>{choose(d);setHorizon(h);go("patterns","report");}}/></div>}
           {page==="overview"&&!desk&&<ExploreHeading cutoff={forecast?.data_cutoff} openModel={openDistrictModel}/>}
           {page==="overview"&&desk&&<header className="showcase-heading review-heading"><div>
             <p className="console-eyebrow"><ClipboardList size={15}/> Local practice workspace</p><h1>Review desk</h1>
@@ -234,7 +262,7 @@ export function Dashboard() {
               satellite(true)}
           </div>}
           {page==="patterns"&&<div className="console-page console-legacy console-patterns">
-            <ForecastLab report={report} forecasts={forecast} planner={planner} onAtlas={openAtlas}
+             <ForecastLab key={modelView} initialView={modelView} report={report} forecasts={forecast} planner={planner} onAtlas={openAtlas}
               focus={{selection,select:selectSubject,horizon,changeHorizon:setHorizon,onBrief:()=>toEvidence("briefs")}}/>
           </div>}
           {page==="evidence"&&<div className="console-page console-legacy">

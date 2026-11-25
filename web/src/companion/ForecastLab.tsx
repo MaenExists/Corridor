@@ -90,9 +90,9 @@ function Issued({ rows, onAtlas }: {rows:Forecast[];onAtlas:(s:Selection,horizon
 
 type Focus = { selection:Selection; select:(target:Selection)=>void; horizon:7|28; changeHorizon:(h:7|28)=>void; onBrief:()=>void };
 
-export function ForecastLab({report,forecasts,planner,onAtlas,initialHorizon=28,focus}:{report:Evaluation|null;forecasts:Forecasts|null;
-  planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void;initialHorizon?:7|28;focus?:Focus}) {
-  const [view,setView]=useState<"evidence"|"replay"|"issued"|"report">(focus?"evidence":"replay");
+export function ForecastLab({report,forecasts,planner,onAtlas,initialHorizon=28,focus,initialView}:{report:Evaluation|null;forecasts:Forecasts|null;
+  planner:boolean;onAtlas:(s:Selection,horizon:7|28)=>void;initialHorizon?:7|28;focus?:Focus;initialView?:"evidence"|"report"}) {
+  const [view,setView]=useState<"evidence"|"replay"|"issued"|"report">(initialView??(focus?"evidence":"replay"));
   const [scope,setScope]=useState<"area"|"corridor">("area");
   const [localHorizon,setLocalHorizon]=useState<7|28>(initialHorizon);
   const horizon=focus?.horizon??localHorizon;
