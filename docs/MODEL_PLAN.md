@@ -169,6 +169,8 @@ The explicit risk-terrain surface on its own did best on new places among the mo
 - The product shows two lists: "same place again" from the grid ranker, and a "new-place watch" from the risk-terrain surface restricted to cells more than 2 km from any earlier report.
 - The risk terrain is scored on post-cutoff months, which are fully fresh, and on the reused 2024 to mid-2026 window. It is credited only if it beats population on the fresh list in both.
 
+*Correction, same day, before any later window was scored.* A unit test found that the risk-terrain penalty (α = 10⁻³ with the L-BFGS solver) shrank rare-band relative risks toward 1. A simulated 2.75× risk came out as 1.6×. α is now 10⁻⁵ with the Newton solver, which recovers the empirical ratio. All three windows are rerun with the fix. The development figures above came from the shrunk version. The rule recorded above applies unchanged.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
