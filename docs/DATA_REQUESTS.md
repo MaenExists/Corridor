@@ -1,5 +1,11 @@
 # Data requests for case forecasts and recovery planning
 
+## The one request that switches the live forecast on
+
+Ask the Kerala Excise Commissionerate for the **monthly "Statewide Details of Enforcement Activities" statements from October 2024 to the latest month**. Ask them to continue publishing them, or to send them each month. The department published these statements for every month from 2015 to September 2024, and Corridor's validated model is trained on exactly this format. With the gap filled, the model issues a forecast for next month immediately. Without it, the model needs six more monthly homepage snapshots, the earliest being March 2027. An RTI request for existing records is enough because the statements already exist. [Excise RTI](https://keralaexcise.gov.in/rti) · [Kerala RTI portal](https://rtiportal.kerala.gov.in/)
+
+From 2019 to 2024, public uploads would have allowed a timely forecast at only 2 of 70 month-ends because statements were often posted months late. A direct monthly feed for an authorized analyst is what makes the forecast usable.
+
 ## API and download shortlist
 
 | Priority | Access to obtain | What it adds |
