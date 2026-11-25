@@ -15,6 +15,7 @@ export default defineConfig({
       "**/DATA_AUDIT_REAL.md", "**/*.sqlite*", "**/*.db", "**/*.joblib", "**/*.pkl"] },
     proxy: { "/api": `http://127.0.0.1:${portOr(process.env.CORRIDOR_API_PORT,8787)}` } },
   build: { rollupOptions: { input: { main: fileURLToPath(new URL("index.html", import.meta.url)),
-    recovery: fileURLToPath(new URL("recovery.html", import.meta.url)) },
+    recovery: fileURLToPath(new URL("recovery.html", import.meta.url)),
+    hotspots: fileURLToPath(new URL("hotspots.html", import.meta.url)) },
     output: { manualChunks: { leaflet: ["leaflet"] } } } }
 });
