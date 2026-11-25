@@ -20,6 +20,18 @@ Store approved files outside public paths, such as in the gitignored ml/data/rea
 
 See [the intake guide](ml/docs/data-collection-guide.md) for the schema. The validator and as-of selection precede weekly model integration. The existing **make real** command is a separate legacy source-CSV diagnostic.
 
+## District-month forecast from official Excise statements
+
+```sh
+make excise-history     # recover and verify the 2016–2024 monthly statements (first run downloads from the Internet Archive)
+make district-dev       # development replay used to choose settings
+make district-test      # the frozen test, January 2023 – September 2024
+make district-forecast  # issue or withhold as of 30 June 2026; set AS_OF=YYYY-MM-DD for another date
+make excise-snapshot    # monthly: record the district panel shown on the live Excise homepage
+```
+
+Raw statements, the verified panel and reports stay in the gitignored `ml/data/real/public_sources/` directory. The design, gates and results are in [the model plan](docs/MODEL_PLAN.md#district-month-model-recovered-excise-statements).
+
 ## Evaluate a private next-month forecast
 
 `make monthly-forecast` checks the saved Excise snapshot against the 30 June 2026 cutoff. With a reconciled, authorized history of monthly Excise NDPS registrations, run the same pipeline at a month-end cutoff.

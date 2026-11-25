@@ -1,0 +1,7 @@
+# District model checkpoint — 25 November 2026
+
+- **Data.** 117 Excise monthly statements (April 2015 – September 2024) were retrieved from the Internet Archive and hashed. 105 months from January 2016 have all 14 district rows summing to the printed statewide NDPS total. Rotated totals in March 2023 and August 2022 and the scanned July 2022 page are recorded in a local manual check file. Yearly sums match the State Planning Board district series: 32 of 56 district-years exactly, the rest within 8 cases. Raids are reported only until early 2021.
+- **Model.** Smoothed district share (0.3) × latest statewide total × shrunken calendar-month effect (n / (n + 4)), with negative binomial 80% intervals using the previous 24 months of errors. Chosen on 2019–2022 development; pre-registered in commit 7ea6272 before the test.
+- **Test (January 2023 – September 2024).** One month ahead passed all gates: MAE 8.70 against 9.31, bias −0.1%, coverage 82.3% and rank correlation 0.81. Two and three months ahead failed skill and are withheld.
+- **Live status.** The 30 June 2026 snapshot is withheld because its latest month is September 2024. As of 25 November 2026 it is withheld while rebuilding after the gap: October 2026 is recorded, and 5 more consecutive months are needed. Public uploads alone allowed a timely forecast at 2 of 70 month-ends from 2019 to 2024.
+- **Next.** Ask Excise for the October 2024 onward statements (see DATA_REQUESTS). Run `make excise-snapshot` each month. Serve the 2023–2024 real replay in the interface next to the synthetic showcase.
