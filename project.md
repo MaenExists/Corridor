@@ -3,7 +3,7 @@
 Corridor is an AI forecasting and recovery-planning system for Kerala, built for Hackfinity 2026. It learns from official records of drug cases to serve two audiences:
 
 1. **Where next.** Each month, it forecasts where in Kerala recorded NDPS cases are likely to concentrate next month. For each of the 14 districts it gives expected cases with an 80% range, the probability of being a top-four district, and the probability of running hot, meaning above its own normal share. The two hottest-probability districts become the month's alerts. Analysts see where activity is expected and how confident each call is.
-2. **Public and recovery services.** It maps district hotspots of need so that rehabilitation centres, counselling and health services can focus capacity on the areas that need it most. Each hotspot shows which evidence supports it and where data is missing.
+2. **Public and recovery services.** The recovery access map (`/recovery.html`) shows, square kilometre by square kilometre, where Kerala residents are far from de-addiction help and how many registered beds they can reach. It ranks named localities where new outreach or capacity would reach the most people. Rehabilitation centres and health services can see exactly where to focus. It never labels where people who use drugs live: no public source measures that, and doing so would stigmatise neighbourhoods and deter people from seeking treatment.
 
 ## Hackfinity
 
@@ -29,7 +29,7 @@ The validated horizon is one month, and the gain over simple methods is modest. 
 | Audience | Product |
 | --- | --- |
 | Authorized enforcement analysts | Monthly where-next brief: district expected cases, ranges, top-four and hot probabilities, two alerts, evaluation history and withheld states |
-| Health and prevention planners | District need view: verified services, staffed capacity, treatment demand when aggregate care data is available, and the enforcement forecast as separate context |
+| Health and prevention planners | Recovery access map: 322 located centres with register beds, a 1 km access grid, ranked priority localities and district gaps, with recorded Excise cases as separate context. Care demand by taluk is added when Vimukthi or DHS aggregates arrive, with small counts suppressed |
 | Public | Verified treatment and counselling directory and approved district-level indicators |
 
 - A forecast is the number of cases agencies are expected to **record**. It also reflects where and how intensively officers enforce, so it is not a measure of how many people use drugs.
@@ -45,7 +45,8 @@ The knowledge cutoff for the historical snapshot is **30 June 2026, end of day I
 2. ✅ Build and pass the where-next hotspot forecast. Next, finer "where": request aggregate monthly NDPS counts by Excise range or circle office, and a drug-type series in the same format.
 3. Keep the series current with `make excise-snapshot` every month. Request the October 2024 – September 2026 statements and future monthly exports from Excise. See [data requests](docs/DATA_REQUESTS.md).
 4. Serve the where-next brief and the real replay (forecast vs recorded outcome, 2023–2024) and live status in the interface, next to the synthetic showcase.
-5. Build the recovery view: the verified directory, then district care demand and capacity once Vimukthi and DHS aggregates arrive.
-6. Evaluate documented movement between districts only where coverage and baseline gates pass.
+5. ✅ Build the recovery access map (`make recovery-refresh`). Next: travel time instead of straight-line distance, and care demand by taluk from Vimukthi or DHS. Wastewater results by catchment would be an anonymous, near-real-time measure of use.
+6. Extend the recovery view: the verified directory, then district care demand and capacity once Vimukthi and DHS aggregates arrive.
+7. Evaluate documented movement between districts only where coverage and baseline gates pass.
 
 See [implementation status](docs/FINAL_REPORT.md), [run instructions](README.md) and [data sources](docs/DATA_SOURCES.md).

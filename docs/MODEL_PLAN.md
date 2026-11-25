@@ -122,6 +122,9 @@ Use explicit evidence grades for adjudicated findings, agency-confirmed accounts
 
 ## Health and rehabilitation
 
+**Recovery access map (built 25 November 2026).** `ml/recovery/access_map.py` locates 322 centres: 308 from the State Mental Health Authority de-addiction register, by PIN-code centroid, and the 14 Vimukthi centres, by gazetteer town or OpenStreetMap geocoder. It clips the WorldPop 2020 1 km grid to Kerala (46,057 cells, 34.7 million people). Each cell gets its straight-line distance to the nearest centre and its registered beds within 25 km per 100,000 people, using a two-step catchment that shares each centre's beds among everyone in reach. Localities are ranked by people × km beyond 10 km. 19.9% of residents live more than 10 km from a centre; Idukki has 46% beyond 10 km and 16% beyond 20 km. Only 12 register rows split out de-addiction beds; the rest print establishment totals, so bed access is an upper bound. The map has no layer estimating where people who use drugs live, and adds care demand only as suppressed aggregates.
+
+
 Verify a public service directory and official contact details. Ingest facility-month or district-month aggregates of first visits, admissions, referrals, counselling contacts, wait times, staffed slots, days open and reporting completeness. Preserve programme definitions and distinguish facility from service-user residence district when approved aggregate residence data exist. Compare a seasonal monthly baseline and a pooled Poisson model for approved treatment counts. Assess changes in access, referrals and outreach, which affect utilization. Publish only approved aggregates with small-cell suppression. Public help and official reporting links stay independent of model training, individual information and unverified allegations.
 
 ## Data and architecture

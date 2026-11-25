@@ -32,6 +32,15 @@ make excise-snapshot    # monthly: record the district panel shown on the live E
 
 Raw statements, the verified panel and reports stay in the gitignored `ml/data/real/public_sources/` directory. The design, gates and results are in [the model plan](docs/MODEL_PLAN.md#district-month-model-recovered-excise-statements).
 
+## Recovery access map
+
+```sh
+make recovery-refresh   # fetch the current centre register, Vimukthi directory and Excise month, then build
+make recovery-map       # rebuild from local copies
+```
+
+Open **http://127.0.0.1:5173/recovery.html** (add `?offline=1` to skip map tiles). The first build needs the WorldPop 2020 1 km India grid and the GeoNames India postal file in `ml/data/real/public_sources/geo/`, plus the packages in `requirements-collection.txt`. Outputs stay in gitignored paths.
+
 ## Evaluate a private next-month forecast
 
 `make monthly-forecast` checks the saved Excise snapshot against the 30 June 2026 cutoff. With a reconciled, authorized history of monthly Excise NDPS registrations, run the same pipeline at a month-end cutoff.
