@@ -80,6 +80,17 @@ Development findings that shaped this design:
 
 **Results (scored once, 25 November 2026, `make where-test`).** All gates passed. The two hot-district alerts each month were right 38% of the time, against an 18% base rate (2.15× lift) and 36% for persistence. Hot-alert AUC was 0.76 against 0.72 for persistence, with Brier skill +0.14. Top-four probabilities had Brier skill +0.41 and AUC 0.93. Surge AUC was 0.73. The predicted top four captured 39.3% of cases, against 38.6% for 12-month shares and 41.7% with perfect foresight, so ranking stays mostly structural. Probabilities ran slightly high on the test window: hot averaged 0.21 against an observed 0.18, and surge 0.26 against 0.20. Monitor calibration on new months before quoting probabilities as exact.
 
+**Audit (25 November 2026, `make where-audit`, no settings changed).** The gates passed, but the evidence is thin.
+
+- Alert precision on the test window was 38%, with a 95% month-block bootstrap interval of 24–52%.
+- The model's advantage over persistence was −10 to +14 percentage points, and its AUC advantage −0.01 to +0.10. Neither is distinguishable from flagging last month's hottest districts.
+- Random alerts scored 17.5%, so the model clearly beats chance.
+- Alerts caught 16 of 52 hot district-months, so 69% were missed. Both alerts were wrong in 8 of 21 months.
+- Development years were uneven: the model trailed persistence in 2020 and 2021 and led in 2019, 2022 and 2024.
+- Calibration: hot probabilities of 0.1–0.2 came true only 6% of the time. Top-four probabilities above 0.7 came true 98% of the time, against 83% predicted. Surge probabilities of 0.3–0.7 ran about a third too high.
+- Hot events were mostly not small-count noise: 11.5% occurred under 30 cases. A correct alert meant a median of about 17 cases above the district's normal share.
+- Malappuram was hot in 12 of 21 test months. Its share was rising, and the 12-month normal lags a trend, so part of the hot signal is trend-following.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
