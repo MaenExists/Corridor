@@ -21,6 +21,8 @@ The example is fictional. The importer expects UTF-8, the exact header above, an
 
 Run the command in [the README](../../README.md). It verifies the shape and whether at least one latest-as-of observation is complete. It does not infer series coverage or perform training. Compare coverage against an expected district-period calendar and reconcile with official aggregate reference tables before training. For Monday-start whole-week forecasts, the feature cutoff is Sunday end of day IST.
 
+For a next-month trial, supply reconciled `excise` / `ndps_registrations` / `month` rows to the monthly command in the README. It needs at least 50 complete archive months documented by the cutoff and enough timely releases to replay all validation stages. Keep annual totals, other metrics and separate agencies in their own series. A late or withdrawn report can block forecast issuance.
+
 ## Existing local diagnostic
 
 The earlier **make real** path uses source CSVs in the gitignored training_dataset directory. Its sample comprises public reporting and court orders. Comparable complete district-year totals can be supplied via the existing official counts template, using the source and retrieval date. Apply the existing conservative deduplication and documented availability checks. The old paths and private audit remain local. The aggregate intake above runs independently. It does not read those files or export records.

@@ -34,6 +34,14 @@ The same command fits a lagged Poisson challenger independently for each window.
 
 Court orders support incident evidence alone. Use court decision dates for order identity and documented archive coverage, and leave incident dates unset until the underlying passage has been reviewed. Use an exact court case number plus decision date to group orders and an evidenced crime number, station and year to propose incident linkage. Review fuzzy matches before merging. Keep reported drug classes and original units, with log-transformed quantities available for review. Large quantities warrant a transit or context check. Classify movement only from explicit supporting evidence. Use official case counts as the model outcome. Treat NCRB personal-possession and trafficking-possession as separate enforcement-recorded proxies. They do not substitute for independent treatment demand or verified movement.
 
+## Next-month model for official registrations
+
+The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
+
+Require at least six earlier complete training examples by month at each model fit. The rolling replay uses six development months, 12 interval calibration months and 12 final test months, with two one-month gaps to allow outcomes to mature. Freeze method selection before calibration and fix interval width before final test. Require at least 50 complete observed months overall, with additional time needed when publication delays reduce historical eligibility. Select the challenger only if it improves on the strongest baseline by at least 5% in both development and test. If development selects a baseline, allow it to proceed when final test error is within 5% of the best baseline there.
+
+The initial test gate also requires absolute error no greater than 25% of reported volume, interval coverage for all districts together in at least 10 of 12 test months, and aggregate interval width no greater than twice observed volume. Calibrate intervals from each month's largest normalized district error to keep the calibration unit at one month. These thresholds are initial project choices. Observed test performance supports a limited historical check, with future changes in reporting, enforcement and activity still affecting error. Issuance stays local and describes recorded counts.
+
 ## Chronological evaluation
 
 | Stage | Proposed dates |

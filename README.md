@@ -20,6 +20,16 @@ Store approved files outside public paths, such as in the gitignored ml/data/rea
 
 See [the intake guide](ml/docs/data-collection-guide.md) for the schema. The validator and as-of selection precede weekly model integration. The existing **make real** command is a separate legacy source-CSV diagnostic.
 
+## Evaluate a private next-month forecast
+
+`make monthly-forecast` checks the saved Excise snapshot against the 30 June 2026 cutoff. With a reconciled, authorized history of monthly Excise NDPS registrations, run the same pipeline at a month-end cutoff.
+
+```sh
+.venv/bin/python -m ml.forecast.monthly_counts --as-of 2026-06-30 --input ml/data/real/excise_monthly_history.csv
+```
+
+Use genuine release dates and include complete district coverage. The pipeline replays what was known at each historical forecast date, tests a regularized Poisson model against three baselines, and withholds the result when history or independent evaluation is insufficient. Reports stay in the gitignored `prepared/monthly_forecast/` directory.
+
 ## Public collection snapshot
 
 The downloaded official tables, court archive and public recovery directory are stored locally in the gitignored ml/data/real/public_sources directory. The local collection and coverage reports are kept in the Git-ignored files `docs/progress/PUBLIC_COLLECTION.md` and `docs/progress/SOURCE_COVERAGE.md`. The public snapshot provides context, court candidates and directory data. The official district series remains too sparse for a weekly real forecast.
