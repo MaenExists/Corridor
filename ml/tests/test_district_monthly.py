@@ -39,3 +39,23 @@ def test_intervals_widen_with_dispersion():
     wide = model.interval(40.0, 0.1)
     assert narrow[0] >= wide[0] and narrow[1] <= wide[1]
     assert model.dispersion([(10.0, 10.0)] * 5) is None
+
+
+def test_issue_requires_recent_consecutive_months():
+    panel = fictional_panel(months=30)
+    latest = panel.months[-1]
+    issued = model.issue(panel, model.add_months(latest, 1))
+    assert issued["status"] == "issued_next_month"
+    assert len(issued["forecasts"]) == 14
+    assert sorted(row["rank"] for row in issued["forecasts"]) == list(range(1, 15))
+    stale = model.issue(panel, model.add_months(latest, 3))
+    assert stale["status"] == "withheld_stale_data" and stale["forecasts"] == []
+
+
+def test_issue_waits_after_a_gap():
+    panel = fictional_panel(months=40)
+    keep = list(range(30)) + [39]
+    gapped = model.Panel([panel.months[i] for i in keep], panel.counts[keep])
+    report = model.issue(gapped, panel.months[39])
+    assert report["status"] == "withheld_rebuilding_after_gap"
+    assert report["months_still_needed"] == model.RESUME_MONTHS - 1

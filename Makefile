@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -38,6 +38,8 @@ district-dev:
 	$(PY) -m ml.train.district_monthly --stage development
 district-test:
 	$(PY) -m ml.train.district_monthly --stage test
+district-forecast:
+	$(PY) -m ml.train.district_monthly --stage forecast --as-of $${AS_OF:-2026-06-30}
 monthly-forecast:
 	$(PY) -m ml.forecast.monthly_counts
 forecast:

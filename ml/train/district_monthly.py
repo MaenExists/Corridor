@@ -50,6 +50,10 @@ GATES = {
     "interval_coverage_range": (0.72, 0.88),
     "min_mean_rank_correlation": 0.7,
 }
+RESUME_MONTHS = 6  # consecutive months needed after a gap; measured on development
+CUTOFF = date(2026, 6, 30)
+LIVE_MONTHS = ROOT / "excise_month.csv"
+HISTORY = ROOT / "excise_monthly_history.csv"
 DEVELOPMENT_GRID = {"share_smoothing": (0.2, 0.3, 0.4, 0.5), "seasonal_shrink": (1.0, 2.0, 4.0, None)}
 
 
@@ -90,7 +94,8 @@ def month_effect(panel, origin, month, shrink):
     if shrink is None:
         return 0.0
     changes = [math.log(panel.state[step] / panel.state[step - 1]) for step in range(1, origin + 1)
-               if panel.months[step].month == month and panel.state[step - 1] > 0 and panel.state[step] > 0]
+               if panel.months[step].month == month and panel.state[step - 1] > 0 and panel.state[step] > 0
+               and add_months(panel.months[step - 1], 1) == panel.months[step]]
     return sum(changes) / (len(changes) + shrink) if changes else 0.0
 
 
@@ -192,7 +197,7 @@ def metrics(rows, method):
         "rmse": round(float(np.sqrt((error ** 2).mean())), 3),
         "wape": round(float(np.abs(error).sum() / actual.sum()), 4),
         "relative_bias": round(float(error.sum() / actual.sum()), 4),
-        "mean_rank_correlation": round(float(np.mean(correlations)), 3),
+        "mean_rank_correlation": round(float(np.mean(correlations)), 3) if correlations else None,
         "top4_overlap": round(float(np.mean(top)), 3),
     }
 
@@ -214,13 +219,27 @@ def coverage(rows):
             "mean_width": round(float(np.mean(widths)), 2)}
 
 
+def by_district(rows):
+    """Per-district error and coverage. The baseline comparator is chosen after scoring, so it is optimistic."""
+    output = {}
+    for district in DISTRICTS:
+        subset = [row for row in rows if row["district"] == district]
+        scores = {method: metrics(subset, method)["mae"] for method in (MODEL, *BASELINES) if metrics(subset, method)}
+        covered = coverage(subset)
+        output[district] = {"model_mae": scores[MODEL],
+                            "best_baseline_mae_chosen_after_scoring": min(value for name, value in scores.items() if name != MODEL),
+                            "mean_actual": round(float(np.mean([row["actual"] for row in subset])), 1),
+                            "interval_coverage": covered["coverage"] if covered else None}
+    return output
+
+
 def stage_report(panel, window):
     report = {}
     for horizon in HORIZONS:
         rows = replay(panel, horizon, *window)
         scores = {method: metrics(rows, method) for method in (MODEL, *BASELINES)}
         scores = {name: score for name, score in scores.items() if score}
-        report[f"h{horizon}"] = {"scores": scores, "interval": coverage(rows), "rows": rows}
+        report[f"h{horizon}"] = {"scores": scores, "interval": coverage(rows), "by_district": by_district(rows), "rows": rows}
     return report
 
 
@@ -256,6 +275,71 @@ def strip_rows(stage):
     return {key: {name: value for name, value in section.items() if name != "rows"} for key, section in stage.items()}
 
 
+def releases_panel(as_of, paths=(HISTORY, LIVE_MONTHS)):
+    """Latest complete release of every month known by a date. Months may have gaps."""
+    from ml.data.aggregate_intake import as_of as select, read_releases
+    releases = []
+    for path in paths:
+        if path.exists():
+            with path.open(encoding="utf-8-sig", newline="") as stream:
+                releases += [release for release in read_releases(stream) if release.period.agency == "excise"
+                             and release.period.metric == "ndps_registrations" and release.period.frequency == "month"]
+    by_month = {}
+    for period, release in select(releases, as_of).items():
+        if release.status == "complete":
+            by_month.setdefault(period.start, {})[period.district] = release.count
+    months = sorted(month for month, values in by_month.items() if set(values) == set(DISTRICTS))
+    return Panel(months, np.array([[by_month[month][district] for district in DISTRICTS] for month in months], float).reshape(-1, 14))
+
+
+def consecutive_run(panel, origin):
+    run = 1
+    while origin - run >= 0 and add_months(panel.months[origin - run], run) == panel.months[origin]:
+        run += 1
+    return run
+
+
+def eligible_origin(panel, origin):
+    return origin >= 12 and consecutive_run(panel, origin) >= min(RESUME_MONTHS, origin + 1)
+
+
+def issue(panel, as_of):
+    """Issue next-month district forecasts when the validated conditions hold, else explain the withholding."""
+    current = as_of.replace(day=1)
+    latest = panel.months[-1] if panel.months else None
+    target = add_months(latest, 1) if latest else add_months(current, 1)
+    report = {"as_of": as_of.isoformat(), "target_month": target.isoformat(),
+              "latest_complete_month": latest.isoformat() if latest else None,
+              "validated_horizon_months": 1, "resume_after_gap_months": RESUME_MONTHS, "forecasts": []}
+    if latest is None:
+        return dict(report, status="withheld_no_data")
+    origin = len(panel.months) - 1
+    if target < current:
+        # The validated horizon is one month. Older data cannot support the current month.
+        behind = (current.year * 12 + current.month) - (latest.year * 12 + latest.month)
+        return dict(report, target_month=add_months(current, 1).isoformat(), status="withheld_stale_data",
+                    months_behind=behind)
+    run = consecutive_run(panel, origin)
+    if origin < 12 or run < RESUME_MONTHS:
+        return dict(report, status="withheld_rebuilding_after_gap", consecutive_months=run,
+                    months_still_needed=RESUME_MONTHS - run)
+    errors = []
+    for step in range(13, origin + 1):
+        if add_months(panel.months[step - 1], 1) == panel.months[step] and eligible_origin(panel, step - 1):
+            mean = share_state_mean(panel, step - 1, 1)
+            errors += list(zip(mean.tolist(), panel.counts[step].tolist()))
+    phi = dispersion(errors[-DISPERSION_WINDOW * len(DISTRICTS):])
+    mean = share_state_mean(panel, origin, 1)
+    ranks = np.argsort(-mean, kind="stable")
+    rank_of = {DISTRICTS[position]: rank + 1 for rank, position in enumerate(ranks)}
+    report["forecasts"] = [{
+        "district": district, "expected": round(float(value), 1), "interval_80": interval(float(value), phi),
+        "expected_share": round(float(value / mean.sum()), 4), "rank": rank_of[district],
+    } for district, value in zip(DISTRICTS, mean, strict=True)]
+    report["statewide_expected"] = round(float(mean.sum()), 1)
+    return dict(report, status="issued_next_month")
+
+
 def write_json(path, value):
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     temporary = path.with_suffix(".tmp")
@@ -265,8 +349,17 @@ def write_json(path, value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--stage", choices=("development", "test"), default="development")
+    parser.add_argument("--stage", choices=("development", "test", "forecast"), default="development")
+    parser.add_argument("--as-of", type=date.fromisoformat, help="information date; default 30 June 2026")
     args = parser.parse_args()
+    if args.stage == "forecast":
+        as_of = args.as_of or CUTOFF
+        report = issue(releases_panel(as_of), as_of)
+        write_json(OUTPUT / f"forecast_{as_of.isoformat()}.json", report)
+        detail = {key: report[key] for key in ("months_behind", "consecutive_months", "months_still_needed") if key in report}
+        print(f"As of {as_of}: {report['status'].replace('_', ' ')} for {report['target_month'][:7]}. "
+              f"Latest complete month {report['latest_complete_month']}. {detail or ''}")
+        return
     panel = load_panel()
     report = {
         "target": "Recorded Kerala Excise NDPS cases per district and month",
