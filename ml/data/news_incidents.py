@@ -399,6 +399,24 @@ def describe(urls, workers=4):
     return cache
 
 
+SYNTHETIC = re.compile(r"(?<![a-z])(mdma|meth\w*|amphetamine|lsd|ecstasy|cocaine|heroin|brown sugar|synthetic|"
+                       r"nitrazepam|tramadol|ketamine|hybrid ganja)(?![a-z])")
+CANNABIS = re.compile(r"(?<![a-z])(ganja|cannabis|hashish|hash oil|charas|weed|marijuana)(?![a-z])")
+QUANTITY = re.compile(r"(\d+(?:\.\d+)?)\s*(kg|kgs|kilo|kilos|kilograms?|g|gm|gms|grams?)(?![a-z])")
+
+
+def drug_and_quantity(slug_text, description):
+    """Drug family and the largest stated quantity in grams, from the headline and summary."""
+    text = plain(description + " " + slug_text.replace("-", " "))
+    drug = ("synthetic" if SYNTHETIC.search(text) else "cannabis" if CANNABIS.search(text) else "other")
+    grams = []
+    for number, unit in QUANTITY.findall(text.replace(",", "")):
+        value = float(number) * (1000 if unit.startswith("k") else 1)
+        if 0 < value < 5_000_000:
+            grams.append(value)
+    return drug, (max(grams) if grams else None)
+
+
 def dedupe(rows, days=2):
     """One incident per place within a short window: syndicated and follow-up stories collapse."""
     rows = sorted(rows, key=lambda r: (r["place"], r["published"]))
@@ -428,10 +446,12 @@ def build(fetch_descriptions=False):
         where = locate(row["slug"], row["section"], index, description)
         if not where:
             continue
+        drug, grams = drug_and_quantity(row["slug"], description)
         located.append({"published": row["published"], "source": row["source"], "section": row["section"],
-                        "slug": row["slug"], **where})
+                        "slug": row["slug"], "drug": drug, "quantity_g": grams, **where})
     incidents = dedupe(located)
-    fields = ["published", "place", "district", "precision", "lat", "lon", "reports", "source", "section", "slug"]
+    fields = ["published", "place", "district", "precision", "lat", "lon", "reports", "drug", "quantity_g", "source",
+              "section", "slug"]
     with INCIDENTS.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fields, extrasaction="ignore")
         writer.writeheader()
