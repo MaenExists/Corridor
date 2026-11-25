@@ -156,10 +156,10 @@ def http_note(error):
     return "invalid_response" if isinstance(error, ValueError) else "request_failed"
 
 
-def kanoon_search(client, start, end, pages):
+def kanoon_search(client, start, end, pages, *, first_page=0):
     query = f"NDPS doctypes:kerala fromdate:{start:%d-%m-%Y} todate:{end:%d-%m-%Y}"
     response = client.get("search/", {
-        "formInput": query, "pagenum": 0, "maxpages": pages,
+        "formInput": query, "pagenum": first_page, "maxpages": pages,
     }, method="POST")
     docs = response.get("docs")
     if not isinstance(docs, list):
@@ -204,6 +204,44 @@ def collect_kanoon(root, end, pages, doc_limit, months_only):
                ("start", "end", "provider_search_estimate", "result_rows_in_range", "distinct_documents",
                 "full_documents", "status"), report)
     print(f"Indian Kanoon: {len(archive)} distinct index records and {len(selected)} full documents.", flush=True)
+
+def retry_capped_kanoon(root, end, extra_pages):
+    client = Client(KAN, credential("INDIAN_KANOON_API_TOKEN"), root / "responses", 0.8)
+    with (root / "coverage.csv").open(encoding="utf-8", newline="") as stream:
+        months = [row for row in csv.DictReader(stream)
+                  if row["status"] == "search_window_capped" and date.fromisoformat(row["end"]) <= end]
+
+    results = []
+    stopped = False
+    errors = 0
+    for row in reversed(months):
+        start, stop = (date.fromisoformat(row[key]) for key in ("start", "end"))
+        prior = int(row["distinct_documents"])
+        observed = prior
+        estimate = int(row["provider_search_estimate"])
+        state = "deferred" if stopped else "short"
+        if not stopped:
+            try:
+                baseline, _ = kanoon_search(client, start, stop, 5)
+                more, estimate_now = kanoon_search(client, start, stop, extra_pages, first_page=5)
+                observed = len({item["tid"] for item in [*baseline, *more]})
+                estimate = max(estimate, estimate_now or 0)
+                state = "complete_by_estimate" if observed >= estimate else "short"
+                errors = 0
+            except (OSError, ValueError) as error:
+                state = http_note(error)
+                errors += 1
+                stopped = errors >= 3 or state in {"http_401", "http_402", "http_429"}
+        results.append((start, stop, estimate, prior, observed, observed - prior, state))
+        write_rows(root / "coverage_retry.csv", (
+            "start", "end", "provider_search_estimate", "baseline_documents", "retrieved_documents",
+            "added_documents", "status",
+        ), sorted(results))
+
+    complete = sum(row[-1] == "complete_by_estimate" for row in results)
+    print(f"Court retry: {len(months)} flagged windows, {sum(row[-2] for row in results)} "
+          f"additional index records, {complete} reached the provider estimate.", flush=True)
+
 
 MALAYALAM_SOURCES = "165995,321044,282841,656236,656246,656244,656239,1912665"
 ENGLISH_SOURCES = "1569814,656245,973649,22331"
@@ -326,13 +364,18 @@ def main():
     parser.add_argument("--pages", type=int)
     parser.add_argument("--court-documents-per-month", type=int, default=2)
     parser.add_argument("--court-recent-only", action="store_true")
+    parser.add_argument("--retry-capped", action="store_true", help="Retrieve two additional pages per capped court month")
     parser.add_argument("--media-scope", choices=("all", "archive", "year", "district", "national"),
                         default="archive")
     parser.add_argument("--district", choices=DISTRICTS, action="append")
     args = parser.parse_args()
     if not START <= args.end <= cutoff_today() or not 0 <= args.court_documents_per_month <= 5:
         parser.error("Invalid cutoff or document cap.")
-    if args.provider == "kanoon":
+    if args.retry_capped:
+        if args.provider != "kanoon" or args.pages is not None:
+            parser.error("--retry-capped uses a fixed two-page budget per court window.")
+        retry_capped_kanoon(ROOT / "kanoon_pilot", args.end, 2)
+    elif args.provider == "kanoon":
         pages = 5 if args.pages is None else args.pages
         if not 1 <= pages <= 10:
             parser.error("Court pages per request must be between 1 and 10.")

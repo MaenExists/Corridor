@@ -24,6 +24,16 @@ See [the intake guide](ml/docs/data-collection-guide.md) for the schema. The val
 
 The downloaded official tables, court archive and public recovery directory are stored locally in the gitignored ml/data/real/public_sources directory. The local collection and coverage reports are kept in the Git-ignored files `docs/progress/PUBLIC_COLLECTION.md` and `docs/progress/SOURCE_COVERAGE.md`. The public snapshot provides context, court candidates and directory data. The official district series remains too sparse for a weekly real forecast.
 
+## Prepare private research tables
+
+With the saved source snapshot, the optional dependencies in `requirements-collection.txt`, and Poppler, run `make prepare-training`. It prepares official tables, screens the cached court texts for relevance, and writes a protected annual training bundle under `ml/data/real/public_sources/prepared/training_bundle/`. The bundle separates 2020–2023 training rows, 2024 holdout outcomes and a January–August 2025 check. It supports retrospective testing of recorded Excise counts. Court documents stay in the evidence review tables. `make prepare-research` checks the separate effort-adjusted model's readiness. The paid court search retry is a separate explicit command.
+
+Run `make train-annual` against the prepared bundle to fit the annual Poisson model to convergence. The command selects settings using rolling validation within the training years, freezes the fit, and compares it with two simple baselines on 2024. The checkpoint and evaluation are kept in the local, gitignored `prepared/annual_fit/` directory.
+
+Run `make train-boosting` to train a boosted-tree challenger on the same archive. It selects depth, learning rate, leaf size and number of boosting rounds using earlier-year replays. It saves separate full-year and January–August models and evaluates their historical forecasts against simple baselines. Outputs stay in the gitignored `prepared/count_boosting/` directory.
+
+After both fits, run `make eval-counts` for a common-outcome comparison of Poisson regression, boosting, a fixed blend with the previous-year count, and the previous-year baseline. The report records average error, bias, count deviance, and available exploratory interval coverage in the gitignored `prepared/count_comparison/` directory.
+
 ## Project documents
 
 - [Project scope](project.md)

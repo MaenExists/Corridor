@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -17,6 +17,21 @@ real:
 	$(PY) -m ml.evaluate.run real
 release-real:
 	$(PY) -m ml.evaluate.run real --release-existing
+prepare-inputs:
+	$(PY) -m ml.data.training_prep
+	$(PY) -m ml.data.effort_prep
+	$(PY) -m ml.data.evidence_prep
+prepare-research: prepare-inputs
+	$(PY) -m ml.train.effort_yield
+prepare-training: prepare-inputs
+	$(PY) -m ml.data.court_quality
+	$(PY) -m ml.data.model_bundle
+train-annual:
+	$(PY) -m ml.train.annual_counts
+train-boosting:
+	$(PY) -m ml.train.count_boosting
+eval-counts:
+	$(PY) -m ml.evaluate.compare_counts
 forecast:
 	$(PY) -m ml.forecast.batch
 refresh:
