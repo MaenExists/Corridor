@@ -362,10 +362,46 @@ def build():
         print(f"Annual reconciliation: {exact} of {len(comparison)} district-years match exactly; largest difference {worst}.")
 
 
+LIVE_PAGE = "https://keralaexcise.gov.in/"
+LIVE = ROOT / "excise_live_months.csv"
+
+
+def snapshot(today=None):
+    """Save today's Excise homepage and add its previous-month district panel to the live series.
+
+    The homepage shows only the latest month, so a missed month cannot be recovered later.
+    """
+    from bs4 import BeautifulSoup
+    from ml.data.public_intake import excise_month
+
+    today = today or date.today()
+    folder = RAW / "live"
+    folder.mkdir(parents=True, exist_ok=True)
+    page = fetch(LIVE_PAGE)
+    (folder / f"{today.isoformat()}.html").write_bytes(page)
+    rows = excise_month(BeautifulSoup(page.decode("utf-8", "replace"), "html.parser"), today.isoformat())
+    existing = []
+    if LIVE.exists():
+        with LIVE.open(encoding="utf-8", newline="") as stream:
+            existing = list(csv.reader(stream))[1:]
+    known = {tuple(row[:6]) for row in existing}
+    added = [tuple(str(value) for value in row) for row in rows if tuple(str(value) for value in row[:6]) not in known]
+    with LIVE.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(COLUMNS)
+        writer.writerows(sorted([*existing, *added], key=lambda row: (row[4], row[2])))
+    month = rows[0][4] if rows else "no month"
+    print(f"Homepage panel for {month}: {'added' if added else 'already recorded'}.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--download", action="store_true", help="retrieve missing statements from the Internet Archive")
+    parser.add_argument("--snapshot", action="store_true", help="record the month shown on the live Excise homepage")
     args = parser.parse_args()
+    if args.snapshot:
+        snapshot()
+        return
     if args.download or not MANIFEST.exists():
         acquire()
     build()

@@ -53,6 +53,7 @@ GATES = {
 RESUME_MONTHS = 6  # consecutive months needed after a gap; measured on development
 CUTOFF = date(2026, 6, 30)
 LIVE_MONTHS = ROOT / "excise_month.csv"
+LIVE_SERIES = ROOT / "excise_live_months.csv"
 HISTORY = ROOT / "excise_monthly_history.csv"
 DEVELOPMENT_GRID = {"share_smoothing": (0.2, 0.3, 0.4, 0.5), "seasonal_shrink": (1.0, 2.0, 4.0, None)}
 
@@ -275,7 +276,7 @@ def strip_rows(stage):
     return {key: {name: value for name, value in section.items() if name != "rows"} for key, section in stage.items()}
 
 
-def releases_panel(as_of, paths=(HISTORY, LIVE_MONTHS)):
+def releases_panel(as_of, paths=(HISTORY, LIVE_MONTHS, LIVE_SERIES)):
     """Latest complete release of every month known by a date. Months may have gaps."""
     from ml.data.aggregate_intake import as_of as select, read_releases
     releases = []
