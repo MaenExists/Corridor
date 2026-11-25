@@ -144,7 +144,7 @@ Explicit patterns are readable and fitted only on reports before each window.
   - air or sea entry: near an airport or port, with the same large-haul share;
   - transit corridor: on highways or railways, stretched out or with large hauls;
   - retail market: a dense town with a median haul of 100 g or less;
-  - venue-linked: resorts, tourist sites or colleges;
+  - venue-linked: the average report sits within 0.5 km of a resort, tourist site or college (tightened from 1–1.5 km after the first issue labelled nearly every urban cluster; labels are not scored);
   - emerging: most reports in the last six months.
 - **Corridor spread**: reports attach to points on highways, main roads and railways within 2 km and spread along the network up to 12 km. Cells within 1.5 km of a line inherit that activity.
 
@@ -170,6 +170,42 @@ The explicit risk-terrain surface on its own did best on new places among the mo
 - The risk terrain is scored on post-cutoff months, which are fully fresh, and on the reused 2024 to mid-2026 window. It is credited only if it beats population on the fresh list in both.
 
 *Correction, same day, before any later window was scored.* A unit test found that the risk-terrain penalty (α = 10⁻³ with the L-BFGS solver) shrank rare-band relative risks toward 1. A simulated 2.75× risk came out as 1.6×. α is now 10⁻⁵ with the Newton solver, which recovers the empirical ratio. All three windows are rerun with the fix. The development figures above came from the shrunk version. The rule recorded above applies unchanged.
+
+**Results after the fix (26 November 2026, `make patterns-evaluate`, single pass).** For speed, the ETAS feature uses parameters fitted on reports before 2022 in every window. Figures are for 28 days.
+
+| Window | Model | All reports, top 1% | New-place, top 1% | New-place, top 5% | Fresh list |
+| --- | --- | --- | --- | --- | --- |
+| Development 2022–23 (244 new) | grid ranker | 49.3% | 5.3% | 38.1% | 4.3% |
+| | pattern ranker | 43.7% | 11.9% | 34.4% | 22.0% |
+| | risk terrain | 43.9% | 29.1% | 43.9% | 26.8% |
+| | population | 15.1% | 16.4% | 52.0% | 15.3% |
+| Reused 2024 – mid-2026 (484 new) | grid ranker | 51.3% | 2.7% | 33.9% | 16.9% |
+| | pattern ranker | 41.3% | 5.4% | 27.1% | 14.8% |
+| | risk terrain | 36.1% | 14.5% | 38.6% | 21.5% |
+| | population | 10.0% | 10.1% | 45.3% | 19.4% |
+| Post-cutoff Jul–Nov 2026 (63 new) | grid ranker | 67.8% | 6.4% | 20.6% | 8.5% |
+| | pattern ranker | 46.7% | 0% | 20.6% | 10.2% |
+| | risk terrain | 42.5% | 6.4% | 17.5% | 6.8% |
+| | population | 13.6% | 6.4% | 23.8% | 11.9% |
+
+Verdict:
+
+- **Pattern ranker: not adopted.** It failed the pre-registered development criterion on new places in the top 5%, with 34.4% against 38.1% for the grid ranker. It also lost 5–21 points on all reports in every window.
+- **Risk terrain on new places: not credited.** The exploratory rule required it to beat population on the fresh list in both later windows. It did not: 21.5% against 19.4% (difference −4.9 to +7.2 points) on the reused window, and 6.8% against 11.9% after the cutoff. Its early edge was development-specific. Where the next *new* place appears is, so far, predicted as well by where people live as by anything in the context layers.
+- **Corridor spread and border distances added nothing.** Border distances and corridor activity had zero or negative grouped importance. The news sample has very few seizures near the land border, which is itself a coverage finding.
+- **What the explicit patterns do show, descriptively.** Relative risks were fitted on reports before 2024, holding the other layers and population fixed:
+  - within 0.5 km of a police station: 5.8× (enforcement presence, not drug activity);
+  - within 0.5 km of a railway station: 5.2×;
+  - 1–2 km from resorts or homestays: 2.9×;
+  - 1–2 km from liquor outlets: 2.9×;
+  - within 0.5 km of a bus station: 2.5×;
+  - within 0.5 km of a national highway: 2.3×;
+  - within 0.5 km of a school: 2.3×.
+  
+  These describe where *reported* seizures happen. They are useful context for planners but are not shown to forecast new places.
+- **Hotspot types (descriptive).** Current clusters include Aluva, Kalamassery and Karivil as transit corridors, Angamaly (airport, 86% large hauls) and Pettah (port) as air or sea entry, and Cherumartapula as a retail market. No cluster meets the entry-gateway rule, because border coverage is missing.
+
+Next inputs that could change this: official station-level or Excise range counts, including border check-post seizures, and rural Malayalam-language coverage. Score any change on months after November 2026.
 
 ## Next-month model for official registrations
 
