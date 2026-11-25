@@ -115,6 +115,23 @@ What this measures: *reported* seizures. A news report needs a seizure, a press 
 
 Whether the bootstrap interval against long-run hotspots excludes zero is reported, but it is not a gate. Months after 30 June 2026 form a separate post-cutoff check.
 
+**Data, 26 November 2026 (`make news-harvest`).** The harvest read 363,914 Kerala-section stories and kept 4,500 seizure candidates by headline. Their summaries yielded 2,128 incidents after merging repeat stories. 974 of these name a locality: 39 in 2016, between 18 and 46 a year in 2017–2021, 114 in 2022, 82 in 2023, 141 in 2024, 248 in 2025, and 204 in 2026 to 25 November. Ernakulam (380) and Thiruvananthapuram (222) hold 62% of them, and Pathanamthitta (3) and Kottayam (5) almost none. That is city-desk coverage, not the state's seizure geography.
+
+**Development (2022–2023).** For 28 days, the learned ranker's top 1% of cells held 61.8% of located reports, against 49.7% for ETAS, 39.7% for long-run hotspots and 15.2% for population. It is therefore the primary model. ETAS fitted θ 0.30, a 1 km spread (the floor) and an 83-day time scale.
+
+**Test (scored once, 26 November 2026, `make hotspot-test`).** All four gates passed. For 28 days, the ranker's top 1% of cells held 56.7% of located reports (PAI 57), against 45.9% for ETAS, 28.4% for long-run hotspots, 26.0% for the last 365 days and 10.0% for population. Its advantage over long-run hotspots was +24 to +31 points (95% block bootstrap). Top-20-cell precision was 10.0%, against 2.5%. Results at 7 days were similar, at 58.4% against 28.1%.
+
+**Audit (`make hotspot-audit`, no settings changed).** The skill is almost entirely repetition.
+
+- 74% of test reports came from a locality that already had an earlier report. The ranker caught 77% of these and 3.3% of reports from new localities, the same rate as long-run hotspots.
+- A plain "same locality again" baseline, the long-run density with a 1 km kernel, caught 56.8% overall against the ranker's 57.9%. The gain over the 3 km long-run map comes from kernel sharpness: locations are locality centroids, so the same cells recur.
+- By district, the ranker caught 85% of reports in Ernakulam and 72% in Thiruvananthapuram. It caught 0% in Palakkad (59 reports), Kasaragod and Pathanamthitta, and 7% in Kannur.
+- By year it caught 62% in 2024, 53% in 2025 and 66% in 2026. The repeat baseline is now reported in every stage.
+
+**Post-cutoff check (1 July – 25 November 2026, `make hotspot-postcutoff`).** For 28 days the ranker caught 70.8%, against 65.9% for the repeat map (advantage +3.9 to +7.6 points) and 33.2% for long-run hotspots. For 7 days it caught 63.9% against 64.7% for the repeat map. ETAS trailed the repeat map at both horizons.
+
+Reading: this is a good, honest map of *where seizures keep getting reported*, refreshed from live sitemaps. It is not yet a model of where drugs move next. Near repeat is real in these data (θ about 0.4 within 1 km, with a months-long time scale). Predicting new places would need inputs the news sample lacks: official station-level counts, routes and checkpost data, and coverage outside the city desks. Revision candidates are to be scored only on months after November 2026. They are a ranker feature for district-level official trend (from the Excise series), a source-coverage correction, and Malayalam-language publishers for rural coverage.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.

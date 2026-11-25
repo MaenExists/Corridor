@@ -22,6 +22,8 @@ The forecasting model is trained on 105 months (January 2016 to September 2024) 
 
 The where-next layer simulates the count model jointly and passed its own pre-registered test. The two monthly hot-district alerts were right 38% of the time against an 18% base rate (AUC 0.76 vs 0.72 for persistence). Top-four probabilities had Brier skill +0.41. The ranking itself is mostly fixed structure: the predicted top four held 39.3% of cases against 41.7% with perfect foresight. The finer "where" of a range office, drug type or route needs data the public series lacks. See [the model plan](docs/MODEL_PLAN.md#where-next-hotspot-forecast).
 
+The grid layer answers "which square kilometre" in the hotspot-policing style. A learned ranker over 1 km cells is trained on 974 dated, located seizure reports from four publishers' sitemaps (2016 – November 2026). On a held-out test (2024 to mid-2026), its top 1% of cells held 57% of the next 28 days' located reports, against 28% for a long-run hotspot map. After the cutoff it held 71%. The audit is blunt: nearly all of this is "the same locality again". A plain repeat map scores within one point, and seizures at localities never reported before are caught only 3% of the time. Coverage is city-desk heavy (Ernakulam and Thiruvananthapuram hold 62% of reports). See [the grid section](docs/MODEL_PLAN.md#grid-hotspot-forecast-reported-seizures) and `/hotspots.html`.
+
 The validated horizon is one month, and the gain over simple methods is modest. About a third of district forecasts miss by more than 20%. After the cutoff, the statewide seasonal adjustment did worse than a three-month average. Forecasts two or three months ahead lose to the 12-month average and are withheld. Issuance needs the latest month and, after any break in the series, six consecutive months. Public uploads lapsed between October 2024 and September 2026, so the live forecast restarts as monthly homepage snapshots accumulate, or sooner with an official export. See [the model plan](docs/MODEL_PLAN.md).
 
 ## Product principles
@@ -42,7 +44,7 @@ The knowledge cutoff for the historical snapshot is **30 June 2026, end of day I
 ## Build order
 
 1. ✅ Recover and verify the monthly district series. Build and pre-register the district model, then pass the held-out test.
-2. ✅ Build and pass the where-next hotspot forecast. Next, finer "where": request aggregate monthly NDPS counts by Excise range or circle office, and a drug-type series in the same format.
+2. ✅ Build and pass the where-next hotspot forecast, then the 1 km grid forecast from located news reports (`make news-harvest hotspot-forecast`). Next for the grid: official station- or range-level counts, Malayalam publishers for rural coverage, and scoring revisions only on months after November 2026. Next, finer "where": request aggregate monthly NDPS counts by Excise range or circle office, and a drug-type series in the same format.
 3. Keep the series current with `make excise-snapshot` every month. Request the October 2024 – September 2026 statements and future monthly exports from Excise. See [data requests](docs/DATA_REQUESTS.md).
 4. Serve the where-next brief and the real replay (forecast vs recorded outcome, 2023–2024) and live status in the interface, next to the synthetic showcase.
 5. ✅ Build the recovery access map (`make recovery-refresh`). Next: travel time instead of straight-line distance, and care demand by taluk from Vimukthi or DHS. Wastewater results by catchment would be an anonymous, near-real-time measure of use.

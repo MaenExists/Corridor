@@ -33,6 +33,17 @@ For the first approved court intake, use anonymous HTTPS or AWS CLI unsigned acc
 
 Pilot about **100 documents** total, with court and media, both languages as available, early and late years, varied districts and negative examples. Double-review an overlapping sample. Report precision and recall for event/date/district, inter-rater disagreement, explicit endpoint yield, duplicate rate, and availability gaps by year and district. Scale one source at a time against a frozen review set. Use a resumable manifest per source, month and partition with counts, hashes, timing and disposition. Cache authorized files locally with source-specific limits. Hold out duplicate clusters across extraction evaluation splits. Use CPU OCR for image-only pages. Raw text, document links, case identifiers, and location details remain local.
 
+### Publisher sitemaps used for the grid forecast (acquired 25–26 November 2026)
+
+`make news-harvest` reads only sitemaps that each publisher's robots.txt advertises to crawlers. Sources and depth:
+
+- **New Indian Express** daily sitemaps from 2016. The Kerala, Kochi and Thiruvananthapuram sections are used.
+- **Times of India** monthly city sitemaps from 2016: Kochi, Thiruvananthapuram and Kozhikode.
+- **Asianet News** daily sitemaps from January 2022, its earliest: the Kerala and local-news sections.
+- **Onmanorama**'s rolling sitemaps of recent weeks.
+
+The Hindu's robots.txt disallows its archive sitemaps, so it is not used. Manorama Online and Mathrubhumi disallow crawling of their sites and are not used. For each headline-selected candidate, only the publisher's own meta description is fetched. Article text is not retrieved. Sitemaps, summaries and the incident table stay local and gitignored. The result is a selected sample of *reported* seizures, dominated by city desks.
+
 ## 3. Public recovery and service planning
 
 | Source | Acquisition and use |
