@@ -162,6 +162,13 @@ New scores:
 
 Post-cutoff months (July–November 2026) are reported as the first fully fresh check. Hotspot types are descriptive labels from rules, not validated categories.
 
+**Development result (26 November 2026, `make patterns-dev`).** The pre-registered criterion failed. On new-place reports in the top 5% of cells, the pattern ranker scored 34.8% against 38.5% for the grid ranker (difference −16 to +8 points). Its overall top-1% hit rate fell to 48.4% from 51.7%. The pattern ranker is therefore not adopted.
+
+The explicit risk-terrain surface on its own did best on new places among the model scores: 22.5% at the top 1%, against 16.4% for population and 5.7% for the grid ranker. On the fresh list it hit 21%, against 15% for population and 10% for the grid ranker. Population was strongest at the top 5% (52% against 49%). This came from looking at development, so the decision recorded *here, before any later window was scored*, is exploratory.
+
+- The product shows two lists: "same place again" from the grid ranker, and a "new-place watch" from the risk-terrain surface restricted to cells more than 2 km from any earlier report.
+- The risk terrain is scored on post-cutoff months, which are fully fresh, and on the reused 2024 to mid-2026 window. It is credited only if it beats population on the fresh list in both.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
