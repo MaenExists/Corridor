@@ -20,7 +20,7 @@ The forecasting model is trained on 105 months (January 2016 to September 2024) 
 | 80% range coverage | 82% | — |
 | District ranking correlation | 0.81 | 0.77 |
 
-The validated horizon is one month. Forecasts two or three months ahead lose to the 12-month average and are withheld. Issuance needs the latest month and, after any break in the series, six consecutive months. Public uploads lapsed between October 2024 and September 2026, so the live forecast restarts as monthly homepage snapshots accumulate, or sooner with an official export. See [the model plan](docs/MODEL_PLAN.md).
+The validated horizon is one month, and the gain over simple methods is modest. About a third of district forecasts miss by more than 20%. After the cutoff, the statewide seasonal adjustment did worse than a three-month average. Forecasts two or three months ahead lose to the 12-month average and are withheld. Issuance needs the latest month and, after any break in the series, six consecutive months. Public uploads lapsed between October 2024 and September 2026, so the live forecast restarts as monthly homepage snapshots accumulate, or sooner with an official export. See [the model plan](docs/MODEL_PLAN.md).
 
 ## Product principles
 
