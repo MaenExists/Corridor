@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -60,6 +60,12 @@ hotspot-postcutoff:
 	$(PY) -m ml.train.hotspot_grid postcutoff
 hotspot-audit:
 	$(PY) -m ml.evaluate.hotspot_audit
+context-layers:
+	$(PY) -m ml.data.context_layers
+patterns-evaluate:
+	$(PY) -m ml.train.hotspot_patterns evaluate
+patterns-forecast:
+	$(PY) -m ml.train.hotspot_patterns forecast $(if $(AS_OF),--as-of $(AS_OF),)
 hotspot-forecast:
 	$(PY) -m ml.train.hotspot_grid forecast $(if $(AS_OF),--as-of $(AS_OF),)
 district-dev:
