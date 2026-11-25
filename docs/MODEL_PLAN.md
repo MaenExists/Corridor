@@ -91,6 +91,28 @@ Development findings that shaped this design:
 - Hot events were mostly not small-count noise: 11.5% occurred under 30 cases. A correct alert meant a median of about 17 cases above the district's normal share.
 - Malappuram was hot in 12 of 21 test months. Its share was rising, and the 12-month normal lags a trend, so part of the hot signal is trend-following.
 
+## Grid hotspot forecast (reported seizures)
+
+The district models answer "which district". This layer answers "which square kilometre", using the cell-forecast method used abroad for hotspot policing. `ml/data/news_incidents.py` reads publisher sitemaps from the New Indian Express and the Times of India, from January 2016. It keeps Kerala drug-seizure stories by headline and fetches each candidate's own short summary (meta description), not the article text. It locates each story at the most specific Kerala locality named in the headline or summary, using GeoNames localities and post offices. Stories within two days at the same place merge into one incident. Only locality-level incidents enter the grid model. Desk-only stories ("Kochi: police arrested…") are kept for counts but not for cells.
+
+`ml/train/hotspot_grid.py` ranks the 1 km WorldPop cells inside Kerala, the recovery-map grid, at weekly origins for the next 7 and 28 days. Every model sees only reports published before the origin.
+
+- **Self-exciting point process (ETAS, Mohler et al. 2011).** A long-run kernel density of past seizures (3 km bandwidth) forms the background. Each seizure adds a triggering term that decays in time and space (near repeat). θ, ω, σ (floor 1 km, the locality precision) and μ are fitted by EM on reports before the evaluation window, then frozen.
+- **Learned ranker.** Gradient-boosted trees on seizure densities over 28 days, 91 days, 365 days and all history at 1, 3 and 10 km. Further features: days since the last report within 3 km, the ETAS intensity, log population of the cell and within 5 km, and distance to the nearest railway station. It is trained on earlier origins only, with sampled negatives.
+- **Baselines.** Long-run hotspots (all-history density), last 365 days, last 28 days, population and random cells. Ties break by population.
+
+Scores: hit rate and PAI (hit rate divided by area share) for the top 1% and 5% of cells, and the share of the top 20 cells with at least one report. Differences use a quarterly block bootstrap.
+
+What this measures: *reported* seizures. A news report needs a seizure, a press note and an editor's interest. City desks and large hauls are over-represented, and rural and small seizures are under-represented. A cell that rarely appears is not shown to be safe. Locations are locality centroids from text, so the resolution is a locality (about 1–3 km), not a street or a 150 m square. The output supports a planning conversation about where reported seizures cluster. It is not a patrol order, and it scores no person or address.
+
+**Pre-registration, 25 November 2026, written before any grid result was run.** Development origins run 2018–2021 (ETAS fitted on reports before 2018, ranker trained on 2017 origins). The primary model is whichever of ETAS and the learned ranker has the higher development hit rate at the top 1% of cells for 28 days. The test runs once on origins from January 2022 to windows ending 30 June 2026, refitting ETAS and the ranker on data before 2022 with the same settings. Gates for the primary model at 28 days:
+
+- PAI at 1% of area of at least 5;
+- hit rate at 1% at least that of long-run hotspots and of population;
+- top-20-cell precision above long-run hotspots.
+
+Whether the bootstrap interval against long-run hotspots excludes zero is reported, but it is not a gate. Months after 30 June 2026 form a separate post-cutoff check.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
