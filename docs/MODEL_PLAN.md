@@ -132,6 +132,36 @@ Whether the bootstrap interval against long-run hotspots excludes zero is report
 
 Reading: this is a good, honest map of *where seizures keep getting reported*, refreshed from live sitemaps. It is not yet a model of where drugs move next. Near repeat is real in these data (θ about 0.4 within 1 km, with a months-long time scale). Predicting new places would need inputs the news sample lacks: official station-level counts, routes and checkpost data, and coverage outside the city desks. Revision candidates are to be scored only on months after November 2026. They are a ranker feature for district-level official trend (from the Excise series), a source-coverage correction, and Malayalam-language publishers for rural coverage.
 
+## Patterns around hotspots (explicit and learned)
+
+The grid audit showed that the ranker repeats past localities and catches about 3% of reports at new ones. `ml/train/hotspot_patterns.py` asks what surrounds hotspots. Context comes from an OpenStreetMap extract (`ml/data/context_layers.py`): railway stations and lines, national highways, main roads, bus stations, airports, ports, colleges, schools, tourist sites, resorts and homestays, liquor outlets, the land border and the points where main roads and railway lines cross it, plus police stations and Excise offices as an enforcement-presence control. Incidents now carry a drug family (synthetic, cannabis, other) and the largest stated quantity.
+
+Explicit patterns are readable and fitted only on reports before each window.
+
+- **Risk terrain**: a penalised Poisson regression of reports per cell on distance bands (0–0.5, 0.5–1, 1–2 and 2–5 km) to each layer and log population. Each coefficient is a relative risk.
+- **Hotspot typology**: DBSCAN clusters (4 km, at least three reports, last two years). Rules label each cluster:
+  - entry gateway: near the border or a crossing, and at least 30% of reports are hauls of 1 kg or more;
+  - air or sea entry: near an airport or port, with the same large-haul share;
+  - transit corridor: on highways or railways, stretched out or with large hauls;
+  - retail market: a dense town with a median haul of 100 g or less;
+  - venue-linked: resorts, tourist sites or colleges;
+  - emerging: most reports in the last six months.
+- **Corridor spread**: reports attach to points on highways, main roads and railways within 2 km and spread along the network up to 12 km. Cells within 1.5 km of a line inherit that activity.
+
+The learned pattern ranker adds the risk-terrain score, corridor activity (last year, all history and large hauls only), ring counts at 2–5 km and 5–15 km, the distance to each hotspot type, and the raw distances to the grid ranker's features. It is trained exactly as the grid ranker.
+
+New scores:
+- hit rate at 1% and 5% for reports at localities with no earlier report ("new places");
+- their median percentile rank;
+- a "fresh list": the same ranking restricted to cells more than 2 km from every earlier report, scored on new-place reports that fall in such cells.
+
+**Pre-registration, 26 November 2026, before any pattern score was computed.** Primary metric: new-place hit rate in the top 5% of cells for 28 days. The pattern ranker counts as an improvement only if all three hold:
+- it beats the grid ranker on this metric in development (2022–2023);
+- on 2024 to mid-2026 the 95% block-bootstrap interval for the difference excludes zero. This window was already used to score the grid ranker. The pattern design was not tuned on it, but this is a second use and is labelled as such;
+- its overall hit rate at 1% is within two points of the grid ranker's or better.
+
+Post-cutoff months (July–November 2026) are reported as the first fully fresh check. Hotspot types are descriptive labels from rules, not validated categories.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
