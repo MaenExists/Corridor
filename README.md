@@ -32,7 +32,7 @@ Run `make train-annual` against the prepared bundle to fit the annual Poisson mo
 
 Run `make train-boosting` to train a boosted-tree challenger on the same archive. It selects depth, learning rate, leaf size and number of boosting rounds using earlier-year replays. It saves separate full-year and January–August models and evaluates their historical forecasts against simple baselines. Outputs stay in the gitignored `prepared/count_boosting/` directory.
 
-After both fits, run `make eval-counts` for a common-outcome comparison of Poisson regression, boosting, a fixed blend with the previous-year count, and the previous-year baseline. The report records average error, bias, count deviance, and available exploratory interval coverage in the gitignored `prepared/count_comparison/` directory.
+After both fits, run `make eval-counts` to train a lagged Poisson challenger and compare it with the original Poisson, boosting, a fixed blend, and the previous-year baseline on the same outcomes. The gitignored `prepared/count_comparison/` directory contains the frozen challenger and a report with average error, bias, count deviance, exploratory interval coverage, and the selected retrospective references.
 
 ## Project documents
 

@@ -1,5 +1,6 @@
 """Compare frozen district count estimators on common retrospective outcomes."""
 
+from dataclasses import asdict
 import json
 import math
 from pathlib import Path
@@ -13,10 +14,11 @@ from ml.data.training_prep import PREPARED
 from ml.evaluate.metrics import count_metrics, interval_coverage, calibrated_interval
 from ml.train import annual_counts as poisson
 from ml.train import count_boosting as trees
+from ml.train import lagged_poisson as lagged
 
 OUTPUT = PREPARED / "count_comparison"
 BLEND_WEIGHT = 0.5
-METHODS = ("poisson", "boosted", "blended", "previous_year")
+METHODS = ("previous_year", "poisson", "boosted", "blended", lagged.METHOD)
 
 
 def read_json(path):
@@ -106,6 +108,20 @@ def run(bundle=poisson.TRAINING_BUNDLE, poisson_fit=poisson.FIT_DIR, tree_fit=tr
     # Use the last documented population estimate as exposure for the 2025 replay.
     partial = predict_rows(partial_history, PARTIAL_YEAR, partial_model, annual_pop,
                            tree_fit / "jan_aug.joblib", tree_checkpoint["january_august"])
+    adaptive_annual, adaptive_annual_fit = lagged.train_window(full_history, HOLDOUT_YEAR)
+    adaptive_partial, adaptive_partial_fit = lagged.train_window(partial_history, PARTIAL_YEAR)
+    annual = adaptive_annual.attach(annual)
+    partial = adaptive_partial.attach(partial)
+    output.mkdir(parents=True, exist_ok=True, mode=0o700)
+    lagged_path = output / "lagged_poisson.json"
+    poisson.write_json(lagged_path, {
+        "track": manifest["track"],
+        "implementation_sha256": digest(Path(lagged.__file__)),
+        "annual_2024": adaptive_annual_fit,
+        "january_august_2025": adaptive_partial_fit,
+        "training_inputs": {name: manifest["files"][name]["sha256"]
+                            for name in ("train_features.csv", "train_targets.csv", "jan_aug_reference.csv")},
+    })
     annual_label = f"holdout_{HOLDOUT_YEAR}_targets.csv"
     partial_label = f"jan_aug_{PARTIAL_YEAR}_check.csv"
     annual_targets = poisson.target_panel(
@@ -117,25 +133,35 @@ def run(bundle=poisson.TRAINING_BUNDLE, poisson_fit=poisson.FIT_DIR, tree_fit=tr
         "track": manifest["track"],
         "target": "Recorded district Excise detections in each matched reporting window",
         "model_artifacts": {"annual_poisson": digest(poisson_fit / "model.json"),
-                            "boosted_fit": digest(tree_fit / "fit.json")},
+                            "boosted_fit": digest(tree_fit / "fit.json"), "lagged_poisson": digest(lagged_path)},
         "evaluation_inputs": {name: manifest["files"][name]["sha256"] for name in (annual_label, partial_label)},
         "implementation_sha256": digest(Path(__file__)),
         "blend_boosted_weight": BLEND_WEIGHT,
         "annual_2024": compare(
             annual, {district: annual_targets[district, HOLDOUT_YEAR] for district in DISTRICTS},
-            {"poisson": annual_checkpoint["interval"], "boosted": tree_checkpoint["annual"]["interval"]},
+            {"poisson": annual_checkpoint["interval"], "boosted": tree_checkpoint["annual"]["interval"],
+             lagged.METHOD: adaptive_annual_fit["interval"]},
         ),
         "january_august_2025": compare(
-            partial, partial_targets[PARTIAL_YEAR], {"boosted": tree_checkpoint["january_august"]["interval"]},
+            partial, partial_targets[PARTIAL_YEAR],
+            {"boosted": tree_checkpoint["january_august"]["interval"], lagged.METHOD: adaptive_partial_fit["interval"]},
         ),
         "partial_poisson": {
             "settings": annual_checkpoint["settings"], "training_rows": len(partial_training),
-            "iterations": partial_model.iterations, "prediction_population_year": HOLDOUT_YEAR,
+            "parameters": asdict(partial_model), "prediction_population_year": HOLDOUT_YEAR,
         },
-        "selection": "Previously examined outcomes. Blend and partial Poisson are retrospective comparisons.",
+        "selection": "Previously examined outcomes. Method comparisons are retrospective.",
         "prospective_accuracy_verified": False,
     }
-    output.mkdir(parents=True, exist_ok=True, mode=0o700)
+    references = {}
+    for name, fit in (("annual_2024", adaptive_annual_fit), ("january_august_2025", adaptive_partial_fit)):
+        scores = report[name]["scores"]
+        review = lagged.adoption_status(fit, scores)
+        report[name]["lagged_poisson_review"] = review
+        eligible = (method for method in METHODS
+                    if method != lagged.METHOD or review["lagged_model_promoted_for_retrospective_research"])
+        references[name] = min(eligible, key=lambda method: scores[method]["mae"])
+    report["retrospective_references"] = references
     poisson.write_json(output / "evaluation.json", report)
     for name in ("annual_2024", "january_august_2025"):
         scores = report[name]["scores"]

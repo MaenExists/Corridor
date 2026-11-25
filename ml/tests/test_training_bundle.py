@@ -165,10 +165,37 @@ def test_count_comparison_scores_the_same_windows_for_all_models(tmp_path, monke
     assert report["partial_poisson"]["prediction_population_year"] == HOLDOUT_YEAR
     assert not report["prospective_accuracy_verified"]
 
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    for name in ("holdout_2024_targets.csv", "jan_aug_2025_check.csv"):
+        path = bundle / name
+        rows = read_rows(path)
+        target = "recorded_excise_ndps_detections"
+        rows[0][target] = str(int(rows[0][target]) + 1000)
+        write_rows(path, rows[0], (row.values() for row in rows))
+        manifest["files"][name]["sha256"] = compare_counts.digest(path)
+    manifest_path.write_text(json.dumps(manifest))
+    rescored = compare_counts.run(bundle, poisson_fit, tree_fit, tmp_path / "comparison")
+    assert report["model_artifacts"]["lagged_poisson"] == rescored["model_artifacts"]["lagged_poisson"]
+    for name in ("annual_2024", "january_august_2025"):
+        assert report[name]["scores"]["lagged_poisson"] != rescored[name]["scores"]["lagged_poisson"]
+
     with (tree_fit / "annual.joblib").open("ab") as stream:
         stream.write(b"changed")
     with pytest.raises(ValueError, match="artifact does not match"):
         compare_counts.run(bundle, poisson_fit, tree_fit, tmp_path / "comparison")
+
+
+def test_lagged_poisson_requires_a_real_gain_over_previous_year_for_promotion():
+    from ml.train.lagged_poisson import adoption_status
+
+    def scores(lagged, previous, original):
+        return {"lagged_poisson": {"mae": lagged}, "previous_year": {"mae": previous}, "poisson": {"mae": original}}
+
+    checkpoint = {"development_scores": scores(8, 10, 10)}
+    assert not adoption_status(checkpoint, scores(9.9, 10, 12))["baseline_gate_passed"]
+    assert not adoption_status(checkpoint, scores(8, 10, 7))["lagged_model_promoted_for_retrospective_research"]
+    assert adoption_status(checkpoint, scores(8, 10, 9))["lagged_model_promoted_for_retrospective_research"]
 
 
 def test_court_screen_separates_case_charge_background_and_missing_facts():
