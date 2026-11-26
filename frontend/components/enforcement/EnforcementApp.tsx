@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { Header, Mark } from "@/components/Header";
 import { useMemo, useState } from "react";
 import type { EnforcementView } from "@/lib/types";
 import type { Basemap, Focus, Layers } from "@/components/map/MapView";
@@ -48,24 +48,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
 
   return (
     <div className="min-h-dvh lg:h-dvh grid grid-rows-[56px_auto_auto] lg:grid-rows-[56px_minmax(0,1fr)_auto] bg-paper">
-      {/* Header: one row of ruled cells */}
-      <header className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_auto_1fr_auto] border-b border-ink">
-        <Link href="/" className="flex items-center gap-2.5 px-4 md:px-5 border-r border-ink">
-          <Mark />
-          <span className="font-semibold tracking-[-0.01em] text-[15px]">NarcoTrace</span>
-        </Link>
-        <nav className="flex" aria-label="Sections">
-          <span className="flex items-center px-3 md:px-5 border-r border-ink bg-ink text-paper label">Enforcement</span>
-          <Link href="/public" className="flex items-center px-3 md:px-5 md:border-r border-ink label text-ink-2 hover:bg-paper-2">Public</Link>
-        </nav>
-        <div className="hidden md:flex items-center px-5 text-[13px] text-ink-2">
-          Where reported drug seizures are most likely in the next four weeks.
-        </div>
-        <div className="hidden sm:flex items-center gap-4 px-5 border-l border-ink cross">
-          <span className="label text-mute">Updated</span>
-          <span className="text-[13px] tabular">{date(latest)}</span>
-        </div>
-      </header>
+      <Header section="enforcement" tagline="Where reported drug seizures are most likely in the next four weeks." updated={date(latest)} />
 
       {/* Body: the map leads, a ruled rail on the right */}
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
@@ -151,14 +134,5 @@ function Toggle({ on, onClick, children }: { on: boolean; onClick: () => void; c
   );
 }
 
-export function Mark() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
-      <rect x="1" y="1" width="22" height="22" fill="none" stroke="#0b0b0b" strokeWidth="1.5" />
-      <path d="M1 12h22M12 1v22" stroke="#0b0b0b" strokeWidth="1" />
-      <rect x="13.5" y="4" width="6" height="6" fill="#e0301e" />
-    </svg>
-  );
-}
-
+export { Mark };
 export { KIND };

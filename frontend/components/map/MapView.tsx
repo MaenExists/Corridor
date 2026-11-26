@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 import type * as Leaflet from "leaflet";
 import type { Cell, Gateway, HotspotKind, Level, WatchPlace } from "@/lib/types";
+import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
 
-export type Basemap = "satellite" | "street";
+export type { Basemap };
 export type Layers = { places: boolean; kinds: boolean; gateways: boolean };
 export type Focus = { lat: number; lon: number; zoom?: number } | null;
 
@@ -13,7 +14,6 @@ const KIND_LETTER: Record<string, string> = {
   "entry gateway": "G", "air or sea entry": "A", "transit corridor": "T", "retail market": "R",
   "venue-linked": "V", emerging: "E",
 };
-const KERALA: Leaflet.LatLngBoundsExpression = [[8.15, 74.85], [12.85, 77.45]];
 const HALF = 0.0045; // half a 1 km square in degrees
 
 type Props = {
@@ -32,67 +32,20 @@ export default function MapView(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const L = useRef<typeof Leaflet | null>(null);
   const map = useRef<Leaflet.Map | null>(null);
-  const base = useRef<Leaflet.Layer[]>([]);
   const groups = useRef<Record<string, Leaflet.LayerGroup>>({});
   const select = useRef(props.onSelect);
   select.current = props.onSelect;
 
-  // Create the map once.
-  useEffect(() => {
-    let cancelled = false;
-    import("leaflet").then(mod => {
-      if (cancelled || !host.current || map.current) return;
-      const leaflet = mod.default ?? mod;
-      L.current = leaflet;
-      const m = leaflet.map(host.current, { zoomControl: false, minZoom: 6, maxZoom: 17, zoomSnap: 1, attributionControl: true });
-      m.fitBounds(KERALA, { padding: [8, 8] });
-      leaflet.control.zoom({ position: "bottomright" }).addTo(m);
-      for (const name of ["mask", "districts", "cells", "dots", "kinds", "gateways", "focus"]) groups.current[name] = leaflet.layerGroup().addTo(m);
-      fetch("/geo/kerala-state.geojson").then(r => r.json()).then(state => {
-        const geom = state.geometry ?? state.features?.[0]?.geometry;
-        const polys: number[][][][] = geom.type === "MultiPolygon" ? geom.coordinates : [geom.coordinates];
-        const world = [[-89, -179], [-89, 179], [89, 179], [89, -179]] as [number, number][];
-        const holes = polys.map(poly => poly[0].map(([x, y]) => [y, x] as [number, number]));
-        leaflet.polygon([world, ...holes], { interactive: false, stroke: false, fillColor: "#f3f1ea", fillOpacity: .62 })
-          .addTo(groups.current.mask);
-        leaflet.polygon(holes, { interactive: false, color: "#0b0b0b", weight: 1.25, fill: false }).addTo(groups.current.mask);
-      });
-      m.on("zoomend", () => showScale());
-      fetch("/geo/kerala-districts.geojson").then(r => r.json()).then(geo => {
-        leaflet.geoJSON(geo, { interactive: false, style: { color: "#ffffff", weight: 1, opacity: .75, fill: false, dashArray: "2 3" } })
-          .addTo(groups.current.districts);
-      });
-      map.current = m;
-      requestAnimationFrame(() => m.invalidateSize());
-      setTick(m);
-    });
-    return () => { cancelled = true; map.current?.remove(); map.current = null; };
-  }, []);
+  const ctx = useRef<MapContext | null>(null);
 
-  function setTick(_: Leaflet.Map) { drawAll(); }
+  useLeafletMap(host, c => {
+    ctx.current = c; L.current = c.L; map.current = c.map;
+    for (const name of ["cells", "dots", "kinds", "gateways", "focus"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
+    c.map.on("zoomend", () => showScale());
+    drawAll();
+  }, () => { map.current = null; ctx.current = null; });
 
-  function drawBase() {
-    const m = map.current, leaflet = L.current;
-    if (!m || !leaflet) return;
-    base.current.forEach(l => m.removeLayer(l));
-    const pane = m.getPane("tilePane");
-    if (props.basemap === "satellite") {
-      pane?.classList.add("sat"); pane?.classList.remove("street");
-      base.current = [
-        leaflet.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 18, attribution: "Imagery © Esri, Maxar, Earthstar Geographics" }),
-        leaflet.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 18, opacity: .85 }),
-      ];
-    } else {
-      pane?.classList.add("street"); pane?.classList.remove("sat");
-      base.current = [leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        { maxZoom: 19, attribution: "© OpenStreetMap contributors" })];
-    }
-    base.current.forEach(l => l.addTo(m));
-    groups.current.districts?.eachLayer(l => (l as Leaflet.GeoJSON).setStyle?.({
-      color: props.basemap === "satellite" ? "#ffffff" : "#0b0b0b", opacity: props.basemap === "satellite" ? .75 : .45 }));
-  }
+  function drawBase() { if (ctx.current) setBasemap(ctx.current, props.basemap); }
 
   function drawCells() {
     const leaflet = L.current, g = groups.current.cells;

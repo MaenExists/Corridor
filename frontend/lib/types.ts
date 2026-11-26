@@ -74,3 +74,49 @@ export type EnforcementView = {
   record: Record | null;
   missing: string[];
 };
+
+export type Centre = {
+  id: string;
+  name: string;
+  government: boolean;
+  beds: number | null;
+  bedsAreTotal: boolean;   // the register printed only a whole-establishment figure
+  district: string;
+  lat: number;
+  lon: number;
+  basis: string;
+};
+
+export type FarPlace = {
+  id: string;
+  name: string;
+  area: string;
+  lat: number;
+  lon: number;
+  peopleFar: number;
+  averageKm: number;
+};
+
+export type DistrictAccess = {
+  name: string;
+  population: number;
+  shareOver10: number;
+  shareOver20: number;
+  centres: number;
+  bedsPer100k: number;
+};
+
+export type PublicView = {
+  builtOn: string;
+  checkedOn: string;
+  shareOver10: number;
+  peopleOver10: number;
+  population: number;
+  centresLocated: number;
+  centresUnlocated: number;
+  centres: Centre[];
+  far: FarPlace[];
+  districts: DistrictAccess[];
+  limits: string[];
+  missing: string | null;
+};

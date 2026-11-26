@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mark } from "@/components/enforcement/EnforcementApp";
+import { Mark } from "@/components/Header";
 
 export default function Home() {
   return (
@@ -28,8 +28,8 @@ export default function Home() {
 
         <Door href="/enforcement" index="02" title="Enforcement" line="Where reported seizures are most likely in the next four weeks, why those places, and how often the forecast is right."
           cta="Open the map" live />
-        <Door href="/public" index="03" title="Public" line="Where people live far from de-addiction help, place by place, for health services and families."
-          cta="Coming next" />
+        <Door href="/public" index="03" title="Public" line="Where people live far from de-addiction help, and the nearest centres from any spot, for families and health services."
+          cta="Open the map" live />
       </main>
 
       <footer className="grid grid-cols-2 lg:grid-cols-4 border-t border-ink text-[12px] text-ink-2">

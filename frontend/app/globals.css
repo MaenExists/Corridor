@@ -82,3 +82,15 @@
 .nt-type.sel { background: var(--color-ink); color: var(--color-paper); }
 
 .scroll-thin { scrollbar-width: thin; scrollbar-color: var(--color-ink) transparent; }
+
+/* Recovery map */
+.nt-grid { image-rendering: pixelated; }
+.nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #f3f1ea; border: 1.5px solid #0b0b0b; }
+.nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #0b0b0b; border-color: #f3f1ea; outline: 1px solid #0b0b0b; }
+.nt-centre.sel { outline: 2px solid #e0301e; outline-offset: 2px; }
+.nt-probe { width: 22px; height: 22px; border: 1.5px solid #0b0b0b; border-radius: 50%; background: rgba(243,241,234,.35);
+  box-shadow: 0 0 0 4px rgba(243,241,234,.55); position: relative; }
+.nt-probe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #0b0b0b; }
+.leaflet-container.cursor-crosshair { cursor: crosshair; }
+.nt-far .nt-centre { width: 6px; height: 6px; margin: 4px; border-width: 1px; }
+.nt-far .nt-centre.gov { width: 9px; height: 9px; margin: 2.5px; }
