@@ -40,6 +40,7 @@ Pilot about **100 documents** total, with court and media, both languages as ava
 - **New Indian Express** daily sitemaps from 2016. The Kerala, Kochi and Thiruvananthapuram sections are used.
 - **Times of India** monthly city sitemaps from 2016: Kochi, Thiruvananthapuram and Kozhikode.
 - **Asianet News** daily sitemaps from January 2022, its earliest: the Kerala and local-news sections.
+- **News18 Malayalam** daily sitemaps from 2018 (the earliest it serves): the Kerala and crime sections, with English slugs that name towns.
 - **Onmanorama**'s rolling sitemaps of recent weeks.
 
 The Hindu's robots.txt disallows its archive sitemaps, so it is not used. Manorama Online and Mathrubhumi disallow crawling of their sites and are not used. For each headline-selected candidate, only the publisher's own meta description is fetched. Article text is not retrieved. Sitemaps, summaries and the incident table stay local and gitignored. The result is a selected sample of *reported* seizures, dominated by city desks.

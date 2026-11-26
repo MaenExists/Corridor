@@ -207,6 +207,12 @@ Verdict:
 
 Next inputs that could change this: official station-level or Excise range counts, including border check-post seizures, and rural Malayalam-language coverage. Score any change on months after November 2026.
 
+**Coverage expansion (26 November 2026).** News18 Malayalam was added: daily sitemaps from 2018, the Kerala and crime sections, and English slugs naming towns. Summaries in Malayalam script no longer fail the English-only drug-word check. Located incidents rose from 974 to 1,262. The new ones are mostly smaller towns: Kuttippuram, Chavara, Punalur, Ponnani, Chalakudy. The frozen scores above stand. A rerun on the expanded data is informative only, and the frozen files are kept as `patterns/frozen_974/`. For 28 days:
+
+- **"Same place again" improves with coverage.** The grid ranker's top 1% caught 67.0% against 58.6% for the repeat map on the reused window (51.3% before). After the cutoff it caught 72.3% against 63.8% (67.8% before).
+- **New places are still unsolved.** Fresh-list hit rate on the reused window was 20.9% for the risk terrain against 14.3% for population (difference −2.0 to +13.8 points). After the cutoff it was 5.3% against 9.3%. The pattern ranker was unstable (23.5% on all reports in the reused window) and remains not adopted.
+- **Border gateways now appear.** With News18's coverage, the cluster rules label Muthanga (Wayanad–Karnataka crossing), Neyyattinkara (near the Tamil Nadu crossings) and Manjeshwar as entry gateways. Thalassery is labelled because the Mahé (Puducherry) enclave boundary counts as a land border. Muthanga now ranks among the top forecast cells. These are descriptive, not validated.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
