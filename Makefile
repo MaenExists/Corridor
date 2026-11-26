@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff frontend-setup frontend frontend-build frontend-test place-names recovery-need hotspot-v2 hotspot-v2-forecast hotspot-ledger hotspot-weekly
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff frontend-setup frontend frontend-build frontend-test place-names recovery-need hotspot-v2 hotspot-v2-forecast hotspot-ledger hotspot-weekly news-prominence hotspot-v3 hotspot-v3-forecast
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -72,6 +72,17 @@ hotspot-v2:
 	$(PY) -m ml.train.hotspot_v2 evaluate
 hotspot-v2-forecast:
 	$(PY) -m ml.train.hotspot_v2 forecast $(if $(AS_OF),--as-of $(AS_OF),)
+news-prominence:
+	$(PY) -m ml.data.news_prominence
+hotspot-v3:
+	$(PY) -m ml.train.hotspot_v3 features
+	$(PY) -m ml.train.hotspot_v3 tune
+	$(PY) -m ml.train.hotspot_v3 evaluate
+	$(PY) -m ml.train.hotspot_v3 cutoff
+	$(PY) -m ml.train.hotspot_v3 importance
+hotspot-v3-forecast:
+	$(PY) -m ml.train.hotspot_v3 features
+	$(PY) -m ml.train.hotspot_v3 forecast $(if $(AS_OF),--as-of $(AS_OF),)
 hotspot-ledger:
 	$(PY) -m ml.forecast.hotspot_ledger both $(if $(AS_OF),--as-of $(AS_OF),)
 # Weekly live cycle: fresh reports, all forecasts, then freeze this week's lists and score matured ones.
@@ -81,6 +92,9 @@ hotspot-weekly:
 	$(PY) -m ml.train.hotspot_grid forecast $(if $(AS_OF),--as-of $(AS_OF),)
 	$(PY) -m ml.train.hotspot_patterns forecast $(if $(AS_OF),--as-of $(AS_OF),)
 	$(PY) -m ml.train.hotspot_v2 forecast $(if $(AS_OF),--as-of $(AS_OF),)
+	$(PY) -m ml.data.news_prominence
+	$(PY) -m ml.train.hotspot_v3 features
+	$(PY) -m ml.train.hotspot_v3 forecast $(if $(AS_OF),--as-of $(AS_OF),)
 	$(PY) -m ml.forecast.hotspot_ledger both $(if $(AS_OF),--as-of $(AS_OF),)
 hotspot-cutoff:
 	$(PY) -m ml.evaluate.hotspot_cutoff

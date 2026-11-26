@@ -38,8 +38,12 @@ function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
 const clean = (d?: string | null) => (d ?? "").replace(/ district$/i, "").replace(/ District$/, "").trim();
 
 type GridCell = { rank: number; lat: number; lon: number; locality: string; taluk: string | null; district: string;
-  reports_within_3km_28d: number; reports_within_3km_365d: number };
-type Grid = { as_of: string; horizon_days: number; cells: GridCell[]; weekly_located_reports: number[];
+  reports_within_3km_28d: number; reports_within_3km_365d: number; news_365d?: number; reports_here_ever?: number;
+  expected_reports_28d?: number | null };
+type V3Cutoff = { cutoff: string; checked_through: string; post_cutoff_located_reports: number; caught: number;
+  new_place_reports: number; new_place_caught: number; top20_with_later_report: number;
+  by_month: { month: string; located_reports: number; v3: number }[] };
+type Grid = { as_of: string; horizon_days: number; cells: GridCell[]; model?: string; v3_cutoff?: V3Cutoff; weekly_located_reports: number[];
   latest_report_by_source: Record<string, string>; located_reports_used: number;
   cutoff_check?: { cutoff: string; checked_through: string; post_cutoff_located_reports: number;
     total: { grid_ranker: number; new_place_reports: number; risk_terrain_watch: number };
@@ -82,6 +86,9 @@ function places(grid: Grid, patterns: Patterns | null): { places: WatchPlace[]; 
       else if (year > 0) why.push(`${year === 1 ? "One seizure" : `${year} seizures`} reported within 3 km in the past year.`);
       else why.push("Ranked up by the pattern of reports around it, not by reports of its own.");
       if (month > 0) why.push(`Reported again in the last four weeks (${month}).`);
+      const news = Math.max(...group.map(c => c.news_365d ?? 0));
+      if (year === 0 && news >= 3) why.push(`In the news often (${news} stories located here this year) but no seizure reported yet. First reports tend to come from places like this.`);
+      else if (news >= 20) why.push(`Heavily covered by the news (${news} stories this year), so seizures here get reported.`);
       if (cluster) why.push(KIND_REASON[cluster.types[0]] ?? "");
       if (gate && gate.d < 15) why.push(`About ${Math.round(gate.d)} km from the border crossing near ${gate.g.near}.`);
       return {
@@ -89,6 +96,8 @@ function places(grid: Grid, patterns: Patterns | null): { places: WatchPlace[]; 
         district: clean(top.district), lat: top.lat, lon: top.lon,
         level: i < 8 ? "high" : i < 24 ? "elevated" : "watch", rank: i + 1, squares: group.length,
         reportsYear: year, reportsMonth: month, why: why.filter(Boolean), kind: cluster?.types[0] ?? null,
+        expected: group.some(c => c.expected_reports_28d != null)
+          ? group.reduce((a, c) => a + (c.expected_reports_28d ?? 0), 0) : null,
       } satisfies WatchPlace;
     }),
   };
@@ -222,7 +231,15 @@ export async function enforcementView(): Promise<EnforcementView> {
       ? { status: "paused", note: `The monthly district forecast is paused. Official monthly figures restarted after a two-year gap, and it needs ${forecasts.resume_after_gap_months} months in a row before it forecasts again.` }
       : { status: "unknown", note: "District forecast status unavailable." },
     weekly: grid?.weekly_located_reports ?? [],
-    record: cc ? {
+    record: grid?.v3_cutoff && cc ? {
+      cutoff: grid.v3_cutoff.cutoff, through: grid.v3_cutoff.checked_through, caught: grid.v3_cutoff.caught,
+      total: grid.v3_cutoff.post_cutoff_located_reports,
+      repeatShare: cc.strict_hit_rate.repeat_locality_1km, populationShare: cc.strict_hit_rate.population,
+      months: grid.v3_cutoff.by_month.map(m => ({ month: m.month, caught: m.v3, total: m.located_reports })),
+      topTwenty: 20, topTwentyHit: grid.v3_cutoff.top20_with_later_report,
+      newPlaces: grid.v3_cutoff.new_place_reports, newCaught: grid.v3_cutoff.new_place_caught,
+      previous: { caught: cc.total.grid_ranker, newCaught: cc.total.risk_terrain_watch },
+    } : cc ? {
       cutoff: cc.cutoff, through: cc.checked_through, caught: cc.total.grid_ranker, total: cc.post_cutoff_located_reports,
       repeatShare: cc.strict_hit_rate.repeat_locality_1km, populationShare: cc.strict_hit_rate.population,
       months: cc.by_month.map(m => ({ month: m.month, caught: m.grid_ranker, total: m.located_reports })),

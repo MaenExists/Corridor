@@ -55,6 +55,10 @@ ONM_SITEMAPS = ["https://www.onmanorama.com/kerala.sitemaplist1.xml", "https://w
                 *[f"https://www.onmanorama.com/archive-sitemaplist{n}.xml" for n in range(1, 5)]]
 ONM_PATH = re.compile(r"onmanorama\.com/news/kerala/(20\d{2})/(\d{2})/(\d{2})/[^/]+\.html$")
 NIE_DATE = re.compile(r"/(20\d{2})/([A-Z][a-z]{2})/(\d{1,2})/")
+# Madhyamam (Malayalam daily): district local news, Kerala, crime and metro sitemaps, English slugs.
+MAD_INDEX = "https://www.madhyamam.com/sitemap/sitemap-index.xml"
+MAD_CATEGORIES = {"12", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "1509", "1639"}
+MAD_DISTRICT = {"trivandrum": "thiruvananthapuram", "kasarkode": "kasaragod", "kasargod": "kasaragod"}
 
 DRUG = re.compile(r"(?<![a-z])(ganja|mdma|hashish|hash-oil|cannabis|heroin|brown-sugar|charas|lsd|methamphetamine|"
                   r"meth|cocaine|opium|narcotic|narcotics|ndps|drugs?|synthetic-drugs?|nitrazepam|tramadol|"
@@ -181,12 +185,39 @@ def onm_rows(refresh=True):
                 yield {"source": "onm", "section": "kerala", "published": "-".join(found.groups()), "url": loc}
 
 
+def madhyamam_rows(refresh=True):
+    """Madhyamam category sitemaps (5,000 stories a page). The first page of each category is re-read on every
+    harvest; the stories' own publish times come from their pages when they are described."""
+    index = cached(RAW / "madhyamam" / "sitemap-index.xml.gz", MAD_INDEX, refresh).decode("utf-8", "replace")
+    pages = sorted({(c, int(p)) for c, p in re.findall(r"news-(\d+)-(\d+)-sitemap\.xml", index) if c in MAD_CATEGORIES})
+    for category, page in pages:
+        url = f"https://www.madhyamam.com/sitemap/news-{category}-{page}-sitemap.xml"
+        body = cached(RAW / "madhyamam" / f"news-{category}-{page}.xml.gz", url, refresh and page == 1)
+        for block in ENTRY.findall(body):
+            loc = re.search(rb"<loc>\s*(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?\s*</loc>", block, re.S)
+            mod = LASTMOD.search(block)
+            if not loc or not mod:
+                continue
+            story = loc.group(1).decode("utf-8", "replace")
+            parts = story.split("/")[3:-1]
+            district = ""
+            if "local-news" in parts and parts.index("local-news") + 1 < len(parts):
+                district = parts[parts.index("local-news") + 1]
+            elif len(parts) >= 2 and parts[0] == "kerala" and parts[1] in SECTION_DISTRICT:
+                district = parts[1]
+            district = MAD_DISTRICT.get(district, district)
+            yield {"source": "madhyamam", "section": district if district in SECTION_DISTRICT else (parts[0] if parts else ""),
+                   "published": mod.group(1).decode()[:10], "url": story}
+
+
 def slug(url):
     path = url.split("?")[0].rstrip("/")
     if "indiatimes.com" in path:
         return path.split("/articleshow/")[0].rsplit("/", 1)[-1]
     if "news18.com" in path:
         return re.sub(r"(-[a-z]{1,4})*-\d{4,}\.html$", "", path.rsplit("/", 1)[-1])
+    if "madhyamam.com" in path:
+        return re.sub(r"-\d{5,}$", "", path.rsplit("/", 1)[-1])
     if "asianetnews.com" in path:
         return re.sub(r"-[a-z0-9]{2,4}-[a-z0-9]{6}$", "", path.rsplit("/", 1)[-1])
     return re.sub(r"-\d{5,}\.html$|\.html$", "", path.rsplit("/", 1)[-1])
@@ -212,6 +243,7 @@ def harvest(refresh_recent=7, workers=6):
         for found in pool.map(lambda d: list(n18_rows(d, refresh=(today - d).days < refresh_recent)), n18_days):
             rows.extend(found)
     rows.extend(onm_rows())
+    rows.extend(madhyamam_rows())
     seen, kept = set(), []
     for row in rows:
         row["slug"] = slug(row["url"])
@@ -230,8 +262,12 @@ def harvest(refresh_recent=7, workers=6):
 
 # ---------------------------------------------------------------- places
 
+MALAYALAM_TEXT = re.compile("[\u0D00-\u0D7F]")
 MALAYALAM_DRUG = re.compile("ലഹരി|കഞ്ചാവ്|എംഡിഎംഎ|മയക്കുമരുന്ന്|ഹാഷിഷ്|മെത്താംഫെറ്റമിൻ|രാസലഹരി")
-SECTION_DISTRICT = {"kochi": "Ernakulam", "thiruvananthapuram": "Thiruvananthapuram", "kozhikode": "Kozhikode"}
+SECTION_DISTRICT = {"kochi": "Ernakulam", "thiruvananthapuram": "Thiruvananthapuram", "kozhikode": "Kozhikode",
+                    "kollam": "Kollam", "pathanamthitta": "Pathanamthitta", "alappuzha": "Alappuzha", "kottayam": "Kottayam",
+                    "idukki": "Idukki", "ernakulam": "Ernakulam", "thrissur": "Thrissur", "palakkad": "Palakkad",
+                    "malappuram": "Malappuram", "wayanad": "Wayanad", "kannur": "Kannur", "kasaragod": "Kasaragod"}
 DISTRICT_WORDS = {
     "thiruvananthapuram": "Thiruvananthapuram", "trivandrum": "Thiruvananthapuram", "kollam": "Kollam",
     "pathanamthitta": "Pathanamthitta", "alappuzha": "Alappuzha", "alleppey": "Alappuzha",
@@ -382,6 +418,7 @@ def locate(slug_text, section, index, description=""):
 
 
 DESCRIPTIONS = ROOT / "news" / "descriptions.jsonl"
+PUBLISHED = re.compile(rb'<meta[^>]+property="article:published_time"[^>]+content="(\d{4}-\d{2}-\d{2})')
 META = re.compile(rb'<meta[^>]+(?:name|property)="(description|og:description|og:title)"[^>]+content="([^"]*)"', re.I)
 
 
@@ -405,7 +442,9 @@ def describe(urls, workers=4):
             found.setdefault(name.decode().lower(), html.unescape(content.decode("utf-8", "replace")))
         time.sleep(0.25)
         text = max((found.get("og:description", ""), found.get("description", "")), key=len)
-        return {"url": url, "description": text, "title": found.get("og:title", ""), "status": "ok"}
+        stamp = PUBLISHED.search(body)
+        return {"url": url, "description": text, "title": found.get("og:title", ""), "status": "ok",
+                "published_time": stamp.group(1).decode()[:10] if stamp else ""}
 
     with ThreadPoolExecutor(workers) as pool, DESCRIPTIONS.open("a", encoding="utf-8") as stream:
         for count, row in enumerate(pool.map(one, todo), 1):
@@ -450,6 +489,7 @@ def dedupe(rows, days=2):
 
 
 def build(fetch_descriptions=False):
+    from ml.data.malayalam_places import locate_malayalam
     index = place_index()
     with CANDIDATES.open(encoding="utf-8", newline="") as stream:
         candidates = list(csv.DictReader(stream))
@@ -464,14 +504,25 @@ def build(fetch_descriptions=False):
         if description and latin and not drug_words:
             continue  # the summary shows the story is not about a drug seizure
         where = locate(row["slug"], row["section"], index, description)
+        if (not where or where["precision"] != "locality") and MALAYALAM_TEXT.search(description):
+            # Malayalam summaries name the place in an inflected form the English reader cannot see.
+            found = locate_malayalam(description, (where["district"] if where else None) or SECTION_DISTRICT.get(row["section"]))
+            if found:
+                where = {k: v for k, v in found.items() if k != "via"} | {"geocoder": found["via"]}
         if not where:
             continue
+        where.setdefault("geocoder", "english")
         drug, grams = drug_and_quantity(row["slug"], description)
+        if row["source"] == "madhyamam":
+            stamp = summaries.get(row["url"], {}).get("published_time")
+            if not stamp:
+                continue  # sitemap dates are last-modified stamps; without the page's own date the story is not dated
+            row["published"] = stamp
         located.append({"published": row["published"], "source": row["source"], "section": row["section"],
                         "slug": row["slug"], "drug": drug, "quantity_g": grams, **where})
     incidents = dedupe(located)
     fields = ["published", "place", "district", "precision", "lat", "lon", "reports", "drug", "quantity_g", "source",
-              "section", "slug"]
+              "section", "slug", "geocoder"]
     with INCIDENTS.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fields, extrasaction="ignore")
         writer.writeheader()

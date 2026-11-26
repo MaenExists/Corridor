@@ -10,11 +10,10 @@ export function TrackRecord({ view }: { view: EnforcementView }) {
       {r ? (
         <>
           <Cell label="How often it is right" first>
-            <p className="text-[34px] leading-none tracking-[-0.03em] font-medium tabular">
-              3 <span className="text-mute font-normal text-[20px]">in</span> 4
-            </p>
+            <p className="text-[34px] leading-none tracking-[-0.03em] font-medium tabular">{pct(r.caught / Math.max(r.total, 1))}</p>
             <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">
-              A forecast frozen on {date(r.cutoff)} caught {r.caught} of {r.total} later seizures in 1% of Kerala.
+              A forecast frozen on {date(r.cutoff)} caught {r.caught} of {r.total} later seizures in 1% of Kerala
+              {r.previous ? ` (previous model: ${r.previous.caught}; same place again: ${pct(r.repeatShare)})` : ""}.
             </p>
           </Cell>
           <Cell label="Month by month since then">
@@ -33,9 +32,11 @@ export function TrackRecord({ view }: { view: EnforcementView }) {
             <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular">{r.topTwentyHit}<span className="text-mute text-[16px]">/20</span></p>
             <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">had a seizure afterwards.</p>
           </Cell>
-          <Cell label="Its blind spot">
+          <Cell label={r.previous ? "New places" : "Its blind spot"}>
             <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular text-signal">{r.newCaught}<span className="text-mute text-[16px]">/{r.newPlaces}</span></p>
-            <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">brand-new places caught. It sees repeats, not firsts.</p>
+            <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">
+              {r.previous ? `brand-new places caught (previous model: ${r.previous.newCaught}).` : "brand-new places caught. It sees repeats, not firsts."}
+            </p>
           </Cell>
           <Cell label="Live record">
             {view.ledger?.scoredPreRegistered ? (

@@ -15,6 +15,7 @@ export type WatchPlace = {
   reportsYear: number;
   reportsMonth: number;
   why: string[];           // plain-language reasons
+  expected: number | null; // reports expected around it in the next four weeks (calibrated model), if available
   kind: string | null;     // hotspot type, if the place sits in a labelled cluster
 };
 
@@ -58,6 +59,8 @@ export type Record = {
   topTwentyHit: number;
   newPlaces: number;
   newCaught: number;
+  /** The v1 list's figures on the same check, when v3 is the served list. */
+  previous?: { caught: number; newCaught: number };
 };
 
 /** A learned hotspot profile (pattern engine v2): recurring surroundings of reported seizures. */

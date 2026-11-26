@@ -247,6 +247,150 @@ The repeat_locality_1km baseline caught 62.6%, 58.6% and 63.8% of all reports in
 - **The emerging scan is rare and unproven.** It flagged 6 zones in 26 development months, 5 in 32 later months and 1 after the cutoff. The four-week lift was 0.7×, 1.5× and 0×, on single-digit counts. The busiest-recent-zones rival lifted 1.19×, 0.89× and 0.93×. The scan is shown as a statistical alert ("more recent reports than this area's history explains"), not as a forecast.
 - **What ships.** The "New & rising" tab shows the trees' new-place watch list labelled as a lead, with its evidence table, and the scan's alerts. Learned profiles go in "Why there". The forecast ledger tests the watch list prospectively from 1 December 2026 under the rule above.
 
+## Grid forecast v3 (measurement-aware ranker)
+
+Diagnostics (26 November 2026, before any v3 score) showed that the v1 grid ranker spends most of its budget where a located report cannot land.
+
+- **Only some squares can be hit.** Located reports are placed at the GeoNames locality or post-office point the geocoder chooses. Only 6,697 points can ever be chosen, and they fall in 5,754 of the 46,057 squares. Every located report so far is in that set.
+- **The budget is wasted.** 270 of the 461 squares in the served v1 list are outside it.
+- **Squares with earlier reports carry most of the outcome.** 64–84% of each year's reports came from squares that already had one. There were only 103–275 such squares at the start of each year, fewer than the 461-square budget.
+- **News coverage marks the new places.** `ml/data/news_prominence.py` runs the same geocoder over all 443,146 cached Kerala story slugs since 2016, whatever the topic. Of first reports at new squares, 78–85% landed where earlier news of any kind had been located.
+
+`ml/train/hotspot_v3.py` therefore ranks only reachable squares. The area budget is unchanged (the top 1% of all squares, 461), so hit rates stay comparable. Its features:
+
+- the square's own report history: exponential decays with half-lives of 14 to 1,095 days, window counts, days since the last report, distinct report days and sources, and large hauls;
+- neighbouring activity within 2 km and 2–10 km, distance to the nearest other reported square, and the ETAS intensity (parameters fitted on reports before 2022);
+- news prominence before the origin: all stories and crime stories, over 91 days, 365 days, the previous year and all history, plus the district's totals;
+- the gazetteer point: type, population, number of points, and name ambiguity across districts;
+- surroundings: police station, railway station, bus station, highway and border crossing;
+- population, the statewide report volume, and the season.
+
+The candidates are LightGBM binary, Poisson and LambdaRank configurations and their rank ensemble. Every model, v1 included, is refitted every 13 weeks on all origins whose 28-day window has closed.
+
+This gain comes from modelling how reports are located and covered: where seizures will be reported and placed, not where drugs move. The map names localities, and a flagged square stands for its locality.
+
+**Pre-registration, 26 November 2026, before any v3 score was computed.**
+
+- The configuration is chosen on development (2022–23) only, by top-1% hit rate at 28 days, with top-5% hit rate as the tie-break.
+- The chosen design then runs once on 2024 to mid-2026 and on July–November 2026. v3 tuning never looks at either window, but earlier models were scored on them, so they are labelled reused.
+- **Switch rule.** v3 replaces v1 as the served four-week list if its top-1% hit rate on 2024 to mid-2026 beats v1's (refitted on the same schedule), with the 95% block-bootstrap interval for the difference excluding zero, and it is no more than 2 points below v1 on July–November 2026.
+- Both lists go into the forecast ledger from 1 December 2026. If v3 trails v1 there, pooled over December 2026 to May 2027, the served list reverts to v1.
+- v3 is always reported next to repeat_locality_1km and next to two masked baselines: v1 restricted to reachable squares, and "reported here before, then most news".
+
+**v3 results (26 November 2026, `make hotspot-v3`, original 1,262-report data, single pass).** The development choice was the rank ensemble of the LambdaRank, Poisson and binary configurations, at a 92.7% top-1% hit rate. All 11 configurations scored between 89.7% and 92.7%. Results at 28 days:
+
+| Window | List | Top 1% (461 squares) | Top 115 | Precision of top 20 | First-ever places, top 1% |
+| --- | --- | --- | --- | --- | --- |
+| Development 2022–23 | v3 | 92.7% | 73.2% | 13.4% | 75.2% |
+| | v1 (same refits) | 62.8% | 44.8% | 5.6% | 8.6% |
+| | v1 masked to reachable | 76.0% | 60.5% | 8.7% | 26.9% |
+| | reported before, then news | 92.6% | 71.6% | 16.1% | 74.1% |
+| | repeat_locality_1km | 62.5% | 39.1% | 6.5% | 8.3% |
+| | *v3 − v1, 95% CI* | +25.7 to +34.4 pts | | | |
+| | *v3 − rule, 95% CI* | -1.1 to +1.3 pts | | | |
+| 2024 – mid-2026 (untouched by v3 tuning) | v3 | 91.9% | 68.4% | 22.1% | 62.0% |
+| | v1 (same refits) | 65.0% | 38.7% | 9.8% | 2.0% |
+| | v1 masked to reachable | 79.0% | 56.1% | 13.4% | 14.3% |
+| | reported before, then news | 91.0% | 68.0% | 22.4% | 56.5% |
+| | repeat_locality_1km | 58.7% | 33.4% | 10.4% | 2.4% |
+| | *v3 − v1, 95% CI* | +24.6 to +28.9 pts | | | |
+| | *v3 − rule, 95% CI* | -0.1 to +1.7 pts | | | |
+| Jul–Nov 2026 | v3 | 90.2% | 72.6% | 44.4% | 27.6% |
+| | v1 (same refits) | 72.6% | 55.3% | 30.3% | 0.0% |
+| | v1 masked to reachable | 84.7% | 65.1% | 32.9% | 5.3% |
+| | reported before, then news | 89.7% | 73.1% | 46.2% | 23.7% |
+| | repeat_locality_1km | 64.4% | 39.9% | 18.5% | 0.0% |
+| | *v3 − v1, 95% CI* | +17.1 to +20.2 pts | | | |
+| | *v3 − rule, 95% CI* | +0.4 to +1.0 pts | | | |
+
+- **Verdict by the pre-registered rule: switch to v3.** On the reused window it beat v1 by +24.6 to +29.0 points. After the cutoff it scored 90.2%, against 72.6% for v1.
+- **Where the gain comes from.**
+  - Masking v1 to reachable squares alone gives about half of it.
+  - News prominence gives most of the rest, and nearly all of the new-place gain.
+  - The simple rule "reported before, then most news" is within about one point of v3 overall. v3's own edge is in first-ever places (62.0% against 56.5% on the reused window).
+- **What the top of the list means.** About 1 in 5 of the top 20 squares gets a report within four weeks (22% on the reused window, against 10% for v1).
+- These results describe how reports are located and covered, as explained above. The original-data files are kept in `v3/frozen_data1/`.
+
+## Grid forecast v3.1 (more sources, Malayalam geocoder, short-list optimisation)
+
+**Pre-registration, 26 November 2026, written before any v3.1 score.** Owner's request: collect more data and close the room for improvement.
+
+**Data.**
+- **Madhyamam** (Malayalam daily) is added. It brings district local news for all 14 districts, plus the Kerala, crime and metro sections: 185,919 stories with English slugs and 2,255 drug-seizure candidates by slug. Sitemap dates are last-modified stamps, so a Madhyamam story is dated by its page's own `article:published_time` and is dropped if that is missing.
+- **Malayalam geocoder** (`ml/data/malayalam_places.py`), used only when the English geocoder finds no locality. It reads datelines ("X:"), case endings (-ൽ, -യിൽ, -ലെ, -ത്ത്) and "X police/excise". It ignores "from X" and "to X" (origin and destination), "also in X", and "X സ്വദേശി" or "താമസ" (where someone lives). District names give district precision only.
+  - **Validation before use.** On 304 stories that both geocoders could place (with Malayalam restricted to the English geocoder's reachable points), the Malayalam reading was within 3 km of the English one 82% of the time, within 15 km 93%, and further away 7%.
+  - **Coverage.** On the existing candidates it adds about 360 located stories.
+- Incidents record which geocoder placed them (`geocoder`). News prominence is rebuilt with Madhyamam slugs.
+
+**Model.**
+- Seven short-list features: reports in the last 14 days, nearby reports in the last 28 days, the recent rate against the year, the typical gap between reports, news in the last 28 days, and crime news over 91 and 28 days.
+- Three more configurations: LambdaRank truncated at 50, and slower binary and Poisson boosting.
+
+**Selection on development (2022–23) only.** Among configurations within 1 point of the best top-1% hit rate, choose the highest precision in the top 50 squares, then the highest hit rate in the top 115. The rank ensemble of the best of each objective is eligible under the same rule.
+
+**Evaluation.**
+- One pass on 2024 to mid-2026 and July–November 2026 against v1, both refitted quarterly on the same expanded data.
+- The switch rule is unchanged from v3.
+- Expected counts from the Poisson member are checked for calibration by band.
+
+**Caveat.** The expanded data changes the target, since more stories are located. v3 (old data) and v3.1 (new data) results are therefore reported separately and are not compared as one series.
+
+**v3.1 results (26 November 2026, `make hotspot-v3`, expanded data, single pass).**
+
+The expanded data has 1,979 located incidents, up from 1,262:
+- **Madhyamam** adds 410.
+- **The Malayalam geocoder** places 628 (255 from datelines, 243 from case endings, 130 from police-station context).
+- **Coverage** spreads beyond the city desks. Malappuram rises from about 30 to 218 incidents, and Wayanad reaches 127.
+
+The news prominence table now holds 85,708 located stories from 628,964.
+
+On development, every configuration fell between 81.2% and 84.5% at the top 1%. The rule chose slow Poisson boosting (7 leaves, 800 trees), which had the best top-50 precision among configurations within a point of the best.
+
+| Window | List | Top 1% | Top 115 | Precision top 20 | Precision top 50 | First-ever places, top 1% |
+| --- | --- | --- | --- | --- | --- | --- |
+| Development 2022–23 | v3.1 | 84.5% | 60.8% | 19.2% | 13.6% | 55.1% |
+|  | v1 (same refits, same data) | 57.7% | 30.1% | 7.6% | 6.3% | 6.0% |
+|  | v1 masked to reachable | 73.3% | 44.7% | 11.2% | 8.7% | 24.2% |
+|  | reported before, then news | 84.3% | 59.4% | 19.7% | 13.8% | 48.7% |
+|  | repeat_locality_1km | 50.0% | 28.2% | 8.1% | 5.8% | 5.3% |
+|  | population | 17.9% | 6.1% | 1.8% | 1.3% | 12.6% |
+| | *v3.1 − v1 / − rule, 95% CI* | +21.6 to +30.8 / -1.7 to +1.5 pts | | | | |
+| 2024 – mid-2026 | v3.1 | 86.9% | 59.4% | 26.8% | 19.2% | 38.1% |
+|  | v1 (same refits, same data) | 61.1% | 34.7% | 11.8% | 9.6% | 2.1% |
+|  | v1 masked to reachable | 76.5% | 47.8% | 16.7% | 13.8% | 8.7% |
+|  | reported before, then news | 85.6% | 58.7% | 27.3% | 18.9% | 25.4% |
+|  | repeat_locality_1km | 52.7% | 29.1% | 13.5% | 7.8% | 2.3% |
+|  | population | 11.9% | 4.0% | 2.2% | 1.2% | 3.4% |
+| | *v3.1 − v1 / − rule, 95% CI* | +23.3 to +28.2 / +0.1 to +2.4 pts | | | | |
+| Jul–Nov 2026 | v3.1 | 84.9% | 59.1% | 48.5% | 34.2% | 19.9% |
+|  | v1 (same refits, same data) | 66.0% | 37.7% | 18.2% | 16.7% | 0.0% |
+|  | v1 masked to reachable | 74.6% | 53.3% | 25.9% | 23.1% | 2.8% |
+|  | reported before, then news | 85.0% | 61.1% | 51.8% | 36.1% | 5.7% |
+|  | repeat_locality_1km | 55.3% | 36.6% | 22.4% | 14.9% | 2.8% |
+|  | population | 15.2% | 7.1% | 6.2% | 2.9% | 7.1% |
+| | *v3.1 − v1 / − rule, 95% CI* | +18.3 to +21.6 / -1.8 to +0.3 pts | | | | |
+
+- **Verdict: switch to v3.1** (served from 26 November 2026). On the reused window it beat v1 by +23.3 to +28.2 points. After the cutoff it scored 84.9%, against 66.0% for v1.
+- **The simple rule is close, and that matters.**
+  - v3.1 beats it on the top 1% only narrowly on the reused window and ties after the cutoff.
+  - Its real edge is first-ever places: 38.1% against 25.4% on the reused window, and 19.9% against 5.7% after the cutoff.
+  - On precision of the top 20 the two are level.
+- **Expected counts are calibrated.**
+  - On the reused window the model predicted 3436 reports against 3650 observed.
+  - After the cutoff it predicted 814 against 889.
+  - By band, squares given 0.1–0.3 expected reports had 0.16 on average against 0.16–0.17 predicted, and squares given 0.3–1 had 0.40–0.46 against 0.45–0.46.
+  - Totals run 6–8% low.
+- **Knowledge-cutoff test on the expanded data.** Everything was frozen on 30 June 2026 and checked against all 263 later located reports.
+  - **v3.1** caught 223 (84.8%). 19 of its top 20 places had a later report within 2 km, and it caught 9 of 43 first-ever places.
+  - **v1, same test:** 165 caught (62.7%), 12 of its top 20.
+  - **Repeat map, same test:** 55.5%.
+- **What drives it.** Grouped permutation importance (drop in development top-1% hit rate when a group is shuffled): news prominence +8.5 pts, own history +8.0 pts, surroundings +1.5 pts, population +1.0 pts, neighbours and ETAS +0.7 pts, district and state -0.9 pts, gazetteer point -1.0 pts. News coverage and the square's own history carry the model.
+- **Remaining room.**
+  - The ML barely beats a transparent rule except on new places.
+  - Precision at the very top is bounded by how often anything is reported. Even the best square sees about one report in four weeks.
+  - The next gains need official station-level counts, and more Malayalam outlets with archives (Mathrubhumi and Manorama expose only recent sitemaps; The Hindu's robots.txt disallows its archive, so it is not used).
+  - The ledger scores v3.1 and v1 side by side from 1 December 2026, and the served list reverts if v3.1 trails.
+
 ## Knowledge-cutoff test of the grid system (`make hotspot-cutoff`, 26 November 2026)
 
 Everything is frozen at 30 June 2026 end of day: the ranker and ETAS fits *and* the reports the model may read (1,100 located reports). One forecast was issued from that state and never updated. It was scored against the 162 located reports published from 1 July to 25 November 2026, on the 1,262-report table that includes News18 Malayalam. The flagged area is the top 1% of cells (461 km²).

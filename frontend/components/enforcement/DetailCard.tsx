@@ -34,9 +34,10 @@ function Place({ view, id }: { view: EnforcementView; id: string }) {
           <i className="block size-3 border border-ink" style={{ background: level.fill }} />{level.text} in the next four weeks
         </p>
       </div>
-      <div className="grid grid-cols-2 border-b border-ink">
+      <div className={`grid ${p.expected != null ? "grid-cols-3" : "grid-cols-2"} border-b border-ink`}>
         <Stat value={p.reportsYear} label="seizures reported nearby, past year" />
         <Stat value={p.reportsMonth} label="in the last four weeks" border />
+        {p.expected != null && <Stat value={p.expected < 0.95 ? p.expected.toFixed(1) : String(Math.round(p.expected))} label="reports expected, next four weeks" border />}
       </div>
       <div className="px-4 py-3">
         <p className="label text-mute mb-2">Why it is flagged</p>

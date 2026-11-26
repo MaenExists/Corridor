@@ -64,6 +64,11 @@ def issue(as_of, force=False):
         "repeat_locality_1km": sorted(int(c) for c in np.lexsort((-grid.population, -repeat))[:n_top]),
         "population_fresh": sorted(int(c) for c in np.argsort(-np.where(fresh, grid.population, -1))[:n_top]),
     }
+    for name, file in (("v1_grid_ranker", g.SERVED / "grid_forecast_v1.json"), ("v3_challenger", g.SERVED / "grid_forecast_v3.json")):
+        if file.exists():
+            other = json.loads(file.read_text())
+            if other["as_of"] == as_of.isoformat():
+                lists[name] = snap([(c["lat"], c["lon"]) for c in other["cells"]])
     emerging = []
     if v2 and v2["as_of"] == as_of.isoformat():
         lists["new_place_watch"] = snap(v2["new_place_cells"])
@@ -113,7 +118,7 @@ def score(today=None):
                                               for c, z in zip(centres, entry["emerging"]))) if len(xy) else 0
         rows.append(row)
     keys = ("reports", "new_place_reports_in_fresh_squares", "grid_ranker", "repeat_locality_1km", "new_place_watch",
-            "population_fresh")
+            "population_fresh", "v1_grid_ranker", "v3_challenger")
     official = [r for r in rows if r["pre_registered"]]
     total = {k: sum(r.get(k, 0) for r in official) for k in keys}
     summary = {"updated": today.isoformat(), "pre_registered_from": str(PRE_REGISTERED_START),

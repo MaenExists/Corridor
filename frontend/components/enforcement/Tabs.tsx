@@ -17,7 +17,8 @@ export function WatchTab({ view, highCount, selectedId, onPick }: {
           {highCount} places stand out. Start with these.
         </h2>
         <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">
-          Ranked by how likely a seizure is to be reported around them, learned from past seizures across Kerala.
+          Ranked by how likely a seizure is to be reported around them, learned from past seizures and news coverage
+          across Kerala.{view.places.some(p => p.expected != null) ? " The number is how many reports to expect in four weeks." : ""}
         </p>
       </div>
       <ol>
@@ -32,7 +33,9 @@ export function WatchTab({ view, highCount, selectedId, onPick }: {
                 <span className={`block text-[12px] truncate ${selectedId === p.id ? "text-paper/65" : "text-mute"}`}>{p.area}</span>
               </span>
               <span className="pr-5 flex items-center gap-2">
-                <span className="text-[12px] tabular opacity-70">{p.reportsYear > 0 ? `${p.reportsYear}/yr` : "new"}</span>
+                <span className="text-[12px] tabular opacity-70" title="Reports expected in the next four weeks">
+                  {p.expected != null ? `~${p.expected < 0.95 ? p.expected.toFixed(1) : Math.round(p.expected)}` : p.reportsYear > 0 ? `${p.reportsYear}/yr` : "new"}
+                </span>
                 <i className="block size-3 border border-ink" style={{ background: LEVEL[p.level].fill }} title={LEVEL[p.level].text} />
               </span>
             </button>
