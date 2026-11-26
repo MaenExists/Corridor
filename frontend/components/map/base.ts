@@ -48,7 +48,9 @@ export function setBasemap(ctx: { L: typeof Leaflet; map: Leaflet.Map; districts
       { maxZoom: 18, attribution: "Imagery © Esri, Maxar, Earthstar Geographics" }),
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
       { maxZoom: 18, opacity: .85 }),
-  ] : [L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" })];
+  ] : [L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors",
+    // The site sends no referrer; OSM's tile policy blocks browser requests without one, so send only the origin.
+    referrerPolicy: "strict-origin" } as Leaflet.TileLayerOptions)];
   ctx.base.forEach(l => l.addTo(map));
   ctx.districts.eachLayer(l => (l as Leaflet.GeoJSON).setStyle?.({
     color: "#ffffff", opacity: basemap === "satellite" ? .7 : .45 }));
