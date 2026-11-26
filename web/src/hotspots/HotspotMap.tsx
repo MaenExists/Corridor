@@ -15,6 +15,12 @@ type Brief = {
   audit: { share_at_repeat_localities: number; overall_top1pct: { ranker: number; repeat_1km: number; long_run: number };
     hit_rate_top1pct: { repeat: { ranker: number; events: number }; new: { ranker: number; events: number } } } | null;
   postcutoff: { window: [string, string]; horizon: Record<string, Score> } | null;
+  cutoff_check: { cutoff: string; checked_through: string; flagged_cells: number; post_cutoff_located_reports: number;
+    by_month: { month: string; located_reports: number; grid_ranker: number; repeat_locality_1km: number;
+      long_run_hotspots: number; population: number }[];
+    strict_hit_rate: Record<string, number>; top20_with_later_report: number;
+    top20_localities_at_cutoff: { locality: string; district: string; later_reports_within_2km: number }[];
+    total: { new_place_reports: number; risk_terrain_watch: number } } | null;
 };
 
 const SOURCES: Record<string, string> = { nie: "New Indian Express", toi: "Times of India", onm: "Onmanorama",
@@ -221,6 +227,24 @@ export function HotspotMap() {
         within about {brief.etas.sigma_km.toFixed(1)} km, decaying with a {(1 / brief.etas.omega).toFixed(0)}-day time scale.
         {" "}{pct(1 - brief.etas.background_share)} of reports are attributed to an earlier nearby one.</p>
     </section>}
+    {brief?.cutoff_check && (() => { const c = brief.cutoff_check; return <section className="districts">
+      <h2>Frozen at {c.cutoff}: how much did it get right?</h2>
+      <p className="muted">One forecast made with only the reports and model known on {c.cutoff}, never updated, scored
+        against the {c.post_cutoff_located_reports} located reports published through {c.checked_through}. Flagged area:
+        top 1% of cells ({c.flagged_cells} km²).</p>
+      <div className="table-wrap"><table><thead><tr><th>Month</th><th>Reports</th><th>NarcoTrace</th><th>Repeat map</th>
+        <th>Long-run hotspots</th><th>Population</th></tr></thead><tbody>
+        {c.by_month.map(m => <tr key={m.month}><th scope="row">{m.month}</th><td>{m.located_reports}</td>
+          <td>{m.grid_ranker} ({pct(m.grid_ranker / Math.max(m.located_reports, 1))})</td><td>{m.repeat_locality_1km}</td>
+          <td>{m.long_run_hotspots}</td><td>{m.population}</td></tr>)}
+        <tr><th scope="row">Total</th><td>{c.post_cutoff_located_reports}</td><td><b>{pct(c.strict_hit_rate.grid_ranker)}</b></td>
+          <td>{pct(c.strict_hit_rate.repeat_locality_1km)}</td><td>{pct(c.strict_hit_rate.long_run_hotspots)}</td>
+          <td>{pct(c.strict_hit_rate.population)}</td></tr></tbody></table></div>
+      <p className="muted">{c.top20_with_later_report} of the 20 top localities at the cutoff had a later report within 2 km
+        ({c.top20_localities_at_cutoff.filter(l => l.later_reports_within_2km > 0).map(l => `${l.locality} ${l.later_reports_within_2km}`).join(", ")}).
+        New places stayed unsolved: {c.total.risk_terrain_watch} of {c.total.new_place_reports} reports at never-reported
+        localities were caught.</p>
+    </section>; })()}
     {patterns && <section className="districts">
       <h2>What surrounds hotspots</h2>
       <p className="muted">Risk terrain fitted on reports before {patterns.as_of}: how much more often a cell has a report

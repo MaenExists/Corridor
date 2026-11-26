@@ -229,7 +229,7 @@ Everything is frozen at 30 June 2026 end of day: the ranker and ETAS fits *and* 
 - The single frozen forecast held up for five months. It caught 70–80% of each month's located reports, with November at 65% on a partial month. It never fell below the repeat map.
 - Of the 20 localities it ranked highest at the cutoff, 13 had at least one later report within 2 km. Examples: Perumbavoor (8), Badagara (7), Angamaly (5), Gothurutha (5), Kalamassery (4), Mattancherry (4), and Muthanga at the Karnataka crossing (2). Seven had none, including Kalikavu, Mulamthuruthy, Anchal and Chirayinkeezhu.
 - New places stayed unsolved. 23 of the 162 reports (14%) came from localities with no report before the cutoff. The risk-terrain watch list caught 1 of them and a population list caught 2.
-- The rolling reading, with frozen weights and weekly new reports, scored 70.8% on the earlier 974-report table, against 65.9% for the repeat map.
+- The rolling reading, with frozen weights and weekly new reports, was rerun on the 1,262-report table. For 28 days it caught 69.7% against 63.8% for the repeat map (advantage +3.0 to +6.9 points) and 14.5% for population. For 7 days it caught 66.5% against 62.7%. On the earlier 974-report table it scored 70.8% against 65.9%.
 
 Caveats: 162 reports is a small sample, and an exact binomial 95% interval on 75.9% is roughly 69–82%. The gazetteer and OpenStreetMap context are November 2026 snapshots, used only for locating text and for the watch list. All outcomes are *reported* seizures in five publishers' coverage.
 

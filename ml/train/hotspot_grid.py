@@ -427,6 +427,7 @@ def issue(as_of, horizon=PRIMARY_HORIZON):
                           "long_run_hotspots": test["horizons"][str(horizon)]["long_run_hotspots"],
                           "population": test["horizons"][str(horizon)]["population"]},
         "audit": _read("audit.json"),
+        "cutoff_check": _read("cutoff/cutoff_check.json"),
         "postcutoff": (lambda r: r and {"window": r["window"], "horizon": r["horizons"][str(horizon)]})(_read("postcutoff.json")),
         "measure": "reported drug seizures in two English publishers' Kerala coverage, located to a locality",
     }
