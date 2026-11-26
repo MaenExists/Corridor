@@ -213,6 +213,40 @@ Next inputs that could change this: official station-level or Excise range count
 - **New places are still unsolved.** Fresh-list hit rate on the reused window was 20.9% for the risk terrain against 14.3% for population (difference −2.0 to +13.8 points). After the cutoff it was 5.3% against 9.3%. The pattern ranker was unstable (23.5% on all reports in the reused window) and remains not adopted.
 - **Border gateways now appear.** With News18's coverage, the cluster rules label Muthanga (Wayanad–Karnataka crossing), Neyyattinkara (near the Tamil Nadu crossings) and Manjeshwar as entry gateways. Thalassery is labelled because the Mahé (Puducherry) enclave boundary counts as a land border. Muthanga now ranks among the top forecast cells. These are descriptive, not validated.
 
+## Pattern engine v2 (learned profiles, new-place model, emerging clusters)
+
+`ml/train/hotspot_v2.py` replaces the v1 rule-based typology with learned patterns and splits "same place again" from "new place".
+
+- **Context.** The OSM extract gains hotels and lodges, beaches, ferry jetties, fuel stations, toll plazas, markets, and cinemas or malls, plus counts of ten venue kinds within 2 km. Police stations and Excise offices (effort) and industrial areas (in Kerala largely migrant workers' housing, a group proxy) are left out of every v2 input.
+- **Learned hotspot profiles.** Diagonal Gaussian mixtures on standardised square profiles. The hotspot mixture uses squares with reports in the last three years (weight capped at 5 reports; k from 2 to 8 by BIC). The background mixture uses 8,000 squares drawn in proportion to population (k = 8). The look-alike score is log p_hotspot − log p_background, plus log population. Refitted each 1 January on reports before that date. Profiles are named by their most distinctive traits; the names are descriptive, not validated categories.
+- **New-place model.** It is trained only on squares more than 2 km from every earlier report, with the label "a report in the next 28 days". There are 16 inputs (see the module), including the district's news-report rate per 100,000 people as a coverage control. There are two candidates: L2 logistic regression (C = 0.5) and boosted trees (7 leaves, at least 200 rows per leaf). Training origins run weekly from 2018 and end before each window.
+- **Combined list.** The grid ranker's top 1% with a share s ∈ {0, 5%, 10%, 20%} of slots given to the best new-place squares.
+- **Emerging clusters.** A prospective space-time permutation scan over 3 years of reports, with circles of 2, 5 and 10 km around reports from the last 91 days and windows of 28, 56 and 91 days. Significance comes from 199 date reshuffles, α = 0.05, at least 3 reports, and clusters that do not overlap. It is checked monthly: do reports inside flagged zones over the next 28 days exceed each zone's long-run share (lift)? The rival is the same number of zones around the busiest localities of the last 28 days.
+
+**Pre-registration, 26 November 2026, written before any v2 score was computed.** Windows and scoring are as in the v1 pattern layer (28 days, weekly origins).
+
+- Primary metric: fresh-list hit rate. This is the top 1% of squares more than 2 km from every earlier report, scored on new-place reports that fall in such squares.
+- Choice on development (2022–23) only: the candidate (logistic, trees or the look-alike score) with the highest fresh-list hit rate. It is adopted as the new-place watch list only if it beats both population and the v1 risk terrain on development.
+- The combined share s is the largest s whose development top-1% hit rate is within 1 point of the grid ranker's.
+- The reused 2024 to mid-2026 window and July–November 2026 have been seen before by the v1 layers. Their v2 results are reported as informative, not as tests.
+- **The test is prospective.** From 1 December 2026, `make hotspot-weekly` freezes each week's lists in a local ledger and scores them once they mature. The v2 watch list is credited only if, pooled over December 2026 to May 2027, its fresh-list hits exceed those of a population list of the same size issued at the same time. The grid ranker is reported next to the repeat_locality_1km baseline, as always.
+
+**Results (26 November 2026, `make hotspot-v2`, single pass, 7 minutes).** The table gives fresh-list hit rates: the top 1% of squares more than 2 km from every earlier report, scored on new-place reports in such squares, for 28 days. In brackets is the top-1% hit rate on all reports.
+
+| Window (new-place reports in fresh squares) | Grid ranker | Population | v1 risk terrain | Look-alike | New-place logistic | New-place trees |
+| --- | --- | --- | --- | --- | --- | --- |
+| Development 2022–23 (250) | 16.0% (67.1%) | 14.4% | **28.8%** | 9.6% | 6.4% | 17.6% |
+| Reused 2024 – mid-2026 (454) | 15.4% (63.6%) | 14.3% | 20.9% | 10.6% | 16.5% | **23.1%** |
+| Jul–Nov 2026 (75) | 5.3% (71.3%) | 9.3% | 5.3% | 0% | 9.3% | 5.3% |
+
+The repeat_locality_1km baseline caught 62.6%, 58.6% and 63.8% of all reports in these windows.
+
+- **Decision by the pre-registered rule: the new-place model is not adopted.** Boosted trees had the best development score among the candidates (17.6%). They beat population but not the v1 risk terrain (28.8%), so the combined share stays 0 and the four-week list is the grid ranker alone.
+- **Informative only.** On the reused window, the trees beat population by +1.5 to +14.3 points (95% block bootstrap) and also beat the v1 terrain. After the cutoff, 75 new-place reports were too few to separate anything. The v1 terrain's development lead did not hold later (20.9%, then 5.3%), which is why its watch list was never credited.
+- **The look-alike score alone does not find new places** (9.6%, 10.6%, 0%). Its value is descriptive: it groups hotspots into readable profiles.
+- **The emerging scan is rare and unproven.** It flagged 6 zones in 26 development months, 5 in 32 later months and 1 after the cutoff. The four-week lift was 0.7×, 1.5× and 0×, on single-digit counts. The busiest-recent-zones rival lifted 1.19×, 0.89× and 0.93×. The scan is shown as a statistical alert ("more recent reports than this area's history explains"), not as a forecast.
+- **What ships.** The "New & rising" tab shows the trees' new-place watch list labelled as a lead, with its evidence table, and the scan's alerts. Learned profiles go in "Why there". The forecast ledger tests the watch list prospectively from 1 December 2026 under the rule above.
+
 ## Knowledge-cutoff test of the grid system (`make hotspot-cutoff`, 26 November 2026)
 
 Everything is frozen at 30 June 2026 end of day: the ranker and ETAS fits *and* the reports the model may read (1,100 located reports). One forecast was issued from that state and never updated. It was scored against the 162 located reports published from 1 July to 25 November 2026, on the 1,262-report table that includes News18 Malayalam. The flagged area is the top 1% of cells (461 km²).

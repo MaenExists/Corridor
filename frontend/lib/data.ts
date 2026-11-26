@@ -2,7 +2,7 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { concernSummary } from "./tips";
-import type { Cell, DistrictRow, EnforcementView, Gateway, HotspotKind, Level, WatchPlace } from "./types";
+import type { Cell, DistrictRow, EnforcementView, Gateway, HotspotKind, Ledger, Level, PatternsV2, WatchPlace } from "./types";
 
 // Model outputs stay local and gitignored; the server reads them at request time.
 const ROOT = process.env.NARCOTRACE_ROOT ?? path.join(process.cwd(), "..");
@@ -94,6 +94,50 @@ function places(grid: Grid, patterns: Patterns | null): { places: WatchPlace[]; 
   };
 }
 
+type RawV2 = {
+  as_of: string; decision: { new_place_model: string; adopted_over_population_and_v1: boolean; combined_share: number };
+  profiles: PatternsV2["profiles"];
+  emerging: { centre: { lat: number; lon: number }; near: string; district: string; radius_km: number; window_days: number;
+    observed: number; expected: number; ratio: number; p_value: number }[];
+  new_place_watch: { name: string; district: string; lat: number; lon: number; rank: number; squares: number; profile: string | null;
+    km_to_report: number; reports_5_15km_year: number }[];
+  new_place_cells: [number, number][];
+  evaluation: Record<string, { models: Record<string, { fresh_list_hit_rate: number; hit_rate_1pct: number; new_places_away_from_old_reports: number }>;
+    emerging_scan: Record<string, { lift: number | null }> }>;
+};
+const STAGE_LABEL: Record<string, string> = { development: "2022–23 (design)", reused_test: "2024 – mid-2026 (seen before)", postcutoff: "Jul–Nov 2026 (seen before)" };
+
+function v2View(raw: RawV2 | null): PatternsV2 | null {
+  if (!raw) return null;
+  const model = raw.decision.new_place_model;
+  return {
+    asOf: raw.as_of, profiles: raw.profiles, model, adopted: raw.decision.adopted_over_population_and_v1, share: raw.decision.combined_share,
+    rising: raw.emerging.map((e, i) => ({ id: `r${i}`, name: e.near, district: clean(e.district), lat: e.centre.lat, lon: e.centre.lon,
+      radiusKm: e.radius_km, windowDays: e.window_days, observed: e.observed, expected: e.expected, ratio: e.ratio, p: e.p_value })),
+    lookAlike: raw.new_place_watch.map((w, i) => ({ id: `a${i}`, name: w.name, district: clean(w.district), lat: w.lat, lon: w.lon,
+      rank: w.rank, squares: w.squares, profile: w.profile, kmToReport: w.km_to_report, reportsAround: w.reports_5_15km_year })),
+    lookAlikeCells: raw.new_place_cells,
+    evaluation: Object.entries(raw.evaluation).map(([stage, e]) => ({
+      stage, label: STAGE_LABEL[stage] ?? stage,
+      fresh: Object.fromEntries(Object.entries(e.models).map(([k, v]) => [k, v.fresh_list_hit_rate])),
+      all: Object.fromEntries(Object.entries(e.models).map(([k, v]) => [k, v.hit_rate_1pct])),
+      newPlaces: e.models.population?.new_places_away_from_old_reports ?? 0,
+      scanLift: e.emerging_scan.scan?.lift ?? null, busiestLift: e.emerging_scan.busiest_recent?.lift ?? null,
+    })),
+  };
+}
+
+type RawLedger = { first_issue: string | null; issues_scored: number; issues_scored_pre_registered: number; issues_pending: number;
+  next_due: string | null; total_pre_registered: Record<string, number> };
+function ledgerView(raw: RawLedger | null): Ledger | null {
+  if (!raw) return null;
+  const t = raw.total_pre_registered;
+  return { firstIssue: raw.first_issue, scored: raw.issues_scored, scoredPreRegistered: raw.issues_scored_pre_registered,
+    pending: raw.issues_pending, nextDue: raw.next_due,
+    total: { reports: t.reports ?? 0, grid: t.grid_ranker ?? 0, repeat: t.repeat_locality_1km ?? 0,
+      freshReports: t.new_place_reports_in_fresh_squares ?? 0, watch: t.new_place_watch ?? 0, population: t.population_fresh ?? 0 } };
+}
+
 async function districts(): Promise<{ rows: DistrictRow[] }> {
   const live = await csv(path.join(PUBLIC, "excise_live_months.csv"));
   const history = await csv(path.join(PUBLIC, "excise_enforcement_monthly.csv"));
@@ -124,13 +168,15 @@ async function districts(): Promise<{ rows: DistrictRow[] }> {
 }
 
 export async function enforcementView(): Promise<EnforcementView> {
-  const [grid, patterns, district, forecasts, concern] = await Promise.all([
+  const [grid, patterns, district, forecasts, concern, v2, ledger] = await Promise.all([
     json<Grid>(path.join(GENERATED, "grid_forecast.json")),
     json<Patterns>(path.join(GENERATED, "patterns.json")),
     districts(),
     json<{ status: string; latest_complete_month: string; resume_after_gap_months: number }>(
       path.join(PUBLIC, "prepared/district_monthly/forecast_2026-11-30.json")),
     concernSummary(),
+    json<RawV2>(path.join(GENERATED, "patterns_v2.json")),
+    json<RawLedger>(path.join(GENERATED, "ledger.json")),
   ]);
   // Name each public-tip area after the nearest known locality, so nobody reads coordinates off a list.
   const named = [...(grid?.cells ?? []).map(c => ({ lat: c.lat, lon: c.lon, name: c.locality })),
@@ -142,6 +188,7 @@ export async function enforcementView(): Promise<EnforcementView> {
   const missing: string[] = [];
   if (!grid) missing.push("Grid forecast not built. Run make news-harvest hotspot-forecast.");
   if (!patterns) missing.push("Pattern brief not built. Run make patterns-forecast.");
+  if (!v2) missing.push("Pattern engine v2 not built. Run make hotspot-v2-forecast.");
   const { places: watch, cells } = grid ? places(grid, patterns) : { places: [], cells: [] };
 
   const kinds: HotspotKind[] = (patterns?.clusters ?? []).filter(c => c.types[0] !== "unlabelled").map((c, i) => ({
@@ -183,6 +230,8 @@ export async function enforcementView(): Promise<EnforcementView> {
       newPlaces: cc.total.new_place_reports, newCaught: cc.total.risk_terrain_watch,
     } : null,
     concern,
+    v2: v2View(v2),
+    ledger: ledgerView(ledger),
     missing,
   };
 }

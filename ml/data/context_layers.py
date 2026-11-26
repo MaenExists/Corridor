@@ -12,7 +12,14 @@ from every grid cell to each layer:
   resorts and homestays, liquor shops and bars;
 * enforcement presence: police stations and Excise offices. These are kept
   separate because seizures are booked where officers are, so this factor
-  measures effort, not drug activity.
+  measures effort, not drug activity;
+* extended layers (pattern engine v2 only, 26 Nov 2026): hotels and lodges,
+  beaches, ferry and boat jetties, fuel stations, toll plazas, industrial
+  areas, marketplaces, and cinemas or malls. The frozen v1 pattern model keeps
+  the original layers (V1_POINTS).
+
+Places of worship and anything describing who lives where are deliberately
+not layers.
 
 The OSM file and derived layers stay local. Only the per-cell distance table
 is used by the model.
@@ -58,7 +65,17 @@ POINT_RULES = {
     "liquor_outlet": lambda t: t.get("shop") == "alcohol" or t.get("amenity") in ("bar", "pub"),
     "police_station": lambda t: t.get("amenity") == "police",
     "excise_office": lambda t: "excise" in t.get("name", "").casefold(),
+    "hotel_lodge": lambda t: t.get("tourism") in ("hotel", "motel"),
+    "beach": lambda t: t.get("natural") == "beach",
+    "ferry_jetty": lambda t: t.get("amenity") == "ferry_terminal",
+    "fuel_station": lambda t: t.get("amenity") == "fuel",
+    "toll_booth": lambda t: t.get("barrier") == "toll_booth",
+    "industrial_area": lambda t: t.get("landuse") == "industrial",
+    "marketplace": lambda t: t.get("amenity") == "marketplace",
+    "cinema_mall": lambda t: t.get("amenity") == "cinema" or t.get("shop") == "mall",
 }
+V1_POINTS = ("railway_station", "bus_station", "airport", "port", "college", "school", "tourist_site",
+             "resort_homestay", "liquor_outlet", "police_station", "excise_office")
 LINE_RULES = {
     "national_highway": lambda t: t.get("highway") in ("motorway", "trunk"),
     "main_road": lambda t: t.get("highway") == "primary",
@@ -74,7 +91,7 @@ def extract():
     points = {name: [] for name in POINT_RULES}
     lines = {name: [] for name in LINE_RULES}
     keys = ("railway", "highway", "amenity", "tourism", "natural", "aeroway", "harbour", "landuse", "industrial",
-            "leisure", "shop", "office", "seamark:type")
+            "leisure", "shop", "office", "seamark:type", "barrier")
     processor = osmium.FileProcessor(str(OSM)).with_locations().with_filter(osmium.filter.KeyFilter(*keys))
     for obj in processor:
         tags = {tag.k: tag.v for tag in obj.tags}
@@ -150,11 +167,13 @@ def gateways(layers, border):
     return np.array(merged)
 
 
-def cell_context(cell_xy):
-    """Distance in km from every cell to every layer."""
+def cell_context(cell_xy, extended=False):
+    """Distance in km from every cell to every layer (the v1 layers unless extended)."""
     layers = json.loads(LAYERS.read_text())
     columns = {}
     for name, coords in layers["points"].items():
+        if not extended and name not in V1_POINTS:
+            continue
         columns[name] = (cKDTree(to_km(*np.array(coords).T)).query(cell_xy)[0] if coords
                          else np.full(len(cell_xy), 99.0))
     for name in ("national_highway", "main_road", "railway_line"):
@@ -165,6 +184,18 @@ def cell_context(cell_xy):
     gates = gateways(layers, border)
     columns["border_gateway"] = cKDTree(gates).query(cell_xy)[0] if len(gates) else np.full(len(cell_xy), 99.0)
     return {name: np.minimum(values, 99.0) for name, values in columns.items()}, gates
+
+
+def layer_counts(cell_xy, radius_km, names=None):
+    """How many features of each point layer lie within radius_km of every cell."""
+    layers = json.loads(LAYERS.read_text())
+    out = {}
+    for name, coords in layers["points"].items():
+        if names and name not in names or not coords:
+            continue
+        tree = cKDTree(to_km(*np.array(coords).T))
+        out[name] = np.array([len(n) for n in tree.query_ball_point(cell_xy, radius_km)], dtype=np.float32)
+    return out
 
 
 if __name__ == "__main__":

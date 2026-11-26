@@ -11,15 +11,17 @@ import { WatchTab, WhyTab, DistrictTab } from "./Tabs";
 import { DetailCard, type Selection } from "./DetailCard";
 import { TrackRecord } from "./TrackRecord";
 import { ConcernTab } from "./ConcernTab";
+import { RisingTab } from "./RisingTab";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
   loading: () => <div className="absolute inset-0 grid place-items-center label text-mute">Loading map</div>,
 });
 
-type Tab = "watch" | "why" | "districts" | "tips";
+type Tab = "watch" | "rising" | "why" | "districts" | "tips";
 const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: "watch", label: "Where to look", hint: "Four weeks" },
+  { id: "rising", label: "New & rising", hint: "Active" },
   { id: "why", label: "Why there", hint: "Patterns" },
   { id: "districts", label: "Districts", hint: "Official" },
   { id: "tips", label: "Public tips", hint: "Unverified" },
@@ -28,12 +30,23 @@ const TABS: { id: Tab; label: string; hint: string }[] = [
 export function EnforcementApp({ view }: { view: EnforcementView }) {
   const [tab, setTab] = useState<Tab>("watch");
   const [basemap, setBasemap] = useState<Basemap>("satellite");
-  const [layers, setLayers] = useState<Layers>({ places: true, kinds: false, gateways: true, concern: true });
+  const [layers, setLayers] = useState<Layers>({ places: true, kinds: false, gateways: true, concern: true, rising: true, lookAlike: false });
   const [selection, setSelection] = useState<Selection>(null);
   const [focus, setFocus] = useState<Focus>(null);
   const [pin, setPin] = useState<Pin>(null);
+  const [picked, setPicked] = useState<string | null>(null);
 
-  const select = (kind: "place" | "kind" | "gateway", id: string) => {
+  const select = (kind: "place" | "kind" | "gateway" | "rising" | "look", id: string) => {
+    if (kind === "rising" || kind === "look") {
+      const item = kind === "rising" ? view.v2?.rising.find(r => r.id === id) : view.v2?.lookAlike.find(l => l.id === id);
+      if (!item) return;
+      setSelection(null); setPicked(id); setPin({ lat: item.lat, lon: item.lon, name: item.name });
+      setFocus({ lat: item.lat, lon: item.lon, zoom: kind === "rising" ? 11 : 13, ring: false });
+      setLayers(l => ({ ...l, [kind === "rising" ? "rising" : "lookAlike"]: true }));
+      if (window.matchMedia("(max-width: 1023px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setPicked(null);
     const item = kind === "place" ? view.places.find(p => p.id === id)
       : kind === "kind" ? view.kinds.find(k => k.id === id) : view.gateways.find(g => g.id === id);
     if (!item) return;
@@ -47,6 +60,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
     setTab(t);
     if (t === "why") setLayers(l => ({ ...l, kinds: true, gateways: true }));
     if (t === "tips") setLayers(l => ({ ...l, concern: true }));
+    if (t === "rising") setLayers(l => ({ ...l, rising: true, lookAlike: true }));
   };
   const searchable = useMemo<LocalItem[]>(() => view.places.map(p => ({ id: p.id, name: p.name, sub: p.area, lat: p.lat, lon: p.lon,
     tag: "Watch list" })), [view.places]);
@@ -66,6 +80,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
         <section className="relative h-[62vh] lg:h-auto lg:min-h-0 border-b lg:border-b-0 border-ink overflow-hidden">
           <MapView cells={view.cells} places={view.places} kinds={view.kinds} gateways={view.gateways} concern={view.concern.blocks}
+            rising={view.v2?.rising ?? []} lookAlike={view.v2?.lookAlikeCells ?? []}
             basemap={basemap} layers={layers} focus={focus} pin={pin} selectedId={selection?.id ?? null} onSelect={select} />
 
           {/* Legend, top left */}
@@ -78,6 +93,14 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
                 <span className="flex gap-0.5">{(["high", "elevated", "watch"] as const).map(k =>
                   <i key={k} className="block size-3 border border-ink" style={{ background: LEVEL[k].fill }} />)}</span>
                 Likely seizure areas
+              </Toggle>
+              <Toggle on={layers.rising} onClick={() => setLayers(l => ({ ...l, rising: !l.rising }))}>
+                <span className="block size-3.5 rounded-full border-[1.5px] border-dashed border-signal" />
+                Rising now
+              </Toggle>
+              <Toggle on={layers.lookAlike} onClick={() => setLayers(l => ({ ...l, lookAlike: !l.lookAlike }))}>
+                <span className="block size-3 border border-ink" />
+                Look-alike, no reports yet
               </Toggle>
               <Toggle on={layers.kinds} onClick={() => setLayers(l => ({ ...l, kinds: !l.kinds }))}>
                 <span className="grid place-items-center size-4 border border-ink font-mono text-[9px] font-semibold">T</span>
@@ -118,11 +141,11 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
         </section>
 
         <aside className="flex flex-col lg:min-h-0 lg:border-l border-ink bg-paper">
-          <div className="grid grid-cols-4 border-b border-ink" role="tablist">
+          <div className="grid grid-cols-5 border-b border-ink" role="tablist">
             {TABS.map((t, i) => (
               <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => onTab(t.id)}
-                className={`text-left px-2.5 md:px-3.5 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
-                <span className="block text-[13.5px] font-medium leading-tight">{t.label}</span>
+                className={`min-w-0 text-left px-2 md:px-2.5 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                <span className="block text-[12.5px] font-medium leading-tight">{t.label}</span>
                 <span className={`label ${tab === t.id ? "text-paper/60" : "text-mute"}`}>{t.hint}</span>
               </button>
             ))}
@@ -130,7 +153,10 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
           <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto scroll-thin">
             {tab === "watch" && <WatchTab view={view} highCount={highCount} selectedId={selection?.id ?? null}
               onPick={id => select("place", id)} />}
-            {tab === "why" && <WhyTab view={view} selectedId={selection?.id ?? null} onPick={select} />}
+            {tab === "rising" && <RisingTab v2={view.v2} selectedId={picked}
+              onRising={r => select("rising", r.id)} onLook={l => select("look", l.id)} />}
+            {tab === "why" && <WhyTab view={view} selectedId={selection?.id ?? null} onPick={select}
+              onPlace={(lat, lon, name) => { setSelection(null); setPin({ lat, lon, name }); setFocus({ lat, lon, zoom: 12.5, ring: false }); }} />}
             {tab === "districts" && <DistrictTab view={view} />}
             {tab === "tips" && <ConcernTab concern={view.concern} onPick={b => {
               setSelection(null); setFocus({ lat: b.lat, lon: b.lon, zoom: 12 });

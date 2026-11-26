@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "leaflet/dist/leaflet.css";
+import "@fontsource-variable/noto-sans-malayalam";
 import "./globals.css";
 
 export const metadata: Metadata = {

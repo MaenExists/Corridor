@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import type * as Leaflet from "leaflet";
-import type { Cell, Gateway, HotspotKind, Level, WatchPlace } from "@/lib/types";
+import type { Cell, Gateway, HotspotKind, Level, Rising, WatchPlace } from "@/lib/types";
 import { BLOCK, STEP, TIP_WHAT, type ConcernBlock } from "@/lib/tipRules";
 import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
 
 export type { Basemap };
-export type Layers = { places: boolean; kinds: boolean; gateways: boolean; concern: boolean };
+export type Layers = { places: boolean; kinds: boolean; gateways: boolean; concern: boolean; rising: boolean; lookAlike: boolean };
 export type Focus = { lat: number; lon: number; zoom?: number; ring?: boolean } | null;
 export type Pin = { lat: number; lon: number; name: string } | null;
 
@@ -24,12 +24,14 @@ type Props = {
   kinds: HotspotKind[];
   gateways: Gateway[];
   concern: ConcernBlock[];
+  rising: Rising[];
+  lookAlike: [number, number][];
   basemap: Basemap;
   layers: Layers;
   focus: Focus;
   pin?: Pin;
   selectedId: string | null;
-  onSelect: (kind: "place" | "kind" | "gateway", id: string) => void;
+  onSelect: (kind: "place" | "kind" | "gateway" | "rising" | "look", id: string) => void;
 };
 
 export default function MapView(props: Props) {
@@ -44,7 +46,7 @@ export default function MapView(props: Props) {
 
   useLeafletMap(host, c => {
     ctx.current = c; L.current = c.L; map.current = c.map;
-    for (const name of ["concern", "cells", "dots", "kinds", "gateways", "focus", "pin"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
+    for (const name of ["concern", "look", "cells", "dots", "rising", "kinds", "gateways", "focus", "pin"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
     c.map.on("zoomend", () => showScale());
     drawAll();
   }, () => { map.current = null; ctx.current = null; });
@@ -138,6 +140,32 @@ export default function MapView(props: Props) {
     }
   }
 
+  // Pattern engine v2: rising clusters as red dashed circles; look-alike squares (no reports yet) as hollow squares.
+  function drawRising() {
+    const leaflet = L.current, g = groups.current.rising;
+    if (!leaflet || !g) return;
+    g.clearLayers();
+    if (!props.layers.rising) return;
+    for (const r of props.rising) {
+      leaflet.circle([r.lat, r.lon], { radius: r.radiusKm * 1000, color: "#ff3b26", weight: 2, dashArray: "6 4",
+        fillColor: "#ff3b26", fillOpacity: .08 })
+        .bindTooltip(`Rising near ${r.name}: ${r.observed} reports in ${r.windowDays} days, ${r.expected} expected`, { className: "nt-tip", direction: "top" })
+        .on("click", () => select.current("rising", r.id)).addTo(g);
+    }
+  }
+
+  function drawLook() {
+    const leaflet = L.current, g = groups.current.look;
+    if (!leaflet || !g) return;
+    g.clearLayers();
+    if (!props.layers.lookAlike) return;
+    for (const [lat, lon] of props.lookAlike) {
+      leaflet.rectangle([[lat - HALF, lon - HALF], [lat + HALF, lon + HALF]], {
+        color: "#e8e6df", weight: 1.2, fill: true, fillColor: "#e8e6df", fillOpacity: .06,
+      }).bindTooltip("Looks like a hotspot, no reports yet", { className: "nt-tip", direction: "top" }).addTo(g);
+    }
+  }
+
   function drawFocus() {
     const leaflet = L.current, m = map.current, g = groups.current.focus;
     if (!leaflet || !m || !g) return;
@@ -159,7 +187,7 @@ export default function MapView(props: Props) {
     }).addTo(g);
   }
 
-  function drawAll() { drawBase(); drawConcern(); drawCells(); drawDots(); drawKinds(); drawGateways(); drawPin(); }
+  function drawAll() { drawBase(); drawConcern(); drawLook(); drawCells(); drawDots(); drawRising(); drawKinds(); drawGateways(); drawPin(); }
 
   useEffect(drawBase, [props.basemap]);
   useEffect(drawCells, [props.cells, props.layers.places]);
@@ -167,6 +195,8 @@ export default function MapView(props: Props) {
   useEffect(drawKinds, [props.kinds, props.layers.kinds, props.selectedId]);
   useEffect(drawGateways, [props.gateways, props.layers.gateways]);
   useEffect(drawConcern, [props.concern, props.layers.concern]);
+  useEffect(drawRising, [props.rising, props.layers.rising]);
+  useEffect(drawLook, [props.lookAlike, props.layers.lookAlike]);
   useEffect(drawFocus, [props.focus]);
   useEffect(drawPin, [props.pin]);
 

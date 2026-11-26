@@ -6,7 +6,8 @@ import type { Centre } from "@/lib/types";
 import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
 import { STEP, cellOf, centreOf } from "@/lib/tipRules";
 
-export type AccessLayer = "distance" | "beds" | "none";
+export type AccessLayer = "need" | "distance" | "beds" | "none";
+export type SpotInfo = { grade: "high" | "elevated" | "some" | null; km: number } | null;
 export type Point = { lat: number; lon: number; zoom?: number } | null;
 
 export const DISTANCE_STEPS: [number, string, string][] = [
@@ -17,9 +18,15 @@ export const BED_STEPS: [number, string, string][] = [
   [5, "#ff8a6e", "under 5"], [20, "#ff3b26", "5–20"], [50, "#a8291a", "20–50"], [100, "#5a1c14", "50–100"],
   [Infinity, "transparent", "100 or more"],
 ];
+/** Drug-affected squares only, by distance to help: near help stays grey, far from help turns red. */
+export const NEED_STEPS: [number, string, string][] = [
+  [5, "#4a4944", "under 5 km"], [10, "#7a2a1c", "5–10 km"], [15, "#c0341f", "10–15 km"],
+  [20, "#ff3b26", "15–20 km"], [Infinity, "#ff8a6e", "over 20 km"],
+];
 const colour = (steps: [number, string, string][], v: number) => steps.find(s => v < s[0])![1];
+const GRADE = { h: "high", e: "elevated", s: "some" } as const;
 
-type Grid = { step: number; lat: number[]; lon: number[]; km: number[]; beds: number[] };
+type Grid = { step: number; lat: number[]; lon: number[]; km: number[]; beds: number[]; grade: string | null };
 
 /** Paint the 1 km grid once into a canvas laid out in Web Mercator rows, so Leaflet can stretch it exactly. */
 function gridImage(grid: Grid, layer: Exclude<AccessLayer, "none">) {
@@ -37,7 +44,9 @@ function gridImage(grid: Grid, layer: Exclude<AccessLayer, "none">) {
   canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext("2d")!;
   for (let i = 0; i < grid.lat.length; i++) {
-    const fill = layer === "distance" ? colour(DISTANCE_STEPS, grid.km[i]) : colour(BED_STEPS, grid.beds[i]);
+    if (layer === "need" && (!grid.grade || grid.grade[i] === "-")) continue;
+    const fill = layer === "need" ? colour(NEED_STEPS, grid.km[i])
+      : layer === "distance" ? colour(DISTANCE_STEPS, grid.km[i]) : colour(BED_STEPS, grid.beds[i]);
     if (fill === "transparent") continue;
     ctx.fillStyle = fill;
     const x0 = Math.floor((grid.lon[i] - half - west) / grid.step * scale);
@@ -61,7 +70,9 @@ type Props = {
   selectedCentre: string | null;
   onProbe: (lat: number, lon: number) => void;
   onCentre: (id: string) => void;
-  onGridReady?: (ok: boolean) => void;
+  /** ok: the grid loaded; need: it carries drug-affected grades; lookup: grade and distance at a point. */
+  onGridReady?: (ok: boolean, need: boolean, lookup: (lat: number, lon: number) => SpotInfo) => void;
+  lang?: "en" | "ml";
 };
 
 export default function RecoveryMapView(props: Props) {
@@ -71,6 +82,17 @@ export default function RecoveryMapView(props: Props) {
   const grid = useRef<Grid | null>(null);
   const overlay = useRef<Leaflet.ImageOverlay | null>(null);
   const cells = useRef<Set<string> | null>(null);
+  const index = useRef<Map<string, number> | null>(null);
+
+  function lookup(lat: number, lon: number): SpotInfo {
+    const g = grid.current;
+    if (!g) return null;
+    if (!index.current) index.current = new Map(g.lat.map((a, i) => [cellOf(a, g.lon[i]).join(":"), i]));
+    const i = index.current.get(cellOf(lat, lon).join(":"));
+    if (i == null) return null;
+    const ch = g.grade?.[i] as keyof typeof GRADE | "-" | undefined;
+    return { grade: ch && ch !== "-" ? GRADE[ch] : null, km: g.km[i] };
+  }
   const handlers = useRef(props);
   handlers.current = props;
 
@@ -80,9 +102,11 @@ export default function RecoveryMapView(props: Props) {
     c.map.on("click", e => handlers.current.onProbe(e.latlng.lat, e.latlng.lng));
     setBasemap(c, handlers.current.basemap);
     drawCentres(); drawProbe(); drawPick();
+    c.labels.setLang(handlers.current.lang ?? "en");
     fetch("/api/recovery/cells").then(r => r.ok ? r.json() as Promise<Grid> : null).then(g => {
-      grid.current = g; cells.current = null; handlers.current.onGridReady?.(!!g); drawGrid(); drawPick();
-    }).catch(() => handlers.current.onGridReady?.(false));
+      grid.current = g; cells.current = null; index.current = null;
+      handlers.current.onGridReady?.(!!g, !!g?.grade, lookup); drawGrid(); drawPick();
+    }).catch(() => handlers.current.onGridReady?.(false, false, () => null));
   }, () => { ctx.current = null; });
 
   function drawGrid() {
@@ -144,6 +168,7 @@ export default function RecoveryMapView(props: Props) {
   }
 
   useEffect(() => { if (ctx.current) setBasemap(ctx.current, props.basemap); }, [props.basemap]);
+  useEffect(() => { ctx.current?.labels.setLang(props.lang ?? "en"); }, [props.lang]);
   useEffect(drawGrid, [props.layer]);
   useEffect(drawCentres, [props.centres, props.showCentres, props.selectedCentre]);
   useEffect(drawProbe, [props.probe]);

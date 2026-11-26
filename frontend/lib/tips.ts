@@ -56,30 +56,32 @@ export type TipInput = {
   cell?: unknown; what?: unknown; when?: unknown; seen?: unknown; school?: unknown; note?: unknown;
   device?: unknown; elapsed?: unknown; website?: unknown;
 };
-export type TipResult = { ok: true; counted: boolean } | { ok: false; status: number; message: string };
+/** Error codes let the browser show the message in the reader's language. */
+export type TipError = "slow" | "connection" | "reload" | "place" | "outside" | "what" | "when" | "seen" | "note" | "day" | "month";
+export type TipResult = { ok: true; counted: boolean } | { ok: false; status: number; code: TipError; message: string };
 
 export async function submitTip(input: TipInput, connection: string): Promise<TipResult> {
-  const bad = (message: string, status = 400): TipResult => ({ ok: false, status, message });
+  const bad = (code: TipError, message: string, status = 400): TipResult => ({ ok: false, status, code, message });
   // Bots fill the hidden field or submit instantly; accept silently so they learn nothing.
   if (typeof input.website === "string" && input.website) return { ok: true, counted: false };
-  if (typeof input.elapsed !== "number" || input.elapsed < 4000) return bad("Please take a moment to fill in the form.");
-  if (!connectionAllowed(connection)) return bad("Too many reports from this connection. Try again later.", 429);
+  if (typeof input.elapsed !== "number" || input.elapsed < 4000) return bad("slow", "Please take a moment to fill in the form.");
+  if (!connectionAllowed(connection)) return bad("connection", "Too many reports from this connection. Try again later.", 429);
 
-  if (typeof input.device !== "string" || !/^[0-9a-f]{32}$/.test(input.device)) return bad("Reload the page and try again.");
-  if (typeof input.cell !== "string" || !/^\d{1,5}:\d{1,5}$/.test(input.cell)) return bad("Choose a place on the map.");
-  if (!(await kerala()).has(input.cell)) return bad("Choose a place inside Kerala.");
-  if (typeof input.what !== "string" || !(input.what in TIP_WHAT)) return bad("Choose what you noticed.");
-  if (typeof input.when !== "string" || !(input.when in TIP_WHEN)) return bad("Choose when it happened.");
-  if (typeof input.seen !== "string" || !(input.seen in TIP_SEEN)) return bad("Say how you know.");
-  if (input.note != null && typeof input.note !== "string") return bad("The note must be text.");
+  if (typeof input.device !== "string" || !/^[0-9a-f]{32}$/.test(input.device)) return bad("reload", "Reload the page and try again.");
+  if (typeof input.cell !== "string" || !/^\d{1,5}:\d{1,5}$/.test(input.cell)) return bad("place", "Choose a place on the map.");
+  if (!(await kerala()).has(input.cell)) return bad("outside", "Choose a place inside Kerala.");
+  if (typeof input.what !== "string" || !(input.what in TIP_WHAT)) return bad("what", "Choose what you noticed.");
+  if (typeof input.when !== "string" || !(input.when in TIP_WHEN)) return bad("when", "Choose when it happened.");
+  if (typeof input.seen !== "string" || !(input.seen in TIP_SEEN)) return bad("seen", "Say how you know.");
+  if (input.note != null && typeof input.note !== "string") return bad("note", "The note must be text.");
 
   const reporter = createHmac("sha256", await secret()).update(input.device).digest("hex").slice(0, 20);
   const tips = await load();
   const now = ist();
   const mine = tips.filter(t => t.reporter === reporter);
   const since = (days: number) => mine.filter(t => Date.parse(now.day) - Date.parse(t.day) < days * 864e5).length;
-  if (since(1) >= LIMITS.perDevicePerDay) return bad(`You have sent ${LIMITS.perDevicePerDay} reports today. Thank you. Please come back tomorrow.`, 429);
-  if (since(30) >= LIMITS.perDevicePer30Days) return bad("You have reached this month's limit of reports. Thank you.", 429);
+  if (since(1) >= LIMITS.perDevicePerDay) return bad("day", `You have sent ${LIMITS.perDevicePerDay} reports today. Thank you. Please come back tomorrow.`, 429);
+  if (since(30) >= LIMITS.perDevicePer30Days) return bad("month", "You have reached this month's limit of reports. Thank you.", 429);
 
   const note = screenNote((input.note as string | undefined) ?? "");
   const tip: StoredTip = {

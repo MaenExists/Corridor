@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { fold, KIND_LABEL, type PlaceHit } from "@/lib/placeRules";
+import { fold, type PlaceHit } from "@/lib/placeRules";
+import { useLang } from "@/lib/i18n";
 
 /** Something on this screen that can be found by name too, such as a centre or a watch-list place. */
 export type LocalItem = { id: string; name: string; sub: string; lat: number; lon: number; tag: string };
@@ -25,6 +26,7 @@ export function PlaceSearch({ onSelect, local = [], placeholder = "Search a plac
   const [state, setState] = useState<"idle" | "loading" | "missing">("idle");
   const box = useRef<HTMLDivElement>(null);
   const list = useId();
+  const { t, lang, district } = useLang();
 
   useEffect(() => {
     const q = query.trim();
@@ -50,8 +52,13 @@ export function PlaceSearch({ onSelect, local = [], placeholder = "Search a plac
   const own = fq.length >= 2 ? local.filter(i => fold(i.name).includes(fq)).slice(0, 4) : [];
   const rows: { key: string; name: string; ml?: string; sub: string; tag?: string; pick: Picked }[] = [
     ...own.map(i => ({ key: `l${i.id}`, name: i.name, sub: i.sub, tag: i.tag, pick: { name: i.name, lat: i.lat, lon: i.lon, local: i } })),
-    ...hits.map((h, k) => ({ key: `p${k}`, name: h.name, ml: h.ml, sub: [KIND_LABEL[h.kind] ?? h.kind, h.district].filter(Boolean).join(" · "),
-      pick: { name: h.name, lat: h.lat, lon: h.lon } })),
+    // In Malayalam the Malayalam name leads and the English spelling follows.
+    ...hits.map((h, k) => {
+      const ml = lang === "ml" && h.ml;
+      return { key: `p${k}`, name: ml ? h.ml : h.name, ml: ml ? h.name : h.ml,
+        sub: [t.search.kinds[h.kind] ?? h.kind, h.district && district(h.district)].filter(Boolean).join(" · "),
+        pick: { name: ml ? h.ml : h.name, lat: h.lat, lon: h.lon } };
+    }),
   ];
 
   const choose = (k: number) => {
@@ -78,7 +85,7 @@ export function PlaceSearch({ onSelect, local = [], placeholder = "Search a plac
           role="combobox" aria-expanded={showList} aria-controls={list} aria-autocomplete="list" aria-label={placeholder}
           className="flex-1 min-w-0 bg-transparent px-2.5 py-2 text-[13.5px] outline-none placeholder:text-mute" />
         {query && (
-          <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setHits([]); }}
+          <button type="button" aria-label={t.search.clear} onClick={() => { setQuery(""); setHits([]); }}
             className="size-8 grid place-items-center text-mute hover:text-ink">
             <svg viewBox="0 0 10 10" className="size-2.5"><path d="M1 1l8 8M9 1 1 9" stroke="currentColor" strokeWidth="1.4" /></svg>
           </button>
@@ -100,7 +107,7 @@ export function PlaceSearch({ onSelect, local = [], placeholder = "Search a plac
           ))}
           {!rows.length && (
             <li className="px-3 py-2.5 text-[12px] text-mute">
-              {state === "loading" ? "Searching…" : state === "missing" ? "Place list not built. Run make place-names." : "No match. Try another spelling, or tap the map."}
+              {state === "loading" ? t.search.searching : state === "missing" ? t.search.missing : t.search.noMatch}
             </li>
           )}
         </ul>

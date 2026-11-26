@@ -6,7 +6,7 @@ export function TrackRecord({ view }: { view: EnforcementView }) {
   const weekly = view.weekly.slice(-52);
   const peak = Math.max(...weekly, 1);
   return (
-    <footer className="grid grid-cols-2 lg:grid-cols-[1.25fr_1.4fr_1fr_1fr_1.3fr] border-t border-ink">
+    <footer className="grid grid-cols-2 lg:grid-cols-[1.2fr_1.3fr_.8fr_.9fr_1.1fr_1.2fr] border-t border-ink">
       {r ? (
         <>
           <Cell label="How often it is right" first>
@@ -36,6 +36,22 @@ export function TrackRecord({ view }: { view: EnforcementView }) {
           <Cell label="Its blind spot">
             <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular text-signal">{r.newCaught}<span className="text-mute text-[16px]">/{r.newPlaces}</span></p>
             <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">brand-new places caught. It sees repeats, not firsts.</p>
+          </Cell>
+          <Cell label="Live record">
+            {view.ledger?.scoredPreRegistered ? (
+              <>
+                <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular">{view.ledger.total.grid}<span className="text-mute text-[16px]">/{view.ledger.total.reports}</span></p>
+                <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">caught by {view.ledger.scoredPreRegistered} frozen weekly forecasts; repeat map {view.ledger.total.repeat}.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-[15px] leading-tight font-medium">{view.ledger?.pending ? `${view.ledger.pending} forecast${view.ledger.pending > 1 ? "s" : ""} locked` : "Not started"}</p>
+                <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">
+                  {view.ledger?.nextDue ? `Each week's list is frozen, then scored after four weeks. First score ${date(view.ledger.nextDue)}.`
+                    : "Run make hotspot-weekly to start freezing weekly forecasts."}
+                </p>
+              </>
+            )}
           </Cell>
         </>
       ) : <Cell label="Track record" first><p className="text-[13px]">Run make hotspot-cutoff to measure it.</p></Cell>}

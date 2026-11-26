@@ -1,15 +1,23 @@
-import { rawAccessMap } from "@/lib/publicData";
+import { rawAccessMap, rawNeedMap } from "@/lib/publicData";
 
 export const dynamic = "force-dynamic";
 
-/** The 1 km access grid as flat arrays: latitude, longitude, km to the nearest centre, beds within reach per 100k. */
+/**
+ * The 1 km access grid as flat arrays: latitude, longitude, km to the nearest centre, beds within reach per 100k,
+ * and the drug-affected grade as one character per square (h high, e elevated, s some, - lower).
+ */
 export async function GET() {
   const raw = await rawAccessMap();
   if (!raw) return Response.json({ error: "not built" }, { status: 404 });
+  const need = await rawNeedMap();
+  const grades = need && need.grades.length === raw.cells.length ? need.grades : null;
   const lat: number[] = [], lon: number[] = [], km: number[] = [], beds: number[] = [];
-  for (const [a, b, people, d, r] of raw.cells) {
-    if (people <= 0) continue;
+  let grade = "";
+  raw.cells.forEach(([a, b, people, d, r], i) => {
+    if (people <= 0) return;
     lat.push(a); lon.push(b); km.push(d); beds.push(r);
-  }
-  return Response.json({ step: 1 / 120, lat, lon, km, beds }, { headers: { "Cache-Control": "private, max-age=300" } });
+    grade += grades ? grades[i] : "-";
+  });
+  return Response.json({ step: 1 / 120, lat, lon, km, beds, grade: grades ? grade : null },
+    { headers: { "Cache-Control": "private, max-age=300" } });
 }

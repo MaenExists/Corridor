@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLang } from "@/lib/i18n";
 
 export function Mark() {
   return (
@@ -10,31 +13,41 @@ export function Mark() {
   );
 }
 
-const SECTIONS = [{ id: "enforcement", label: "Enforcement" }, { id: "public", label: "Public" }] as const;
+const SECTIONS = ["enforcement", "public"] as const;
 
 /** One row of ruled cells shared by every screen. */
-export function Header({ section, tagline, updated }: {
+export function Header({ section, tagline, updated, languages }: {
   section: "enforcement" | "public"; tagline: string; updated?: string;
+  /** Show the English / Malayalam switch (public side). */
+  languages?: boolean;
 }) {
+  const { t, lang, setLang } = useLang();
   return (
-    <header className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_auto_1fr_auto] border-b border-ink">
+    <header className={`grid border-b border-ink ${languages ? "grid-cols-[auto_1fr_auto_auto] md:grid-cols-[auto_auto_1fr_auto_auto]" : "grid-cols-[auto_1fr_auto] md:grid-cols-[auto_auto_1fr_auto]"}`}>
       <Link href="/" className="flex items-center gap-2.5 px-4 md:px-5 border-r border-ink">
         <Mark />
         <span className="font-semibold tracking-[-0.01em] text-[15px]">NarcoTrace</span>
       </Link>
       <nav className="flex" aria-label="Sections">
-        {SECTIONS.map((s, i) => s.id === section
-          ? <span key={s.id} aria-current="page"
-              className={`flex items-center px-3 md:px-5 border-ink bg-ink text-paper label ${i ? "md:border-r" : "border-r"}`}>{s.label}</span>
-          : <Link key={s.id} href={`/${s.id}`}
-              className={`flex items-center px-3 md:px-5 border-ink label text-ink-2 hover:bg-paper-2 ${i ? "md:border-r" : "border-r"}`}>{s.label}</Link>)}
+        {SECTIONS.map((id, i) => id === section
+          ? <span key={id} aria-current="page"
+              className={`flex items-center px-3 md:px-5 border-ink bg-ink text-paper label ${i ? "md:border-r" : "border-r"}`}>{t.sections[id]}</span>
+          : <Link key={id} href={`/${id}`}
+              className={`flex items-center px-3 md:px-5 border-ink label text-ink-2 hover:bg-paper-2 ${i ? "md:border-r" : "border-r"}`}>{t.sections[id]}</Link>)}
       </nav>
       <div className="hidden md:flex items-center px-5 text-[13px] text-ink-2">{tagline}</div>
       {updated && (
         <div className="hidden sm:flex items-center gap-4 px-5 border-l border-ink cross">
-          <span className="label text-mute">Updated</span>
+          <span className="label text-mute">{t.updated}</span>
           <span className="text-[13px] tabular">{updated}</span>
         </div>
+      )}
+      {languages && (
+        <button onClick={() => setLang(lang === "en" ? "ml" : "en")} aria-label={t.switchLabel}
+          lang={lang === "en" ? "ml" : "en"}
+          className="flex items-center px-3 md:px-5 border-l border-ink text-[13px] hover:bg-ink hover:text-paper">
+          {t.switchTo}
+        </button>
       )}
     </header>
   );

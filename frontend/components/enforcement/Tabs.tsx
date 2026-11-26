@@ -1,5 +1,6 @@
 "use client";
 
+import { Profiles } from "./RisingTab";
 import type { EnforcementView } from "@/lib/types";
 import { KIND, LEVEL, month, pct } from "./copy";
 
@@ -45,13 +46,15 @@ export function WatchTab({ view, highCount, selectedId, onPick }: {
   );
 }
 
-export function WhyTab({ view, selectedId, onPick }: {
+export function WhyTab({ view, selectedId, onPick, onPlace }: {
   view: EnforcementView; selectedId: string | null; onPick: (kind: "kind" | "gateway", id: string) => void;
+  onPlace: (lat: number, lon: number, name: string) => void;
 }) {
   const peak = Math.max(...view.surroundings.map(s => s.times), 1);
   const byKind = Object.keys(KIND).map(k => ({ k, items: view.kinds.filter(x => x.kinds[0] === k) })).filter(g => g.items.length);
   return (
     <div>
+      {view.v2 && <Profiles profiles={view.v2.profiles} onPlace={onPlace} />}
       <section className="px-5 py-5 border-b border-ink">
         <p className="label text-mute mb-2">What surrounds hotspots</p>
         <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">Seizures cluster near places where people and goods move.</h2>
@@ -75,8 +78,8 @@ export function WhyTab({ view, selectedId, onPick }: {
 
       <section className="border-b border-ink">
         <div className="px-5 pt-5 pb-3">
-          <p className="label text-mute mb-2">Hotspot types</p>
-          <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">What each cluster looks like.</h2>
+          <p className="label text-mute mb-2">Hotspot types · rules</p>
+          <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">What each cluster looks like, by fixed rules.</h2>
         </div>
         {byKind.map(({ k, items }) => (
           <div key={k} className="border-t border-ink/15">

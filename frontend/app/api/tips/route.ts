@@ -15,5 +15,5 @@ export async function POST(req: Request) {
   const result = await submitTip(input, connection);
   return result.ok
     ? Response.json({ ok: true, counted: result.counted }, { headers: { "Cache-Control": "no-store" } })
-    : Response.json({ message: result.message }, { status: result.status, headers: { "Cache-Control": "no-store" } });
+    : Response.json({ code: result.code, message: result.message }, { status: result.status, headers: { "Cache-Control": "no-store" } });
 }

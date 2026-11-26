@@ -3,16 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { PlaceSearch } from "@/components/map/PlaceSearch";
 import { LIMITS, TIP_SEEN, TIP_WHAT, TIP_WHEN, type TipSeen, type TipWhat, type TipWhen } from "@/lib/tipRules";
+import { useLang } from "@/lib/i18n";
+import type { Strings } from "@/lib/strings";
 
 type Mode = "start" | "form" | "help" | "danger" | "done";
 
 // Official channels, checked 26 Nov 2026 against Kerala Police, Kerala Excise and NCB notices.
 const LINES = [
-  { number: "112", call: "112", who: "Emergency", note: "Someone is in danger now" },
-  { number: "99959 66666", call: "+919995966666", who: "Kerala Police · Yodhav", note: "WhatsApp, text or photos, kept confidential", whatsapp: true },
-  { number: "155358", call: "155358", who: "Kerala Excise", note: "Toll-free, informant names kept confidential" },
-  { number: "1933", call: "1933", who: "MANAS · NCB", note: "National narcotics helpline, can be anonymous" },
-  { number: "14446", call: "14446", who: "De-addiction helpline", note: "Free counselling and treatment advice" },
+  { id: "112", number: "112", call: "112" },
+  { id: "yodhav", number: "99959 66666", call: "+919995966666", whatsapp: true },
+  { id: "excise", number: "155358", call: "155358" },
+  { id: "manas", number: "1933", call: "1933" },
+  { id: "14446", number: "14446", call: "14446" },
 ];
 
 function deviceKey() {
@@ -45,6 +47,8 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
   const [error, setError] = useState<string | null>(null);
   const [locating, setLocating] = useState<string | null>(null);
   const opened = useRef(Date.now());
+  const { t: all } = useLang();
+  const t = all.report;
 
   useEffect(() => { onFormOpen(mode === "form"); }, [mode, onFormOpen]);
   useEffect(() => () => onFormOpen(false), [onFormOpen]);
@@ -57,10 +61,10 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
   const ready = !!(pick && what && when && seen);
 
   const locate = () => {
-    if (!navigator.geolocation) { setLocating("This browser cannot share a location. Tap the map instead."); return; }
-    setLocating("Finding you…");
+    if (!navigator.geolocation) { setLocating(t.noGeo); return; }
+    setLocating(all.finding);
     navigator.geolocation.getCurrentPosition(p => { setLocating(null); onPick(p.coords.latitude, p.coords.longitude); },
-      () => setLocating("Location was not shared. Tap the map instead."), { enableHighAccuracy: false, timeout: 10000 });
+      () => setLocating(all.geoDenied), { enableHighAccuracy: false, timeout: 10000 });
   };
 
   async function send() {
@@ -72,9 +76,12 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
         body: JSON.stringify({ cell: pick!.join(":"), what, when, seen, school, note: note.trim() || null,
           device: deviceKey(), elapsed: Date.now() - opened.current, website: trap }),
       });
-      if (!res.ok) { setError((await res.json().catch(() => null))?.message ?? "Could not send. Try again."); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => null) as { code?: string; message?: string } | null;
+        setError((body?.code && t.errors[body.code]) || body?.message || t.sendFail); return;
+      }
       reset(); setMode("done");
-    } catch { setError("Could not reach the server. Check your connection and try again."); }
+    } catch { setError(t.offline); }
     finally { setBusy(false); }
   }
 
@@ -83,62 +90,58 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
       {mode === "start" && (
         <>
           <div className="px-5 py-5 border-b border-ink">
-            <p className="label text-mute mb-2">Report</p>
-            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">Noticed something worrying near you?</h2>
-            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">Tell us what you noticed and roughly where. Never who.</p>
+            <p className="label text-mute mb-2">{t.eyebrow}</p>
+            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">{t.startTitle}</h2>
+            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">{t.startSub}</p>
           </div>
-          <Choice n="01" title="I noticed something in my area" sub="Selling, use in public, hidden packets, odd comings and goings" onClick={start} />
-          <Choice n="02" title="Someone I know needs help" sub="Find care and counselling. Nothing is recorded" onClick={() => setMode("help")} />
-          <Choice n="03" title="Someone is in danger right now" sub="Call emergency services" onClick={() => setMode("danger")} signal />
+          <Choice n="01" title={t.choiceNoticed[0]} sub={t.choiceNoticed[1]} onClick={start} />
+          <Choice n="02" title={t.choiceHelp[0]} sub={t.choiceHelp[1]} onClick={() => setMode("help")} />
+          <Choice n="03" title={t.choiceDanger[0]} sub={t.choiceDanger[1]} onClick={() => setMode("danger")} signal />
           <section className="px-5 py-5 border-b border-ink">
-            <p className="label text-mute mb-3">How a report is used</p>
+            <p className="label text-mute mb-3">{t.howUsed}</p>
             <ol className="space-y-3 text-[13px] leading-snug">
-              <Rule n={1}>No name, phone number or login. Your exact spot never leaves your phone; it is rounded to a 1 km square first.</Rule>
-              <Rule n={2}>One report changes nothing on its own. An area reaches Excise and Police reviewers only when {LIMITS.minReporters} or
-                more different people notice something there, on different days, more than nearby areas usually report.</Rule>
-              <Rule n={3}>Reports never change the forecast, and no public map shows them.</Rule>
-              <Rule n={4}>Do not confront anyone, follow anyone or collect evidence yourself.</Rule>
+              {t.rules(LIMITS.minReporters).map((rule, i) => <Rule key={i} n={i + 1}>{rule}</Rule>)}
             </ol>
           </section>
-          <Lines />
+          <Lines t={t} />
         </>
       )}
 
       {mode === "form" && (
         <form onSubmit={e => { e.preventDefault(); send(); }} noValidate>
-          <Back onClick={() => { reset(); setMode("start"); }} label="New report" />
+          <Back onClick={() => { reset(); setMode("start"); }} label={t.newReport} back={t.back} />
 
-          <Step n="01" title="Where">
+          <Step n="01" title={t.where} optional={null}>
             {pick ? (
               <div className="flex items-center justify-between gap-3 border border-ink px-3 py-2.5">
                 <span className="flex items-center gap-2.5 text-[13px] min-w-0">
                   <i className="block size-3 shrink-0 border-2 border-signal bg-signal/20" />
-                  <span className="truncate">{pickName ? `Around ${pickName}` : "A 1 km square is marked"}</span>
+                  <span className="truncate">{pickName ? all.around(pickName) : t.squareMarked}</span>
                 </span>
-                <button type="button" onClick={onClearPick} className="label text-mute hover:text-ink">Change</button>
+                <button type="button" onClick={onClearPick} className="label text-mute hover:text-ink">{t.change}</button>
               </div>
             ) : (
               <div className="space-y-2">
-                <PlaceSearch inline placeholder="Search a place, junction or landmark" onSelect={p => onPick(p.lat, p.lon, p.name)} />
+                <PlaceSearch inline placeholder={t.searchLandmark} onSelect={p => onPick(p.lat, p.lon, p.name)} />
                 <div className="grid grid-cols-[1fr_auto] border border-ink">
-                  <p className="px-3 py-2 text-[12.5px] text-ink-2">or tap the map</p>
-                  <button type="button" onClick={locate} className="label px-3 border-l border-ink hover:bg-ink hover:text-paper">◎ Where I am</button>
+                  <p className="px-3 py-2 text-[12.5px] text-ink-2">{t.orTap}</p>
+                  <button type="button" onClick={locate} className="label px-3 border-l border-ink hover:bg-ink hover:text-paper">{t.whereIAm}</button>
                 </div>
               </div>
             )}
-            <p className="mt-2 text-[11.5px] text-mute">{locating ?? "Only the square is sent, never your exact spot or your location."}</p>
+            <p className="mt-2 text-[11.5px] text-mute">{locating ?? t.onlySquare}</p>
           </Step>
 
-          <Step n="02" title="What did you notice">
-            <div role="radiogroup" aria-label="What did you notice" className="border border-ink">
+          <Step n="02" title={t.what} optional={null}>
+            <div role="radiogroup" aria-label={t.what} className="border border-ink">
               {(Object.keys(TIP_WHAT) as TipWhat[]).map((k, i) => (
                 <button type="button" key={k} role="radio" aria-checked={what === k} onClick={() => setWhat(k)}
                   className={`w-full grid grid-cols-[18px_1fr] gap-2.5 items-start text-left px-3 py-2 ${i ? "border-t border-ink/20" : ""}
                     ${what === k ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
                   <span className={`mt-[3px] size-3 rounded-full border-[1.5px] ${what === k ? "border-paper bg-paper" : "border-current"}`} />
                   <span>
-                    <span className="block text-[13.5px] leading-tight">{TIP_WHAT[k].label}</span>
-                    <span className={`block text-[11.5px] leading-snug ${what === k ? "text-paper/65" : "text-mute"}`}>{TIP_WHAT[k].hint}</span>
+                    <span className="block text-[13.5px] leading-tight">{t.whatItems[k][0]}</span>
+                    <span className={`block text-[11.5px] leading-snug ${what === k ? "text-paper/65" : "text-mute"}`}>{t.whatItems[k][1]}</span>
                   </span>
                 </button>
               ))}
@@ -148,24 +151,24 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
               <span className={`grid place-items-center size-4 border border-ink ${school ? "bg-ink" : ""}`}>
                 {school && <svg viewBox="0 0 10 10" className="size-2.5"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#0a0a0a" strokeWidth="1.6" /></svg>}
               </span>
-              Close to a school or college
+              {t.nearSchool}
             </button>
           </Step>
 
-          <Step n="03" title="When">
-            <Segmented options={TIP_WHEN} value={when} onChange={setWhen} label="When" />
+          <Step n="03" title={t.when} optional={null}>
+            <Segmented options={keysOf(TIP_WHEN, t.whenItems)} value={when} onChange={setWhen} label={t.when} />
           </Step>
 
-          <Step n="04" title="How do you know">
-            <Segmented options={TIP_SEEN} value={seen} onChange={setSeen} label="How do you know" />
+          <Step n="04" title={t.seen} optional={null}>
+            <Segmented options={keysOf(TIP_SEEN, t.seenItems)} value={seen} onChange={setSeen} label={t.seen} />
           </Step>
 
-          <Step n="05" title="Anything else" optional>
+          <Step n="05" title={t.note} optional={t.optional}>
             <textarea value={note} onChange={e => setNote(e.target.value.slice(0, LIMITS.noteChars))} rows={3}
-              placeholder="What happened, not who. For example: packets passed at the bus shelter most evenings."
+              placeholder={t.notePlaceholder} aria-label={t.note}
               className="w-full bg-transparent border border-ink px-3 py-2 text-[13.5px] leading-snug outline-none resize-none placeholder:text-mute" />
             <div className="mt-1 flex justify-between gap-3 text-[11.5px] text-mute">
-              <span>Names, phone and vehicle numbers and house numbers are removed. Only a reviewer reads notes.</span>
+              <span>{t.noteRule}</span>
               <span className="tabular shrink-0">{note.length}/{LIMITS.noteChars}</span>
             </div>
           </Step>
@@ -178,52 +181,45 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
             {error && <p className="mb-3 text-[12.5px] text-signal" role="alert">{error}</p>}
             <button type="submit" disabled={!ready || busy}
               className="w-full flex items-center justify-between px-4 py-3 bg-ink text-paper disabled:opacity-35 disabled:cursor-not-allowed">
-              <span className="label">{busy ? "Sending" : "Send report"}</span>
+              <span className="label">{busy ? t.sending : t.send}</span>
               <svg viewBox="0 0 16 10" className="w-4"><path d="M0 5h14M10 1l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
             </button>
             <p className="mt-2.5 text-[11.5px] text-mute leading-snug">
-              This is not a police complaint, and nobody is questioned because of one report. If you know who is involved,
-              tell the official lines below directly.
+              {t.notComplaint}
             </p>
           </div>
-          <Lines compact />
+          <Lines compact t={t} />
         </form>
       )}
 
       {mode === "done" && (
         <>
           <div className="px-5 py-6 border-b border-ink">
-            <p className="label text-mute mb-2">Received</p>
-            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">Thank you. Your report is in.</h2>
-            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">
-              It stays private. It counts towards an area only once other people nearby notice something too, on other days.
-              Nothing happens because of one report alone.
-            </p>
+            <p className="label text-mute mb-2">{t.received}</p>
+            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">{t.thanks}</h2>
+            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">{t.doneSub}</p>
             <div className="mt-4 grid grid-cols-2 border border-ink">
-              <button onClick={() => setMode("form")} className="label py-2.5 hover:bg-paper-2">Report something else</button>
-              <button onClick={() => setMode("start")} className="label py-2.5 border-l border-ink hover:bg-paper-2">Done</button>
+              <button onClick={() => setMode("form")} className="label py-2.5 hover:bg-paper-2">{t.another}</button>
+              <button onClick={() => setMode("start")} className="label py-2.5 border-l border-ink hover:bg-paper-2">{t.done}</button>
             </div>
           </div>
-          <Lines />
+          <Lines t={t} />
         </>
       )}
 
       {mode === "help" && (
         <>
-          <Back onClick={() => setMode("start")} label="Getting help" />
+          <Back onClick={() => setMode("start")} label={t.helpLabel} back={t.back} />
           <div className="px-5 py-5 border-b border-ink">
-            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">Help is free and confidential.</h2>
-            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">
-              Asking for help for someone is not a report, and nothing on this screen is recorded. Treatment is confidential,
-              and a person who volunteers for treatment for their own drug use can be spared prosecution (NDPS Act, section 64A).
-            </p>
+            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">{t.helpTitle}</h2>
+            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">{t.helpSub}</p>
             <a href="tel:14446" className="mt-4 flex items-center justify-between border border-ink px-4 py-3 hover:bg-ink hover:text-paper">
               <span><span className="block text-[24px] leading-none font-medium tabular">14446</span>
-                <span className="block mt-1 text-[11.5px] opacity-70">De-addiction helpline · free counselling</span></span>
-              <span className="label">Call</span>
+                <span className="block mt-1 text-[11.5px] opacity-70">{t.helpline}</span></span>
+              <span className="label">{t.call}</span>
             </a>
             <button onClick={onFindHelp} className="mt-2 w-full flex items-center justify-between border border-ink px-4 py-3 hover:bg-paper-2">
-              <span className="text-[13.5px]">Find the nearest centre</span><span className="label">◎</span>
+              <span className="text-[13.5px]">{t.findNearest}</span><span className="label">◎</span>
             </button>
           </div>
         </>
@@ -231,17 +227,15 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
 
       {mode === "danger" && (
         <>
-          <Back onClick={() => setMode("start")} label="Emergency" />
+          <Back onClick={() => setMode("start")} label={t.dangerLabel} back={t.back} />
           <div className="px-5 py-5 border-b border-ink">
-            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">Call 112 now.</h2>
-            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">
-              For an overdose, violence or anyone at risk, emergency services are faster than any report. Stay at a safe distance.
-            </p>
+            <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">{t.dangerTitle}</h2>
+            <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">{t.dangerSub}</p>
             <a href="tel:112" className="mt-4 flex items-center justify-between bg-signal text-white px-4 py-3">
-              <span className="text-[30px] leading-none font-medium tabular">112</span><span className="label">Call</span>
+              <span className="text-[30px] leading-none font-medium tabular">112</span><span className="label">{t.call}</span>
             </a>
           </div>
-          <Lines />
+          <Lines t={t} />
         </>
       )}
     </div>
@@ -263,24 +257,24 @@ function Choice({ n, title, sub, onClick, signal }: { n: string; title: string; 
 function Rule({ n, children }: { n: number; children: React.ReactNode }) {
   return <li className="grid grid-cols-[22px_1fr]"><span className="font-mono text-[11px] text-mute pt-px">{n}</span><span className="text-ink-2">{children}</span></li>;
 }
-function Back({ onClick, label }: { onClick: () => void; label: string }) {
+function Back({ onClick, label, back }: { onClick: () => void; label: string; back: string }) {
   return (
     <div className="flex items-center border-b border-ink">
-      <button type="button" onClick={onClick} aria-label="Back" className="size-10 grid place-items-center border-r border-ink hover:bg-ink hover:text-paper">
+      <button type="button" onClick={onClick} aria-label={back} className="size-10 grid place-items-center border-r border-ink hover:bg-ink hover:text-paper">
         <svg viewBox="0 0 16 10" className="w-3.5"><path d="M16 5H2M6 1 2 5l4 4" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
       </button>
       <span className="label px-4 text-mute">{label}</span>
     </div>
   );
 }
-function Step({ n, title, optional, children }: { n: string; title: string; optional?: boolean; children: React.ReactNode }) {
+function Step({ n, title, optional, children }: { n: string; title: string; optional: string | null; children: React.ReactNode }) {
   return (
     <fieldset className="px-5 py-4 border-b border-ink/20">
       <legend className="contents">
         <span className="flex items-baseline gap-3 mb-2.5">
           <span className="font-mono text-[11px] text-mute">{n}</span>
           <span className="text-[14px] font-medium">{title}</span>
-          {optional && <span className="label text-mute">optional</span>}
+          {optional && <span className="label text-mute">{optional}</span>}
         </span>
       </legend>
       {children}
@@ -302,13 +296,17 @@ function Segmented<K extends string>({ options, value, onChange, label }: {
     </div>
   );
 }
-function Lines({ compact }: { compact?: boolean }) {
+/** The rule's keys with this language's labels, in the rule's order. */
+function keysOf<K extends string>(rule: Record<K, string>, labels: Record<K, string>) {
+  return Object.fromEntries((Object.keys(rule) as K[]).map(k => [k, labels[k]])) as Record<K, string>;
+}
+function Lines({ compact, t }: { compact?: boolean; t: Strings["report"] }) {
   const lines = compact ? LINES.slice(0, 3) : LINES;
   return (
     <section className="pb-2">
       <div className="px-5 pt-5 pb-2">
-        <p className="label text-mute">Official lines</p>
-        {!compact && <p className="mt-1.5 text-[12.5px] text-ink-2 leading-snug">If you know who is involved, or it is urgent, tell these services directly. They keep informants confidential.</p>}
+        <p className="label text-mute">{t.linesTitle}</p>
+        {!compact && <p className="mt-1.5 text-[12.5px] text-ink-2 leading-snug">{t.linesSub}</p>}
       </div>
       <ul>
         {lines.map(l => (
@@ -317,14 +315,14 @@ function Lines({ compact }: { compact?: boolean }) {
               rel="noreferrer" className="grid grid-cols-[112px_1fr] items-center px-5 py-2.5 border-t border-ink/15 hover:bg-paper-2">
               <span className={`font-mono tabular text-[14px] ${l.call === "112" ? "text-signal" : ""}`}>{l.number}</span>
               <span className="min-w-0">
-                <span className="block text-[13px] leading-tight">{l.who}</span>
-                <span className="block text-[11.5px] text-mute leading-snug">{l.note}</span>
+                <span className="block text-[13px] leading-tight">{t.lines[l.id][0]}</span>
+                <span className="block text-[11.5px] text-mute leading-snug">{t.lines[l.id][1]}</span>
               </span>
             </a>
           </li>
         ))}
       </ul>
-      <p className="px-5 pt-2 text-[11px] text-mute">Numbers checked 26 Nov 2026.</p>
+      <p className="px-5 pt-2 text-[11px] text-mute">{t.checked}</p>
     </section>
   );
 }

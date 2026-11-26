@@ -76,7 +76,7 @@ After both fits, run `make eval-counts` to train a lagged Poisson challenger and
 
 ## NarcoTrace frontend (Next.js)
 
-`frontend/` is the new interface, built with Next.js 15 and Tailwind CSS 4: a black theme with ruled lines, grain and a satellite-first map. Both views are live: Enforcement (where seizures are likely next) and Public (distance to de-addiction help, with nearest centres from any spot or from "Near me", computed in the browser). The Public view also has a **Report** tab for tips: what and roughly where, never who. Enforcement sees only areas that several people flag independently, as an unverified layer kept apart from the forecast. See [public reports](docs/PUBLIC_REPORTS.md) for the bias and abuse safeguards.
+`frontend/` is the new interface, built with Next.js 15 and Tailwind CSS 4: a black theme with ruled lines, grain and a satellite-first map. Both views are live: Enforcement (where seizures are likely next) and Public (distance to de-addiction help, with nearest centres from any spot or from "Near me", computed in the browser). The Public view also has a **Report** tab for tips: what and roughly where, never who. Enforcement sees only areas that several people flag independently, as an unverified layer kept apart from the forecast. See [public reports](docs/PUBLIC_REPORTS.md) for the bias and abuse safeguards. The public side reads in English or Malayalam (switch in the header; the choice is kept in a cookie). Its map centres on **drug-affected areas**: recorded police and Excise NDPS cases per district, placed within the district by where people live and where seizures were reported, graded relative to the rest of Kerala, then shaded by distance to the nearest centre. The Enforcement view adds a **New & rising** tab from pattern engine v2 (space-time scan alerts and a new-place watch list, shown as a lead because it did not pass its pre-registered rule) and learned hotspot profiles in "Why there". Every weekly forecast is frozen in a local ledger and scored after four weeks.
 
 ```sh
 make frontend-setup   # Node 22 via mise, then npm ci
@@ -84,6 +84,9 @@ make frontend         # http://127.0.0.1:3000/enforcement
 make frontend-build   # typecheck and production build
 make frontend-test    # rules for public tips and place search
 make place-names      # Kerala place list for map labels and search (local OSM extract, ~4 min)
+make recovery-need    # drug-affected areas for the public map (official NDPS counts placed within districts)
+make hotspot-v2       # evaluate pattern engine v2 (learned profiles, new-place model, emerging scan), ~7 min
+make hotspot-weekly   # live cycle: harvest, all forecasts, freeze this week's lists in the ledger, score matured ones
 ```
 
 The server reads the local, gitignored model outputs at request time (`web/public/generated/hotspots/*.json`, `web/public/generated/recovery/access_map.json`, the Excise CSVs and the district forecast status). Nothing from them is bundled or committed. Set `NARCOTRACE_ROOT` to point at another checkout. Map labels and the search bar use a Kerala place list (about 25,000 towns, villages, neighbourhoods, junctions and public landmarks, with Malayalam names) built from the local OpenStreetMap extract by `make place-names` into the gitignored `web/public/generated/places/`. Single houses are left out, and searches are answered by this server only. Build the inputs first with `make hotspot-forecast patterns-forecast hotspot-cutoff`.

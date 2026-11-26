@@ -49,7 +49,7 @@ function placeLabels(L: typeof Leaflet, map: Leaflet.Map) {
   const pane = map.getPane("labels")!;
   pane.style.zIndex = "450"; pane.style.pointerEvents = "none";
   const group = L.layerGroup().addTo(map);
-  let enabled = true, seq = 0, timer: ReturnType<typeof setTimeout> | undefined;
+  let enabled = true, seq = 0, timer: ReturnType<typeof setTimeout> | undefined, lang: "en" | "ml" = "en";
 
   async function refresh() {
     const id = ++seq, zoom = map.getZoom();
@@ -64,7 +64,8 @@ function placeLabels(L: typeof Leaflet, map: Leaflet.Map) {
       const pt = map.latLngToContainerPoint([p.lat, p.lon]);
       const font = p.rank <= 1 ? 13 : p.rank <= 2 ? 12 : p.rank <= 3 ? 11.5 : 10.5;
       const caps = p.rank <= 1 ? 1.25 : 1;
-      const w = p.name.length * font * .56 * caps + 14, h = font + 10;
+      const name = lang === "ml" && p.ml ? p.ml : p.name;
+      const w = name.length * font * (lang === "ml" && p.ml ? .62 : .56) * caps + 14, h = font + (lang === "ml" ? 13 : 10);
       const box = [pt.x - w / 2, pt.y - h, pt.x + w / 2, pt.y + 3];
       if (box[2] < 0 || box[0] > size.x || box[3] < 0 || box[1] > size.y) continue;
       if (placed.some(o => box[0] < o[2] && box[2] > o[0] && box[1] < o[3] && box[3] > o[1])) continue;
@@ -73,19 +74,23 @@ function placeLabels(L: typeof Leaflet, map: Leaflet.Map) {
       L.marker([p.lat, p.lon], {
         pane: "labels", interactive: false, keyboard: false,
         icon: L.divIcon({ className: "", iconSize: [0, 0], iconAnchor: [0, 0],
-          html: `<div class="nt-label r${p.rank}${landmark ? " lm" : ""}" title="${escape(KIND_LABEL[p.kind] ?? p.kind)}"><span>${escape(p.name)}</span><i></i></div>` }),
+          html: `<div class="nt-label r${p.rank}${landmark ? " lm" : ""}" title="${escape(KIND_LABEL[p.kind] ?? p.kind)}"><span>${escape(name)}</span><i></i></div>` }),
       }).addTo(group);
       if (placed.length >= 160) break;
     }
   }
   map.on("moveend", () => { clearTimeout(timer); timer = setTimeout(refresh, 120); });
   refresh();
-  return { setEnabled(on: boolean) { if (on !== enabled) { enabled = on; refresh(); } } };
+  return {
+    setEnabled(on: boolean) { if (on !== enabled) { enabled = on; refresh(); } },
+    /** Malayalam names where OpenStreetMap has them. */
+    setLang(l: "en" | "ml") { if (l !== lang) { lang = l; refresh(); } },
+  };
 }
 
 /** Desaturated satellite imagery with place labels, or a grey street map. */
 export function setBasemap(ctx: { L: typeof Leaflet; map: Leaflet.Map; districts: Leaflet.LayerGroup; base: Leaflet.Layer[];
-  labels: { setEnabled: (on: boolean) => void } }, basemap: Basemap) {
+  labels: { setEnabled: (on: boolean) => void; setLang: (l: "en" | "ml") => void } }, basemap: Basemap) {
   const { L, map } = ctx;
   ctx.base.forEach(l => map.removeLayer(l));
   const pane = map.getPane("tilePane");

@@ -9,7 +9,7 @@
   --color-signal: #ff3b26;
   --color-signal-soft: #5a1c14;
   --color-ok: #3fb67f;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), "Noto Sans Malayalam Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -53,6 +53,10 @@
 .cross::after { width: 1px; height: 11px; left: -0.5px; top: -5px; }
 
 .label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; }
+/* Malayalam has no capitals and no monospace face; its script needs a little more height to read. */
+:lang(ml) .label { font-family: var(--font-sans); letter-spacing: 0; text-transform: none; font-size: 11.5px; }
+:lang(ml) body { line-height: 1.55; }
+:lang(ml) h2, :lang(ml) h3 { letter-spacing: 0 !important; line-height: 1.35 !important; }
 .tabular { font-variant-numeric: tabular-nums; }
 
 /* Leaflet, restyled to the black theme. */
