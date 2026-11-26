@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import { Header, Mark } from "@/components/Header";
 import { useMemo, useState } from "react";
 import type { EnforcementView } from "@/lib/types";
-import type { Basemap, Focus, Layers } from "@/components/map/MapView";
+import type { Basemap, Focus, Layers, Pin } from "@/components/map/MapView";
+import { PlaceSearch, type LocalItem, type Picked } from "@/components/map/PlaceSearch";
 import { KIND, LEVEL, date } from "./copy";
 import { WatchTab, WhyTab, DistrictTab } from "./Tabs";
 import { DetailCard, type Selection } from "./DetailCard";
@@ -30,12 +31,13 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
   const [layers, setLayers] = useState<Layers>({ places: true, kinds: false, gateways: true, concern: true });
   const [selection, setSelection] = useState<Selection>(null);
   const [focus, setFocus] = useState<Focus>(null);
+  const [pin, setPin] = useState<Pin>(null);
 
   const select = (kind: "place" | "kind" | "gateway", id: string) => {
     const item = kind === "place" ? view.places.find(p => p.id === id)
       : kind === "kind" ? view.kinds.find(k => k.id === id) : view.gateways.find(g => g.id === id);
     if (!item) return;
-    setSelection({ kind, id } as Selection);
+    setSelection({ kind, id } as Selection); setPin(null);
     setFocus({ lat: item.lat, lon: item.lon, zoom: kind === "gateway" ? 11 : 12.5 });
     if (kind === "kind") setLayers(l => ({ ...l, kinds: true }));
     // On small screens the list sits below the map: bring the map back into view.
@@ -45,6 +47,13 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
     setTab(t);
     if (t === "why") setLayers(l => ({ ...l, kinds: true, gateways: true }));
     if (t === "tips") setLayers(l => ({ ...l, concern: true }));
+  };
+  const searchable = useMemo<LocalItem[]>(() => view.places.map(p => ({ id: p.id, name: p.name, sub: p.area, lat: p.lat, lon: p.lon,
+    tag: "Watch list" })), [view.places]);
+  const onSearch = (p: Picked) => {
+    if (p.local) return select("place", p.local.id);
+    setSelection(null); setPin({ lat: p.lat, lon: p.lon, name: p.name }); setFocus({ lat: p.lat, lon: p.lon, zoom: 14, ring: false });
+    if (window.matchMedia("(max-width: 1023px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const latest = view.freshness[0]?.latest ?? view.asOf;
   const highCount = useMemo(() => view.places.filter(p => p.level === "high").length, [view.places]);
@@ -57,10 +66,12 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
         <section className="relative h-[62vh] lg:h-auto lg:min-h-0 border-b lg:border-b-0 border-ink overflow-hidden">
           <MapView cells={view.cells} places={view.places} kinds={view.kinds} gateways={view.gateways} concern={view.concern.blocks}
-            basemap={basemap} layers={layers} focus={focus} selectedId={selection?.id ?? null} onSelect={select} />
+            basemap={basemap} layers={layers} focus={focus} pin={pin} selectedId={selection?.id ?? null} onSelect={select} />
 
           {/* Legend, top left */}
-          <div className="absolute left-3 top-3 md:left-4 md:top-4 z-[500] bg-paper border border-ink w-[196px] md:w-[248px]">
+          <div className="absolute left-3 top-3 md:left-4 md:top-4 z-[600] w-[196px] md:w-[248px] flex flex-col gap-2">
+            <PlaceSearch onSelect={onSearch} local={searchable} placeholder="Search a place" />
+          <div className="bg-paper border border-ink">
             <div className="px-3 py-2 border-b border-ink label">On the map</div>
             <div className="px-3 py-2.5 space-y-1.5 text-[12.5px]">
               <Toggle on={layers.places} onClick={() => setLayers(l => ({ ...l, places: !l.places }))}>
@@ -84,6 +95,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
             <div className="hidden md:block px-3 py-2 border-t border-ink text-[11.5px] text-ink-2 leading-snug">
               Dots mark places. Zoom in to see the 1 km squares. Darker red means more likely.
             </div>
+          </div>
           </div>
 
           {/* Basemap switch, top right */}

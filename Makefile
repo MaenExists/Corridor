@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff frontend-setup frontend frontend-build frontend-test
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff frontend-setup frontend frontend-build frontend-test place-names
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -118,3 +118,5 @@ frontend-build:
 	cd frontend && $(NODE22) npm run typecheck && $(NODE22) npm run build
 frontend-test:
 	cd frontend && $(NODE22) npm test
+place-names:
+	$(PY) -m ml.data.place_names

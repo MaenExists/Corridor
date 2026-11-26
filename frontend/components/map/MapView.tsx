@@ -8,7 +8,8 @@ import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base
 
 export type { Basemap };
 export type Layers = { places: boolean; kinds: boolean; gateways: boolean; concern: boolean };
-export type Focus = { lat: number; lon: number; zoom?: number } | null;
+export type Focus = { lat: number; lon: number; zoom?: number; ring?: boolean } | null;
+export type Pin = { lat: number; lon: number; name: string } | null;
 
 const LEVEL_FILL: Record<Level, string> = { high: "#ff3b26", elevated: "#c0341f", watch: "#6e2519" };
 const KIND_LETTER: Record<string, string> = {
@@ -26,6 +27,7 @@ type Props = {
   basemap: Basemap;
   layers: Layers;
   focus: Focus;
+  pin?: Pin;
   selectedId: string | null;
   onSelect: (kind: "place" | "kind" | "gateway", id: string) => void;
 };
@@ -42,7 +44,7 @@ export default function MapView(props: Props) {
 
   useLeafletMap(host, c => {
     ctx.current = c; L.current = c.L; map.current = c.map;
-    for (const name of ["concern", "cells", "dots", "kinds", "gateways", "focus"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
+    for (const name of ["concern", "cells", "dots", "kinds", "gateways", "focus", "pin"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
     c.map.on("zoomend", () => showScale());
     drawAll();
   }, () => { map.current = null; ctx.current = null; });
@@ -142,11 +144,22 @@ export default function MapView(props: Props) {
     g.clearLayers();
     if (!props.focus) return;
     m.flyTo([props.focus.lat, props.focus.lon], props.focus.zoom ?? 12, { duration: .7 });
-    leaflet.circle([props.focus.lat, props.focus.lon], { radius: 3000, color: "#e8e6df", weight: 1.5, dashArray: "5 5", fill: false })
+    if (props.focus.ring !== false) leaflet.circle([props.focus.lat, props.focus.lon], { radius: 3000, color: "#e8e6df", weight: 1.5, dashArray: "5 5", fill: false })
       .addTo(g);
   }
 
-  function drawAll() { drawBase(); drawConcern(); drawCells(); drawDots(); drawKinds(); drawGateways(); }
+  function drawPin() {
+    const leaflet = L.current, g = groups.current.pin;
+    if (!leaflet || !g) return;
+    g.clearLayers();
+    if (!props.pin) return;
+    const name = props.pin.name.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+    leaflet.marker([props.pin.lat, props.pin.lon], { interactive: false, zIndexOffset: 1000,
+      icon: leaflet.divIcon({ className: "", iconSize: [0, 0], iconAnchor: [0, 0], html: `<div class="nt-pin"><span>${name}</span><i></i></div>` }),
+    }).addTo(g);
+  }
+
+  function drawAll() { drawBase(); drawConcern(); drawCells(); drawDots(); drawKinds(); drawGateways(); drawPin(); }
 
   useEffect(drawBase, [props.basemap]);
   useEffect(drawCells, [props.cells, props.layers.places]);
@@ -155,6 +168,7 @@ export default function MapView(props: Props) {
   useEffect(drawGateways, [props.gateways, props.layers.gateways]);
   useEffect(drawConcern, [props.concern, props.layers.concern]);
   useEffect(drawFocus, [props.focus]);
+  useEffect(drawPin, [props.pin]);
 
   return <div ref={host} className="absolute inset-0" aria-label="Map of Kerala" role="region" />;
 }

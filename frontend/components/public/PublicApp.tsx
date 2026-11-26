@@ -9,6 +9,7 @@ import { BED_STEPS, DISTANCE_STEPS, type AccessLayer, type Point } from "@/compo
 import { date, pct } from "@/components/enforcement/copy";
 import { cellOf } from "@/lib/tipRules";
 import { ReportTab } from "./ReportTab";
+import { PlaceSearch, type LocalItem, type Picked } from "@/components/map/PlaceSearch";
 
 const RecoveryMapView = dynamic(() => import("@/components/map/RecoveryMapView"), {
   ssr: false,
@@ -46,6 +47,7 @@ export function PublicApp({ view }: { view: PublicView }) {
   const [locating, setLocating] = useState<string | null>(null);
   const [pick, setPick] = useState<[number, number] | null>(null);
   const [pickInside, setPickInside] = useState(true);
+  const [pickName, setPickName] = useState<string | null>(null);
   const reporting = tab === "report";
   const [formOpen, setFormOpen] = useState(false);
   // Marking a spot needs streets and buildings, so the shading steps aside while reporting.
@@ -67,9 +69,16 @@ export function PublicApp({ view }: { view: PublicView }) {
     showMapOnSmall();
   };
   const pickCentre = (c: Centre) => { setCentreId(c.id); setProbe(null); setFocus({ lat: c.lat, lon: c.lon, zoom: 12 }); showMapOnSmall(); };
-  const pickAt = (lat: number, lon: number, zoom?: number) => {
-    setPick(cellOf(lat, lon)); setProbe(null); setCentreId(null);
+  const pickAt = (lat: number, lon: number, zoom?: number, name?: string) => {
+    setPick(cellOf(lat, lon)); setPickName(name ?? null); setProbe(null); setCentreId(null);
     if (zoom) setFocus({ lat, lon, zoom });
+  };
+  const searchable = useMemo<LocalItem[]>(() => view.centres.map(c => ({ id: c.id, name: c.name, lat: c.lat, lon: c.lon,
+    sub: `${c.government ? "Government centre" : "Registered centre"} · ${c.district}`, tag: "Centre" })), [view.centres]);
+  const onSearch = (p: Picked) => {
+    if (reporting) return pickAt(p.lat, p.lon, 15, p.name);
+    const c = p.local && view.centres.find(x => x.id === p.local!.id);
+    if (c) pickCentre(c); else probeAt(p.lat, p.lon, p.name, 14);
   };
   const locate = () => {
     if (!navigator.geolocation) { setLocating("This browser cannot share a location."); return; }
@@ -103,7 +112,10 @@ export function PublicApp({ view }: { view: PublicView }) {
             onCentre={id => { const c = view.centres.find(x => x.id === id); if (c) reporting ? pickAt(c.lat, c.lon) : pickCentre(c); }}
             onGridReady={ok => setGridState(ok ? "ready" : "missing")} />
 
-          <div className="absolute left-3 top-3 md:left-4 md:top-4 z-[500] bg-paper border border-ink w-[206px] md:w-[260px]">
+          <div className="absolute left-3 top-3 md:left-4 md:top-4 z-[600] w-[206px] md:w-[260px] flex flex-col gap-2">
+            <PlaceSearch onSelect={onSearch} local={searchable}
+              placeholder={reporting ? "Search where you noticed it" : "Search a place or centre"} />
+          <div className="bg-paper border border-ink">
             <div className="grid grid-cols-3 border-b border-ink" role="group" aria-label="Shading">
               {([["distance", "Distance"], ["beds", "Beds"], ["none", "Off"]] as [AccessLayer, string][]).map(([id, label], i) => (
                 <button key={id} onClick={() => setLayer(id)} aria-pressed={layer === id}
@@ -128,6 +140,7 @@ export function PublicApp({ view }: { view: PublicView }) {
               <span className="flex items-center gap-1.5"><i className="block size-2.5 bg-ink" />Government</span>
               <span className="flex items-center gap-1.5"><i className="block size-2.5 rounded-full border-[1.5px] border-ink" />Registered</span>
             </button>
+          </div>
           </div>
 
           <div className="absolute right-3 top-3 md:right-4 md:top-4 z-[500] flex flex-col items-end gap-2">
@@ -203,7 +216,7 @@ export function PublicApp({ view }: { view: PublicView }) {
           </div>
           <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto scroll-thin">
             {tab === "report" && (
-              <ReportTab pick={pick && pickInside ? pick : null} onPick={(lat, lon) => pickAt(lat, lon, 13)} onClearPick={() => setPick(null)}
+              <ReportTab pick={pick && pickInside ? pick : null} pickName={pickName} onPick={(lat, lon, name) => pickAt(lat, lon, name ? 15 : 13, name)} onClearPick={() => setPick(null)}
                 onFindHelp={() => { chooseTab("find"); locate(); }} onFormOpen={setFormOpen} />
             )}
             {view.missing && <p className="m-5 p-3 border border-ink text-[13px]">{view.missing}</p>}

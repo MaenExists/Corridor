@@ -82,7 +82,8 @@ After both fits, run `make eval-counts` to train a lagged Poisson challenger and
 make frontend-setup   # Node 22 via mise, then npm ci
 make frontend         # http://127.0.0.1:3000/enforcement
 make frontend-build   # typecheck and production build
-make frontend-test    # rules for public tips
+make frontend-test    # rules for public tips and place search
+make place-names      # Kerala place list for map labels and search (local OSM extract, ~4 min)
 ```
 
-The server reads the local, gitignored model outputs at request time (`web/public/generated/hotspots/*.json`, `web/public/generated/recovery/access_map.json`, the Excise CSVs and the district forecast status). Nothing from them is bundled or committed. Set `NARCOTRACE_ROOT` to point at another checkout. Build the inputs first with `make hotspot-forecast patterns-forecast hotspot-cutoff`.
+The server reads the local, gitignored model outputs at request time (`web/public/generated/hotspots/*.json`, `web/public/generated/recovery/access_map.json`, the Excise CSVs and the district forecast status). Nothing from them is bundled or committed. Set `NARCOTRACE_ROOT` to point at another checkout. Map labels and the search bar use a Kerala place list (about 25,000 towns, villages, neighbourhoods, junctions and public landmarks, with Malayalam names) built from the local OpenStreetMap extract by `make place-names` into the gitignored `web/public/generated/places/`. Single houses are left out, and searches are answered by this server only. Build the inputs first with `make hotspot-forecast patterns-forecast hotspot-cutoff`.

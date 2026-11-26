@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PlaceSearch } from "@/components/map/PlaceSearch";
 import { LIMITS, TIP_SEEN, TIP_WHAT, TIP_WHEN, type TipSeen, type TipWhat, type TipWhen } from "@/lib/tipRules";
 
 type Mode = "start" | "form" | "help" | "danger" | "done";
@@ -25,9 +26,10 @@ function deviceKey() {
   } catch { return [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join(""); }
 }
 
-export function ReportTab({ pick, onPick, onClearPick, onFindHelp, onFormOpen }: {
+export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onFormOpen }: {
   pick: [number, number] | null;
-  onPick: (lat: number, lon: number) => void;
+  pickName: string | null;
+  onPick: (lat: number, lon: number, name?: string) => void;
   onClearPick: () => void;
   onFindHelp: () => void;
   onFormOpen: (open: boolean) => void;
@@ -109,15 +111,19 @@ export function ReportTab({ pick, onPick, onClearPick, onFindHelp, onFormOpen }:
           <Step n="01" title="Where">
             {pick ? (
               <div className="flex items-center justify-between gap-3 border border-ink px-3 py-2.5">
-                <span className="flex items-center gap-2.5 text-[13px]">
-                  <i className="block size-3 border-2 border-signal bg-signal/20" />A 1 km square is marked
+                <span className="flex items-center gap-2.5 text-[13px] min-w-0">
+                  <i className="block size-3 shrink-0 border-2 border-signal bg-signal/20" />
+                  <span className="truncate">{pickName ? `Around ${pickName}` : "A 1 km square is marked"}</span>
                 </span>
                 <button type="button" onClick={onClearPick} className="label text-mute hover:text-ink">Change</button>
               </div>
             ) : (
-              <div className="grid grid-cols-[1fr_auto] border border-ink">
-                <p className="px-3 py-2.5 text-[13px]">Tap the map where you noticed it.</p>
-                <button type="button" onClick={locate} className="label px-3 border-l border-ink hover:bg-ink hover:text-paper">◎ Here</button>
+              <div className="space-y-2">
+                <PlaceSearch inline placeholder="Search a place, junction or landmark" onSelect={p => onPick(p.lat, p.lon, p.name)} />
+                <div className="grid grid-cols-[1fr_auto] border border-ink">
+                  <p className="px-3 py-2 text-[12.5px] text-ink-2">or tap the map</p>
+                  <button type="button" onClick={locate} className="label px-3 border-l border-ink hover:bg-ink hover:text-paper">◎ Where I am</button>
+                </div>
               </div>
             )}
             <p className="mt-2 text-[11.5px] text-mute">{locating ?? "Only the square is sent, never your exact spot or your location."}</p>
