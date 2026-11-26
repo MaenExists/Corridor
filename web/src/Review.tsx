@@ -3,7 +3,7 @@ import type { QueueItem } from "../../shared/workspace";
 import { dateLabel, localJSON } from "./data";
 
 export function reviewHeaders(key: string): HeadersInit {
-  return { "Content-Type": "application/json", "X-Corridor-Review-Key": key };
+  return { "Content-Type": "application/json", "X-NarcoTrace-Review-Key": key };
 }
 export function ReviewKey({ value, change }: { value:string;change:(v:string)=>void }) {
   return <label className="review-key">Local analyst review key<input type="password" value={value}

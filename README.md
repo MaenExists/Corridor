@@ -1,6 +1,6 @@
-# Corridor
+# NarcoTrace
 
-Kerala-focused forecasting and recovery planning for Hackfinity 2026. Corridor's rebuild starts with forecasts of recorded seizures or NDPS registrations, historical research into documented district links, and a separate public care directory and service planning view.
+Kerala-focused forecasting and recovery planning for Hackfinity 2026. NarcoTrace's rebuild starts with forecasts of recorded seizures or NDPS registrations, historical research into documented district links, and a separate public care directory and service planning view.
 
 ## Run the local demonstration
 

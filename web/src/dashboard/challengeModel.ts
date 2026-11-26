@@ -5,7 +5,7 @@ type Forest = { bias:number; trees:Node[][] };
 type DistrictInput = { x:(number|null)[]|null; reason:string|null; recent:number; baseline:number|null };
 type Frame = { cutoff:string; start:string; end:string; districts:Record<string,DistrictInput> };
 type Task = { horizon:7|28; model:Forest; training_windows:number; frames:Frame[] };
-export type ChallengePack = { schema:"corridor-challenge-v1"; synthetic:true; run_id:string; frozen_at:string; tasks:Task[] };
+export type ChallengePack = { schema:"narcotrace-challenge-v1"; synthetic:true; run_id:string; frozen_at:string; tasks:Task[] };
 export type Request = { district:string; cutoff:string; horizon:7|28 };
 export type Estimate = Omit<DistrictInput,"x"> & { estimate:number|null };
 export type Trial = { request:Request; runId:string; frozenAt:string; start:string; end:string; trainingWindows:number;
@@ -17,7 +17,7 @@ const bad=()=>new Error("The synthetic challenge files do not match. Run make ch
 
 export async function loadChallenge() {
   const pack=await localJSON<ChallengePack>("/generated/challenge.json");
-  if(pack?.synthetic!==true || pack.schema!=="corridor-challenge-v1" || !/^[a-f0-9]{16}$/.test(pack.run_id) ||
+  if(pack?.synthetic!==true || pack.schema!=="narcotrace-challenge-v1" || !/^[a-f0-9]{16}$/.test(pack.run_id) ||
     !asDate(pack.frozen_at)||!Array.isArray(pack.tasks)||pack.tasks.length!==2)throw bad();
   for(const h of [7,28]){
     const t=pack.tasks.find(t=>t.horizon===h);

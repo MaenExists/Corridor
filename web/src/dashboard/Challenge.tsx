@@ -13,7 +13,7 @@ const message=(e:unknown)=>e instanceof Error?e.message:"The local challenge is 
 
 function download(trial:Trial,district:string,observed:number,review:string) {
   const result=trial.estimates[district];
-  const body={schema:"corridor-challenge-result-v1",synthetic:true,run_id:trial.runId,district,
+  const body={schema:"narcotrace-challenge-result-v1",synthetic:true,run_id:trial.runId,district,
     cutoff:trial.request.cutoff,window_start:trial.start,window_end:trial.end,horizon_days:trial.request.horizon,
     model_frozen_at:trial.frozenAt,model:"poisson_gbm",estimate:result.estimate,baseline_method:"last_56_days",
     baseline:result.baseline,observed_documented_cases:observed,withheld_reason:result.reason,
@@ -22,7 +22,7 @@ function download(trial:Trial,district:string,observed:number,review:string) {
     reviewer_next_step:review||null,
     limitation:"One synthetic test window; not real-world accuracy, underlying drug movement, or evidence for action."};
   const url=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)],{type:"application/json"}));
-  const link=document.createElement("a");link.href=url;link.download="corridor-synthetic-challenge.json";link.click();
+  const link=document.createElement("a");link.href=url;link.download="narcotrace-synthetic-challenge.json";link.click();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
@@ -103,7 +103,7 @@ export function Challenge({report,onEvidence}:{report:Evaluation|null;onEvidence
     <header className="trial-hero">
       <div><p className="console-eyebrow"><span className="trial-live-dot"/> Interactive synthetic experiment</p>
         <h1>Can we forecast what<br className="trial-title-break"/> gets documented?</h1>
-        <p>More reports don’t always mean more harm. Corridor helps prevention teams test a forecast against a simple baseline and see where the records don’t support an answer.</p>
+        <p>More reports don’t always mean more harm. NarcoTrace helps prevention teams test a forecast against a simple baseline and see where the records don’t support an answer.</p>
       </div>
       <ol aria-label="How the challenge works"><li>Choose a past date</li><li>Run the frozen model</li><li>Reveal what was recorded</li></ol>
     </header>
@@ -111,7 +111,7 @@ export function Challenge({report,onEvidence}:{report:Evaluation|null;onEvidence
       <div className="trial-work">
         <section className="console-card trial-command" aria-label="Set up a forecast">
           <div className="trial-section-mark" aria-hidden="true">01 / SET UP</div>
-          <h2>Ask Corridor</h2>
+          <h2>Ask NarcoTrace</h2>
           <form onSubmit={e=>{e.preventDefault();run(question);}}>
             <label className="console-sr" htmlFor="trial-question">Ask for a forecast</label>
             <div className="trial-input"><span aria-hidden="true">›</span>

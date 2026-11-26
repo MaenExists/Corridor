@@ -2,7 +2,7 @@
 
 ## The one request that switches the live forecast on
 
-Ask the Kerala Excise Commissionerate for the **monthly "Statewide Details of Enforcement Activities" statements from October 2024 to the latest month**. Ask them to continue publishing them, or to send them each month. The department published these statements for every month from 2015 to September 2024, and Corridor's validated model is trained on exactly this format. With the gap filled, the model issues a forecast for next month immediately. Without it, the model needs six more monthly homepage snapshots, the earliest being March 2027. An RTI request for existing records is enough because the statements already exist. [Excise RTI](https://keralaexcise.gov.in/rti) · [Kerala RTI portal](https://rtiportal.kerala.gov.in/)
+Ask the Kerala Excise Commissionerate for the **monthly "Statewide Details of Enforcement Activities" statements from October 2024 to the latest month**. Ask them to continue publishing them, or to send them each month. The department published these statements for every month from 2015 to September 2024, and NarcoTrace's validated model is trained on exactly this format. With the gap filled, the model issues a forecast for next month immediately. Without it, the model needs six more monthly homepage snapshots, the earliest being March 2027. An RTI request for existing records is enough because the statements already exist. [Excise RTI](https://keralaexcise.gov.in/rti) · [Kerala RTI portal](https://rtiportal.kerala.gov.in/)
 
 For a finer "where next", also ask for the same monthly NDPS case counts by Excise range or circle office (aggregate counts only), plus district totals by drug type: ganja, MDMA and other synthetics. District is the finest unit the public series supports.
 
@@ -36,7 +36,7 @@ The drafts below are ready to send after the team fills in its own contact detai
 
 Hello,
 
-Our team is developing Corridor, a Hackfinity student project studying whether historical patterns can forecast future numbers of recorded drug seizures and NDPS cases by Kerala district. We are requesting existing machine-readable statistics with no personal records. We would like to start with a representative three-month extract and its data dictionary.
+Our team is developing NarcoTrace, a Hackfinity student project studying whether historical patterns can forecast future numbers of recorded drug seizures and NDPS cases by Kerala district. We are requesting existing machine-readable statistics with no personal records. We would like to start with a representative three-month extract and its data dictionary.
 
 For the pilot and the full archive, please share any available daily or weekly counts from **1 January 2020 through the latest complete period of 2026**, for the 14 Kerala revenue districts, separated by reporting agency and case category. Existing monthly tables are useful where weekly counts are unavailable. The main fields are:
 

@@ -179,7 +179,7 @@ def geocode(query):
         from urllib.parse import urlencode
         from urllib.request import Request, urlopen
         url = "https://nominatim.openstreetmap.org/search?" + urlencode({"q": query, "format": "json", "limit": 1})
-        with urlopen(Request(url, headers={"User-Agent": "Corridor public research client"}), timeout=60) as response:
+        with urlopen(Request(url, headers={"User-Agent": "NarcoTrace public research client"}), timeout=60) as response:
             found = json.loads(response.read())
         cache[query] = [float(found[0]["lat"]), float(found[0]["lon"])] if found else None
         GEOCODE_CACHE.write_text(json.dumps(cache, indent=1))

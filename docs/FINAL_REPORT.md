@@ -1,4 +1,4 @@
-# Corridor rebuild status
+# NarcoTrace rebuild status
 
 Hackfinity is on 28 November 2026. The current demo runs a synthetic historical forecast on Kerala geography and reveals the later fictional outcome. It supports district forecasts, baseline comparison, validation, forecast abstention and aggregate review. Use [the demo script](DEMO_SCRIPT.md).
 

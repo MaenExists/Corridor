@@ -15,7 +15,7 @@ import { AskAtlas } from "./AskAtlas";
 import type { MapRecord } from "./model";
 
 const nav=[
-  {id:"map",name:"Corridor atlas",icon:Map},
+  {id:"map",name:"NarcoTrace atlas",icon:Map},
   {id:"forecast",name:"Forecast lab",icon:ChartNoAxesCombined},
   {id:"ask",name:"Ask the Atlas",icon:Sparkles},
   {id:"records",name:"Evidence library",icon:Files},
@@ -93,7 +93,7 @@ export function Workspace() {
   return <div className="app-shell companion-shell">
     <aside className="sidebar">
       <a href="/" className="brand"><span className="brand-symbol"><Network size={25}/></span>
-        <span>corridor<span className="brand-sub">Kerala forecasting lab</span></span></a>
+        <span>narcotrace<span className="brand-sub">Kerala forecasting lab</span></span></a>
       <div className="workspace-label"><span className="signal-dot"/> {real?"Private aggregate review":"Demonstration workspace"}</div>
       <nav aria-label="Main navigation">
         {real ? <button className="active" aria-current="page"><ChartNoAxesCombined size={18}/><span>Real-data results</span><ChevronRight className="nav-arrow" size={14}/></button> :
@@ -151,7 +151,7 @@ export function Workspace() {
           {record&&<RecordDialog selected={record} close={()=>setRecord(null)}/>}
         </>}
       </main>
-      <footer className="app-footer"><span>Corridor · independent hackathon prototype</span><span>Evidence informs. People decide.</span>
+      <footer className="app-footer"><span>NarcoTrace · independent hackathon prototype</span><span>Evidence informs. People decide.</span>
         <span><i className="signal-dot"/> {real?"Local aggregate review":"Frozen synthetic scenario"}</span></footer>
       {!real&&<p className="companion-footer-role">Demo only. Not a production authorization system.</p>}
     </div>

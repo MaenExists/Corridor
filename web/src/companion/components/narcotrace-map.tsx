@@ -53,7 +53,7 @@ function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export default function CorridorMap({
+export default function NarcoTraceMap({
   records,
   selected,
   onSelect,
@@ -374,7 +374,7 @@ export default function CorridorMap({
       );
       line.on("click", select);
       keyHandler(line,description,select);
-      line.getElement()?.setAttribute("data-corridor-id",id);
+      line.getElement()?.setAttribute("data-narcotrace-id",id);
     }
     for (const p of districtPoints) {
       const linked = "connection" in selected ? selected.connection.includes(p.id) : selected.area===p.id;

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
 
 const browser = await chromium.launch();
-const base=`http://127.0.0.1:${Number(process.env.CORRIDOR_WEB_PORT??5173)}`;
+const base=`http://127.0.0.1:${Number(process.env.NARCOTRACE_WEB_PORT??5173)}`;
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 950 } });
   const unexpected = [];
@@ -152,7 +152,7 @@ try {
   await page.getByRole("button",{name:"Reporting delay",exact:true}).click();
   await page.getByRole("button",{name:"Run scenario",exact:true}).click();
   await page.getByText(/reports visible by archive cutoff/).waitFor();
-  if (process.env.CORRIDOR_REVIEW_KEY) {
+  if (process.env.NARCOTRACE_REVIEW_KEY) {
     await nav.getByRole("button",{name:"Forecasts",exact:true}).click();
     await page.locator(".console-side-extra").getByRole("button",{name:"Review desk"}).click();
     const desk=page.locator(".console-desk-layout");
@@ -167,7 +167,7 @@ try {
     const status=await page.request.post(`${base}/api/lead-status`,{data:{receipt}});
     assert.deepEqual(await status.json(),{status:"new",synthetic:true});
     assert.equal((await page.request.get(`${base}/api/workspace-notes`)).status(),403);
-    await desk.getByLabel("Hub review key").fill(process.env.CORRIDOR_REVIEW_KEY);
+    await desk.getByLabel("Hub review key").fill(process.env.NARCOTRACE_REVIEW_KEY);
     await desk.locator(".console-compose").getByRole("button",{name:"Open",exact:true}).click();
     await desk.getByLabel("Review note",{exact:true}).selectOption("Coverage gap noted");
     const noteRows=desk.locator(".console-activity-list").getByText("Coverage gap noted",{exact:true});
@@ -180,12 +180,12 @@ try {
     await nav.getByRole("button",{name:"Evidence",exact:true}).click();
     await page.getByRole("button", { name: "News inbox" }).click();
     await page.getByText("Possible duplicate", { exact: true }).waitFor();
-    await page.getByLabel("Local analyst review key").fill(process.env.CORRIDOR_REVIEW_KEY);
+    await page.getByLabel("Local analyst review key").fill(process.env.NARCOTRACE_REVIEW_KEY);
     const queue = await api("/api/review-queue");
     const duplicate = queue.items.find(r=>r.status==="possible_duplicate");
     assert.ok(duplicate);
     const duplicateAttempt = await page.request.patch(`${base}/api/review-queue/${duplicate.id}`, {
-      headers:{"X-Corridor-Review-Key":process.env.CORRIDOR_REVIEW_KEY}, data:{status:"verified"} });
+      headers:{"X-NarcoTrace-Review-Key":process.env.NARCOTRACE_REVIEW_KEY}, data:{status:"verified"} });
     assert.equal(duplicateAttempt.status(),409);
     const verify = page.locator("article").filter({hasText:"Ernakulam archive adds"}).getByRole("button", { name: "Verify fixture" });
     if (await verify.count()) {
@@ -259,7 +259,7 @@ try {
   assert.ok(await page.getByLabel("Open reviewed real aggregate").isDisabled());
   await page.getByLabel("I have reviewed this aggregate for disclosure.").check();
   const upload = page.getByLabel("Open reviewed real aggregate");
-  const fixture = {schema:"corridor-real-aggregate-v1",synthetic:false,minimum_group:3,
+  const fixture = {schema:"narcotrace-real-aggregate-v1",synthetic:false,minimum_group:3,
     data_cutoff:"2025-11-20",generated_at:"2025-11-22T09:00:00Z",
     districts:[{district:"Wayanad",cases:4,metrics:[],ratios:[]},{district:"Ernakulam",cases:30,metrics:[{
       horizon_days:28,distinct_event_support:10,windows:12,metrics:{poisson_gbm:1.2345}
@@ -391,7 +391,7 @@ try {
   console.log("Browser: map, district and connection model comparisons, brief hand-off, scenarios, evidence and aggregate suppression passed.");
   console.log("Browser: offline model inference, blind outcome reveal, mismatch guard, accessible district map and run export passed.");
   console.log("Browser: offline rehearsal used local maps across both layouts and the detailed atlas without online tile requests.");
-  if (process.env.CORRIDOR_REVIEW_KEY) console.log("Browser: practice reporting receipt, analyst activity, private lead review and aggregate brief export passed.");
+  if (process.env.NARCOTRACE_REVIEW_KEY) console.log("Browser: practice reporting receipt, analyst activity, private lead review and aggregate brief export passed.");
 } finally {
   await browser.close();
 }

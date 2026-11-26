@@ -12,7 +12,7 @@ from ml.data.real_input import DISTRICTS
 from ml.local_api import local_api
 
 ATOM = "{http://www.w3.org/2005/Atom}"
-COR = "{urn:corridor:fixture}"
+COR = "{urn:narcotrace:fixture}"
 BASE_PATH = "/api/review-queue"
 FIXTURES = (Path("ml/collector/fixtures/demo.rss"), Path("ml/collector/fixtures/demo.atom"))
 
@@ -73,9 +73,9 @@ def find_duplicate(item, others):
 
 
 def run():
-    key = os.environ.get("CORRIDOR_REVIEW_KEY")
+    key = os.environ.get("NARCOTRACE_REVIEW_KEY")
     if not key:
-        raise SystemExit("Set CORRIDOR_REVIEW_KEY to the local key printed by make demo.")
+        raise SystemExit("Set NARCOTRACE_REVIEW_KEY to the local key printed by make demo.")
     base = local_api(BASE_PATH)
     with urlopen(base, timeout=5) as f:
         current = json.load(f)["items"]
@@ -86,7 +86,7 @@ def run():
             continue
         row["duplicate_of"] = find_duplicate(row, current + new)
         request = Request(base, data=json.dumps(row).encode(), method="POST",
-                          headers={"X-Corridor-Review-Key": key, "Content-Type": "application/json"})
+                          headers={"X-NarcoTrace-Review-Key": key, "Content-Type": "application/json"})
         with urlopen(request, timeout=5) as f:
             result = json.load(f)
         if result.get("synthetic") is not True:

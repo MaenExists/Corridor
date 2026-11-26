@@ -1,19 +1,19 @@
-# Corridor
+# NarcoTrace
 
-Corridor is an AI forecasting and recovery-planning system for Kerala, built for Hackfinity 2026. It learns from official records of drug cases to serve two audiences:
+NarcoTrace is an AI forecasting and recovery-planning system for Kerala, built for Hackfinity 2026. It learns from official records of drug cases to serve two audiences:
 
 1. **Where next.** Each month, it forecasts where in Kerala recorded NDPS cases are likely to concentrate next month. For each of the 14 districts it gives expected cases with an 80% range, the probability of being a top-four district, and the probability of running hot, meaning above its own normal share. The two hottest-probability districts become the month's alerts. Analysts see where activity is expected and how confident each call is.
 2. **Public and recovery services.** The recovery access map (`/recovery.html`) shows, square kilometre by square kilometre, where Kerala residents are far from de-addiction help and how many registered beds they can reach. It ranks named localities where new outreach or capacity would reach the most people. Rehabilitation centres and health services can see exactly where to focus. It never labels where people who use drugs live: no public source measures that, and doing so would stigmatise neighbourhoods and deter people from seeking treatment.
 
 ## Hackfinity
 
-St. John's School, Anchal hosts TOOFAN on 28 November 2026. Corridor fits **Prevention** through predictive analytics, with a **Recovery & Rehabilitation** component. The registered category is unconfirmed. Corridor is a student project independent of Kerala Police and Kerala Excise. [Hackfinity 2026](https://hackfinity.online/)
+St. John's School, Anchal hosts TOOFAN on 28 November 2026. NarcoTrace fits **Prevention** through predictive analytics, with a **Recovery & Rehabilitation** component. The registered category is unconfirmed. NarcoTrace is a student project independent of Kerala Police and Kerala Excise. [Hackfinity 2026](https://hackfinity.online/)
 
 ## What the model does today
 
 The forecasting model is trained on 105 months (January 2016 to September 2024) of official Kerala Excise district statements. We recovered these statements from the Internet Archive and verified every month against its printed statewide total. Expected count = the district's smoothed share of statewide cases × the latest statewide total, adjusted by a seasonal effect learned from earlier special-drive periods. Its design and pass/fail gates were registered before it was scored on January 2023 to September 2024, data it had not seen.
 
-| Next-month test, Jan 2023 – Sep 2024 | Corridor | Best simple method |
+| Next-month test, Jan 2023 – Sep 2024 | NarcoTrace | Best simple method |
 | --- | --- | --- |
 | Mean absolute error per district-month | 8.70 cases | 9.31 (12-month average) |
 | Bias | −0.1% | −4.6% |

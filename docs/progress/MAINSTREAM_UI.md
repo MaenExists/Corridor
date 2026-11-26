@@ -1,7 +1,7 @@
 # Satellite dashboard and review desk
 
 > Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
-Run `make setup && make demo`, then open http://127.0.0.1:5173. **Overview** and **Review desk** implement the two visual references in Corridor's existing app.
+Run `make setup && make demo`, then open http://127.0.0.1:5173. **Overview** and **Review desk** implement the two visual references in NarcoTrace's existing app.
 The workspace uses neutral black backgrounds. The Kerala map defaults to OpenStreetMap streets, with real zoom levels and attribution. Map **Layers** offers online NASA detail and the bundled NASA Landsat/Blue Marble archive. The archive is also the fallback when online tiles fail. The district inspector sits beside or below the map instead of covering it.
 The cards, charts, district inspector and review alerts use the existing synthetic archive, batch model and local inbox. The app does not simulate live agency access, risk scores or readiness percentages.
 **Patterns, Evidence, Scenarios, Methodology** open the held-out replay, source and review workflows, arithmetic what-ifs, and the coverage audit.

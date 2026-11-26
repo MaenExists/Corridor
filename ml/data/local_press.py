@@ -46,7 +46,7 @@ def retrieve(root, url):
         html = cache.read_text(encoding="utf-8")
     else:
         opener = build_opener(KeepCredentialOnHost())
-        request = Request(url, headers={"User-Agent": "Corridor research collection/1.0"})
+        request = Request(url, headers={"User-Agent": "NarcoTrace research collection/1.0"})
         try:
             with opener.open(request, timeout=18) as response:
                 if "html" not in response.headers.get("Content-Type", ""):

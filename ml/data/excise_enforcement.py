@@ -32,7 +32,7 @@ RAW = ROOT / "official" / "excise_enforcement"
 MANIFEST = RAW / "manifest.csv"
 PANEL = ROOT / "excise_enforcement_monthly.csv"
 HISTORY = ROOT / "excise_monthly_history.csv"
-USER_AGENT = "Corridor research client (offline public statistics study)"
+USER_AGENT = "NarcoTrace research client (offline public statistics study)"
 
 # Each statement row begins with a division label. Excise divisions match revenue districts.
 LABELS = {

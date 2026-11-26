@@ -64,7 +64,7 @@ const blank = (selection:Selection,horizon:7|28,role:Role):Draft => ({ district:
   connection:role==="analyst" && "connection" in selection?selection.connection.join("|"):null });
 function saveBlob(content:string,type:string,extension:string) {
   const url=URL.createObjectURL(new Blob([content],{type}));
-  const a=document.createElement("a");a.href=url;a.download=`corridor-synthetic-brief.${extension}`;a.click();
+  const a=document.createElement("a");a.href=url;a.download=`narcotrace-synthetic-brief.${extension}`;a.click();
   window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 const html = (v:unknown) => String(v ?? "Unknown").replace(/[&<>"']/g,k=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[k] || k);
@@ -107,14 +107,14 @@ export function Briefs({ forecasts, selection, horizon, role, onModel }: { forec
         abstain_reason:f.abstain_reason,uncertainty:f.uncertainty_note,coverage:f.coverage_gaps.join("; ")}:null};
     if(format==="json")saveBlob(JSON.stringify(out,null,2),"application/json",format);
     else saveBlob(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-      <title>Synthetic Corridor brief</title><style>
+      <title>Synthetic NarcoTrace brief</title><style>
       *{box-sizing:border-box}body{margin:0;background:#f0f5f3;color:#192826;font:16px/1.55 system-ui,sans-serif}
       main{width:min(94%,760px);margin:28px auto;background:#fff;padding:clamp(18px,5vw,48px);border-top:6px solid #237163}
       h1{line-height:1.15;letter-spacing:-.03em;margin:.35em 0}h2{font-size:1.18rem;margin:1.6em 0 .5em}
       .tag{letter-spacing:.12em;color:#175c50;font-size:.75rem}.notice{padding:12px;background:#edf4ef;border-left:3px solid #237163}
       dl{display:grid;grid-template-columns:minmax(7em,1fr) 2fr;margin:0}dt,dd{border-bottom:1px solid #dbe5e0;padding:6px;margin:0;overflow-wrap:anywhere}
       dt{font-weight:650}small{color:#455b54}@media print{body{background:white}main{width:100%;margin:0;padding:0;border:0}dt,dd{break-inside:avoid}}
-      </style><main><strong class="tag">CORRIDOR · SYNTHETIC DATA</strong>
+      </style><main><strong class="tag">NARCOTRACE · SYNTHETIC DATA</strong>
       <h1>${html(out.subject)} · ${out.horizon_days} days</h1><p><small>${html(out.disclaimer)}</small></p>
       <h2>Review assessment</h2><p>${html(out.assessment)}</p><p>Suggested follow-up: ${html(out.next_step)}.</p>
       <h2>Aggregate forecast at export</h2>

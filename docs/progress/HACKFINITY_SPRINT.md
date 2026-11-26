@@ -2,9 +2,9 @@
 
 > Historical checkpoint from the earlier demo build. The active rebuild scope is in [project.md](../../project.md) and [the model plan](../MODEL_PLAN.md).
 
-**Pitch:** Corridor helps prevention teams distinguish a forecast supported by documented records from a gap that needs independent data. It's an experiment you operate, not a heat map of danger.
+**Pitch:** NarcoTrace helps prevention teams distinguish a forecast supported by documented records from a gap that needs independent data. It's an experiment you operate, not a heat map of danger.
 
-[Hackfinity](https://hackfinity.online/) lists Awareness, Prevention, Recovery & Rehabilitation, and Innovation challenges. Pitch Corridor for **Innovation**, which matches the theme in `project.md`, with prevention teams as the intended users. If already registered for **Prevention**, keep the same build and lead with evidence quality for human review. The contribution is a forecast judges can run, check against a baseline, and see decline to answer. No agency endorsement, measured social impact, harm forecast or claim about judging criteria.
+[Hackfinity](https://hackfinity.online/) lists Awareness, Prevention, Recovery & Rehabilitation, and Innovation challenges. Pitch NarcoTrace for **Innovation**, which matches the theme in `project.md`, with prevention teams as the intended users. If already registered for **Prevention**, keep the same build and lead with evidence quality for human review. The contribution is a forecast judges can run, check against a baseline, and see decline to answer. No agency endorsement, measured social impact, harm forecast or claim about judging criteria.
 
 ## Day 1: build the stage moment
 

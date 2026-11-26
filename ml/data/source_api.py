@@ -85,7 +85,7 @@ class Client:
             url += "?" + query
         request = Request(url, method=method, headers={
             "Accept": "application/json",
-            "User-Agent": "Corridor research collection/1.0",
+            "User-Agent": "NarcoTrace research collection/1.0",
         })
         request.add_unredirected_header("Authorization", f"Token {self.token}")
         time.sleep(max(0.0, self.interval - (time.monotonic() - self.last_request)))

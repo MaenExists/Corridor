@@ -18,7 +18,7 @@ const exact = (v:Record<string,unknown>,keys:string[])=>Object.keys(v).every(k=>
 export function decodeRealAggregate(input: unknown): RealResult {
   const obj=record(input);
   const fail=()=>new Error("Choose the reviewed reports/real/ui_aggregate.json file. Raw or unrecognised records are not accepted.");
-  if(!obj || obj.synthetic!==false || obj.schema!=="corridor-real-aggregate-v1" ||
+  if(!obj || obj.synthetic!==false || !["narcotrace-real-aggregate-v1","corridor-real-aggregate-v1"].includes(String(obj.schema)) ||
     !exact(obj,["schema","synthetic","label","universe","minimum_group","districts","generated_at","data_cutoff","coverage_minimum","months"])
     || !count(obj.minimum_group) || obj.minimum_group>1000 || !Array.isArray(obj.districts) || obj.districts.length>14 ||
     !validDate(obj.data_cutoff) || !validDate(obj.generated_at)) throw fail();

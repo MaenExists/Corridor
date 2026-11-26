@@ -1,4 +1,4 @@
-/* The companion UI supplies the layout and tokens. These rules style Corridor-only controls. */
+/* The companion UI supplies the layout and tokens. These rules style NarcoTrace-only controls. */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .companion-sticky{position:sticky;top:0;z-index:18;background:#000}
 .companion-shell .sidebar nav{overflow-y:auto;min-height:0}

@@ -289,14 +289,14 @@ def aggregate_for_picker(report):
                           "metrics": rows, "ratios": ratios})
     months = [{**row, "articles": row["articles"] if isinstance(row["articles"], int) and row["articles"] >= n else None}
               for row in report["coverage"]["months"]]
-    return {"schema": "corridor-real-aggregate-v1", "synthetic": False, "minimum_group": n,
+    return {"schema": "narcotrace-real-aggregate-v1", "synthetic": False, "minimum_group": n,
             "label": LABEL_REAL, "universe": UNIVERSE, "districts": districts, "data_cutoff": report["data_cutoff"],
             "generated_at": report["generated_at"], "coverage_minimum": report["coverage"].get("coverage_floor", .05),
             "months": [{**r, "mix_change": False, "possible_break": False} if r["articles"] is None else r for r in months]}
 
 
 def html_report(report):
-    title = f"{report['label']} | Corridor evaluation"
+    title = f"{report['label']} | NarcoTrace evaluation"
     blocks = []
     for t in report["tasks"]:
         base = "".join(f"<tr><th>{escape(m)}</th><td>{s['n']}</td><td>{s['mae']}</td><td>{s['poisson_deviance']}</td></tr>"
@@ -342,7 +342,7 @@ def run(track):
     if not ds.synthetic:
         os.umask(0o077)
     tasks = [report_task(ds, s, h, splits, track, fingerprint) for s in ("area", "corridor") for h in (7, 28)]
-    report = {"schema": "corridor-eval-v1", "synthetic": ds.synthetic, "label": LABEL_SIM if ds.synthetic else LABEL_REAL,
+    report = {"schema": "narcotrace-eval-v1", "synthetic": ds.synthetic, "label": LABEL_SIM if ds.synthetic else LABEL_REAL,
         "universe": "Invented documented cases, not all movement. No real-world accuracy." if ds.synthetic else UNIVERSE,
         "run_id": fingerprint, "generated_at": datetime.now(timezone.utc).isoformat(), "data_cutoff": ds.as_of.isoformat(),
         "splits": {k: [o.isoformat() for o in v] for k,v in zip(("selection", "calibration", "final"), splits)},

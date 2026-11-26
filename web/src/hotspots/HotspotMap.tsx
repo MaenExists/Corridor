@@ -140,7 +140,7 @@ export function HotspotMap() {
   return <main className="recovery">
     <header className="recovery-head">
       <div>
-        <p className="eyebrow">Corridor · where next</p>
+        <p className="eyebrow">NarcoTrace · where next</p>
         <h1>Where the next reported seizure is most likely</h1>
         <p className="lede">The top 1% of Kerala's 1 km cells for the next {brief?.horizon_days ?? 28} days, ranked by a
           {" "}{brief ? MODEL[brief.model] : "grid model"} trained on dated, located seizure reports. Cells are

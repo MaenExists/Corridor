@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Forecast } from "../../../shared/schema";
 import { dateLabel, DISTRICTS, methodName, NOTICE, pct } from "../data";
 import type { Cases, Evaluation, Forecasts, Selection } from "../data";
-import CorridorMap from "./components/corridor-map";
+import NarcoTraceMap from "./components/narcotrace-map";
 import { dayShift, observedCases, pairId, pairLabel } from "./model";
 import type { MapRecord } from "./model";
 
@@ -131,7 +131,7 @@ export function Atlas({ data, forecasts, report, selection, select, horizon, set
           <span><strong>{filtered.length}</strong> source records</span><span><strong>{filtered.filter(r=>r.status==="documented").length}</strong> reviewed fixtures</span>
           <button className={`toggle ${showForecast?"active":""}`} aria-pressed={showForecast} onClick={()=>setShowForecast(!showForecast)}>
             <span className="switch"/> Forecast layer <span className="experimental">Experimental</span></button></div>
-        <CorridorMap records={filtered} selected={selection} onSelect={select} forecast={current} connections={connections}
+        <NarcoTraceMap records={filtered} selected={selection} onSelect={select} forecast={current} connections={connections}
           showForecast={showForecast} coverage={data.coverage} coverageThreshold={coverageThreshold} showPoints={points}
           setShowPoints={setPoints} focusedDistrict={district} searchText={query} onSearchTextChange={setQuery} searchRequest={searchRequest}
           streetMap={streetMap}/>

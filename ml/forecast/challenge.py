@@ -76,7 +76,7 @@ def build(ds, report, replay):
             frames.append({"cutoff": origin.isoformat(), "start": (origin + timedelta(days=1)).isoformat(),
                            "end": (origin + timedelta(days=horizon)).isoformat(), "districts": districts})
         out.append({"horizon": horizon, "model": export, "training_windows": len(train), "frames": frames})
-    return {"schema": "corridor-challenge-v1", "synthetic": True, "run_id": report["run_id"],
+    return {"schema": "narcotrace-challenge-v1", "synthetic": True, "run_id": report["run_id"],
             "frozen_at": origins[0].isoformat(), "tasks": out}
 
 

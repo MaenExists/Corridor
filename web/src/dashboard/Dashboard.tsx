@@ -173,8 +173,8 @@ export function Dashboard() {
       <p>Demo only. Not a production authorization system.</p>
     </div>
   </details>;
-  const brand=<button className="console-brand" onClick={()=>{if(!real){setLayout("overview");go("challenge");}}} aria-label="Corridor home">
-    <KeralaMark className="console-brand-mark"/><span><strong>CORRIDOR</strong><small>Kerala Forecasting Lab</small></span></button>;
+  const brand=<button className="console-brand" onClick={()=>{if(!real){setLayout("overview");go("challenge");}}} aria-label="NarcoTrace home">
+    <KeralaMark className="console-brand-mark"/><span><strong>NARCOTRACE</strong><small>Kerala Forecasting Lab</small></span></button>;
   const nav=<nav className="console-nav" aria-label="Main navigation">
     {pages.filter(p=>!desk||p.id!=="challenge").map(({id,label,icon:Icon})=>{
       const title=desk&&id==="overview"?"Review desk":label;

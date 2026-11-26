@@ -47,7 +47,7 @@ def test_challenge_is_synthetic_and_contains_only_frozen_inputs():
     pack = json.loads(path.read_text())
     replay = json.loads((WEB / "replay.json").read_text())
     assert pack["synthetic"] is replay["synthetic"] is True
-    assert pack["schema"] == "corridor-challenge-v1" and pack["run_id"] == replay["run_id"]
+    assert pack["schema"] == "narcotrace-challenge-v1" and pack["run_id"] == replay["run_id"]
     assert {task["horizon"] for task in pack["tasks"]} == {7, 28}
     for task in pack["tasks"]:
         expected = next(t for t in replay["tasks"] if t["scope"] == "area" and t["horizon_days"] == task["horizon"])

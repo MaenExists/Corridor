@@ -31,7 +31,7 @@ async function all(db: D1Database, sql: string, values: unknown[] = []) {
 }
 
 function analyst(req: Request, env: Env) {
-  return !!env.DEMO_REVIEW_KEY && req.headers.get("X-Corridor-Review-Key") === env.DEMO_REVIEW_KEY;
+  return !!env.DEMO_REVIEW_KEY && req.headers.get("X-NarcoTrace-Review-Key") === env.DEMO_REVIEW_KEY;
 }
 
 async function assets(env: Env, url: URL, name: string) {
@@ -49,7 +49,7 @@ async function api(req: Request, env: Env): Promise<Response> {
   const origin = req.headers.get("Origin");
   if (origin && !["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8787", "http://localhost:8787", env.DEMO_WEB_ORIGIN].includes(origin))
     return problem("This demo only accepts local requests.", 403);
-  if (path === "/api/health" && method === "GET") return json({ service: "Corridor local demo", status: "ok" });
+  if (path === "/api/health" && method === "GET") return json({ service: "NarcoTrace local demo", status: "ok" });
   if (path === "/api/forecasts/latest" && method === "GET") return json(await assets(env, u, "forecasts.json"));
   if (path === "/api/cases" && method === "GET") {
     const data = await assets(env, u, "cases_synthetic.json");

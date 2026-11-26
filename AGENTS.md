@@ -1,7 +1,7 @@
-# Corridor operating notes
+# NarcoTrace operating notes
 
 - The current scope is in [project.md](project.md). Read [the model plan](docs/MODEL_PLAN.md) before changing forecasting and [the data research](docs/DATA_SOURCES.md) before considering any imports. Checkpoint in docs/progress.
-- The repository owner has requested direct commits and pushes for completed, verified work in this workspace. Use the current branch on the configured Corridor GitHub origin. Keep private inputs, reports, and model artifacts out of commits.
+- The repository owner has requested direct commits and pushes for completed, verified work in this workspace. Use the current branch on the configured NarcoTrace GitHub origin. Keep private inputs, reports, and model artifacts out of commits.
 - Build in order from official aggregate intake to district forecasting and separate care planning, then evaluate documented district links. Use 30 June 2026 end of day IST as the proposed knowledge cutoff. Later mature observations form a separate check.
 - Use official documented seizure or registration counts with compatible coverage and definitions. Court and news are a supplementary sample, not a census. Infrastructure is orientation. Never treat coverage gaps as safety. Keep effort, population, prevalence, care utilization and seizure measurements distinct.
 - Keep synthetic and real tracks segregated. Work offline except dependency installs, the public basemap and explicitly requested public-source research or acquisition. Raw private data, file URLs, coordinates, identifiers and model artifacts stay local and out of logs, exports, commits and serving paths. Private reports remain gitignored pending owner disclosure review. Use no credentialed source or licensed corpus without authorized access. Public artifacts require synthetic provenance or a separately reviewed disclosure process.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cor="urn:corridor:fixture">
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cor="urn:narcotrace:fixture">
   <title>Fictional District Bulletin</title>
   <entry><title>[FICTIONAL] Simulated documented case added to Ernakulam archive</title><link href="https://fixture.invalid/bulletin/01"/><published>2026-11-20T09:00:00Z</published><cor:district>Ernakulam</cor:district><cor:event_date>2026-11-18</cor:event_date></entry>
   <entry><title>[FICTIONAL] Kozhikode reporting sample receives a fictional archival update</title><link href="https://fixture.invalid/bulletin/02"/><published>2026-11-20T08:00:00Z</published><cor:district>Kozhikode</cor:district><cor:event_date>2026-11-19</cor:event_date></entry>

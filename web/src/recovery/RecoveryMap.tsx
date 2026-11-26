@@ -144,7 +144,7 @@ export function RecoveryMap() {
   return <div className="recovery">
     <header className="recovery-head">
       <div>
-        <p className="eyebrow">Corridor · Public recovery planning</p>
+        <p className="eyebrow">NarcoTrace · Public recovery planning</p>
         <h1>Where Kerala residents are far from de-addiction help</h1>
         <p className="lede">Each 1 km square shows how far its residents are from the nearest de-addiction centre and how many registered beds are within reach. Ranked places show where new outreach or capacity would reach the most people. The map never shows where people who use drugs live.</p>
       </div>

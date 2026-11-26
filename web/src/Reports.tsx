@@ -7,14 +7,14 @@ function get<T>(data: unknown, key: string): T | undefined {
 }
 export function readSyntheticReport(raw: unknown): Evaluation {
   const x = raw as Evaluation;
-  if (get(raw,"schema") !== "corridor-eval-v1" || get(raw,"synthetic") !== true || !Array.isArray(x.tasks)
+  if (!["narcotrace-eval-v1","corridor-eval-v1"].includes(String(get(raw,"schema"))) || get(raw,"synthetic") !== true || !Array.isArray(x.tasks)
     || !Array.isArray(x.splits?.final) || !x.splits.final.length || !Number.isFinite(Date.parse(x.data_cutoff))
     || !Number.isFinite(Date.parse(x.generated_at)) || typeof x.feedback !== "string"
     || x.tasks.some(t=>!t || !Array.isArray(t.locations) || !Array.isArray(t.replay) || !t.metrics ||
       !t.abstention_reasons || !t.ranking || !t.interval || !Array.isArray(t.monitoring) || ![7,28].includes(t.horizon_days)
       || !["area","corridor"].includes(t.scope) || t.locations.some(r=>!Array.isArray(r.baseline_beats_candidate) || !r.metrics || !r.interval)
       || t.replay.some(r=>!r.scores || !r.interval || !Number.isFinite(Date.parse(r.date)))))
-    throw new Error("Choose a Corridor synthetic eval_report.json file. Real aggregates have their own view.");
+    throw new Error("Choose a NarcoTrace synthetic eval_report.json file. Real aggregates have their own view.");
   return x;
 }
 const display = (v: number | null | undefined) => v != null && Number.isFinite(v) ? v.toLocaleString("en-IN",{maximumFractionDigits:3}) : "—";
