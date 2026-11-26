@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 import type * as Leaflet from "leaflet";
 import type { Cell, Gateway, HotspotKind, Level, WatchPlace } from "@/lib/types";
+import { BLOCK, STEP, TIP_WHAT, type ConcernBlock } from "@/lib/tipRules";
 import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
 
 export type { Basemap };
-export type Layers = { places: boolean; kinds: boolean; gateways: boolean };
+export type Layers = { places: boolean; kinds: boolean; gateways: boolean; concern: boolean };
 export type Focus = { lat: number; lon: number; zoom?: number } | null;
 
 const LEVEL_FILL: Record<Level, string> = { high: "#ff3b26", elevated: "#c0341f", watch: "#6e2519" };
@@ -21,6 +22,7 @@ type Props = {
   places: WatchPlace[];
   kinds: HotspotKind[];
   gateways: Gateway[];
+  concern: ConcernBlock[];
   basemap: Basemap;
   layers: Layers;
   focus: Focus;
@@ -40,7 +42,7 @@ export default function MapView(props: Props) {
 
   useLeafletMap(host, c => {
     ctx.current = c; L.current = c.L; map.current = c.map;
-    for (const name of ["cells", "dots", "kinds", "gateways", "focus"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
+    for (const name of ["concern", "cells", "dots", "kinds", "gateways", "focus"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
     c.map.on("zoomend", () => showScale());
     drawAll();
   }, () => { map.current = null; ctx.current = null; });
@@ -119,6 +121,21 @@ export default function MapView(props: Props) {
     }
   }
 
+  // Public tips: unverified, so drawn as dashed outlines that never look like forecast squares.
+  function drawConcern() {
+    const leaflet = L.current, g = groups.current.concern;
+    if (!leaflet || !g) return;
+    g.clearLayers();
+    if (!props.layers.concern) return;
+    const h = BLOCK * STEP / 2;
+    for (const b of props.concern) {
+      leaflet.rectangle([[b.lat - h, b.lon - h], [b.lat + h, b.lon + h]], {
+        color: "#e8e6df", weight: 1.5, dashArray: "4 4", fillColor: "#e8e6df", fillOpacity: .1,
+      }).bindTooltip(`Public tips${b.near ? ` near ${b.near}` : ""}: ${b.reporters} people, ${TIP_WHAT[b.what].label.toLowerCase()}. Unverified.`,
+        { className: "nt-tip", direction: "top" }).addTo(g);
+    }
+  }
+
   function drawFocus() {
     const leaflet = L.current, m = map.current, g = groups.current.focus;
     if (!leaflet || !m || !g) return;
@@ -129,13 +146,14 @@ export default function MapView(props: Props) {
       .addTo(g);
   }
 
-  function drawAll() { drawBase(); drawCells(); drawDots(); drawKinds(); drawGateways(); }
+  function drawAll() { drawBase(); drawConcern(); drawCells(); drawDots(); drawKinds(); drawGateways(); }
 
   useEffect(drawBase, [props.basemap]);
   useEffect(drawCells, [props.cells, props.layers.places]);
   useEffect(drawDots, [props.places, props.layers.places]);
   useEffect(drawKinds, [props.kinds, props.layers.kinds, props.selectedId]);
   useEffect(drawGateways, [props.gateways, props.layers.gateways]);
+  useEffect(drawConcern, [props.concern, props.layers.concern]);
   useEffect(drawFocus, [props.focus]);
 
   return <div ref={host} className="absolute inset-0" aria-label="Map of Kerala" role="region" />;

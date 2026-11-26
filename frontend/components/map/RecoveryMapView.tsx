@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type * as Leaflet from "leaflet";
 import type { Centre } from "@/lib/types";
 import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
+import { STEP, cellOf, centreOf } from "@/lib/tipRules";
 
 export type AccessLayer = "distance" | "beds" | "none";
 export type Point = { lat: number; lon: number; zoom?: number } | null;
@@ -53,6 +54,10 @@ type Props = {
   showCentres: boolean;
   focus: Point;
   probe: Point;
+  /** A report location: the 1 km square it was snapped to. */
+  pick?: [number, number] | null;
+  /** Whether the picked square is a populated Kerala square, once the grid has loaded. */
+  onPickInside?: (inside: boolean) => void;
   selectedCentre: string | null;
   onProbe: (lat: number, lon: number) => void;
   onCentre: (id: string) => void;
@@ -65,17 +70,18 @@ export default function RecoveryMapView(props: Props) {
   const groups = useRef<Record<string, Leaflet.LayerGroup>>({});
   const grid = useRef<Grid | null>(null);
   const overlay = useRef<Leaflet.ImageOverlay | null>(null);
+  const cells = useRef<Set<string> | null>(null);
   const handlers = useRef(props);
   handlers.current = props;
 
   useLeafletMap(host, c => {
     ctx.current = c;
-    for (const name of ["centres", "probe", "focus"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
+    for (const name of ["centres", "probe", "focus", "pick"]) groups.current[name] = c.L.layerGroup().addTo(c.map);
     c.map.on("click", e => handlers.current.onProbe(e.latlng.lat, e.latlng.lng));
     setBasemap(c, handlers.current.basemap);
-    drawCentres(); drawProbe();
+    drawCentres(); drawProbe(); drawPick();
     fetch("/api/recovery/cells").then(r => r.ok ? r.json() as Promise<Grid> : null).then(g => {
-      grid.current = g; handlers.current.onGridReady?.(!!g); drawGrid();
+      grid.current = g; cells.current = null; handlers.current.onGridReady?.(!!g); drawGrid(); drawPick();
     }).catch(() => handlers.current.onGridReady?.(false));
   }, () => { ctx.current = null; });
 
@@ -115,6 +121,22 @@ export default function RecoveryMapView(props: Props) {
     }).addTo(g);
   }
 
+  function drawPick() {
+    const c = ctx.current, g = groups.current.pick;
+    if (!c || !g) return;
+    g.clearLayers();
+    if (!props.pick) return;
+    const { lat, lon } = centreOf(...props.pick), h = STEP / 2;
+    if (grid.current && !cells.current)
+      cells.current = new Set(grid.current.lat.map((a, i) => cellOf(a, grid.current!.lon[i]).join(":")));
+    const inside = cells.current ? cells.current.has(props.pick.join(":")) : true;
+    handlers.current.onPickInside?.(inside);
+    c.L.rectangle([[lat - h, lon - h], [lat + h, lon + h]], { color: inside ? "#ff3b26" : "#7d7b74", weight: 2,
+      fillColor: inside ? "#ff3b26" : "#7d7b74", fillOpacity: .18, dashArray: inside ? undefined : "3 3", interactive: false }).addTo(g);
+    // A tap at state scale is too small to check; come in close enough to see the square.
+    if (inside && c.map.getZoom() < 11) c.map.flyTo([lat, lon], 13, { duration: .6 });
+  }
+
   function drawFocus() {
     const c = ctx.current;
     if (!c || !props.focus) return;
@@ -125,6 +147,7 @@ export default function RecoveryMapView(props: Props) {
   useEffect(drawGrid, [props.layer]);
   useEffect(drawCentres, [props.centres, props.showCentres, props.selectedCentre]);
   useEffect(drawProbe, [props.probe]);
+  useEffect(drawPick, [props.pick?.[0], props.pick?.[1]]);
   useEffect(drawFocus, [props.focus]);
 
   return <div ref={host} className="absolute inset-0 cursor-crosshair" aria-label="Map of access to de-addiction help" role="region" />;

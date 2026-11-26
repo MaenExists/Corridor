@@ -9,23 +9,25 @@ import { KIND, LEVEL, date } from "./copy";
 import { WatchTab, WhyTab, DistrictTab } from "./Tabs";
 import { DetailCard, type Selection } from "./DetailCard";
 import { TrackRecord } from "./TrackRecord";
+import { ConcernTab } from "./ConcernTab";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
   loading: () => <div className="absolute inset-0 grid place-items-center label text-mute">Loading map</div>,
 });
 
-type Tab = "watch" | "why" | "districts";
+type Tab = "watch" | "why" | "districts" | "tips";
 const TABS: { id: Tab; label: string; hint: string }[] = [
-  { id: "watch", label: "Where to look", hint: "Next four weeks" },
+  { id: "watch", label: "Where to look", hint: "Four weeks" },
   { id: "why", label: "Why there", hint: "Patterns" },
-  { id: "districts", label: "Districts", hint: "Official counts" },
+  { id: "districts", label: "Districts", hint: "Official" },
+  { id: "tips", label: "Public tips", hint: "Unverified" },
 ];
 
 export function EnforcementApp({ view }: { view: EnforcementView }) {
   const [tab, setTab] = useState<Tab>("watch");
   const [basemap, setBasemap] = useState<Basemap>("satellite");
-  const [layers, setLayers] = useState<Layers>({ places: true, kinds: false, gateways: true });
+  const [layers, setLayers] = useState<Layers>({ places: true, kinds: false, gateways: true, concern: true });
   const [selection, setSelection] = useState<Selection>(null);
   const [focus, setFocus] = useState<Focus>(null);
 
@@ -42,6 +44,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
   const onTab = (t: Tab) => {
     setTab(t);
     if (t === "why") setLayers(l => ({ ...l, kinds: true, gateways: true }));
+    if (t === "tips") setLayers(l => ({ ...l, concern: true }));
   };
   const latest = view.freshness[0]?.latest ?? view.asOf;
   const highCount = useMemo(() => view.places.filter(p => p.level === "high").length, [view.places]);
@@ -53,7 +56,7 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
       {/* Body: the map leads, a ruled rail on the right */}
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
         <section className="relative h-[62vh] lg:h-auto lg:min-h-0 border-b lg:border-b-0 border-ink overflow-hidden">
-          <MapView cells={view.cells} places={view.places} kinds={view.kinds} gateways={view.gateways}
+          <MapView cells={view.cells} places={view.places} kinds={view.kinds} gateways={view.gateways} concern={view.concern.blocks}
             basemap={basemap} layers={layers} focus={focus} selectedId={selection?.id ?? null} onSelect={select} />
 
           {/* Legend, top left */}
@@ -72,6 +75,10 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
               <Toggle on={layers.gateways} onClick={() => setLayers(l => ({ ...l, gateways: !l.gateways }))}>
                 <span className="w-4 text-center">◆</span>
                 Border crossings
+              </Toggle>
+              <Toggle on={layers.concern} onClick={() => setLayers(l => ({ ...l, concern: !l.concern }))}>
+                <span className="block size-3.5 border border-dashed border-ink" />
+                Public tips <span className="text-mute">· unverified</span>
               </Toggle>
             </div>
             <div className="hidden md:block px-3 py-2 border-t border-ink text-[11.5px] text-ink-2 leading-snug">
@@ -99,10 +106,10 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
         </section>
 
         <aside className="flex flex-col lg:min-h-0 lg:border-l border-ink bg-paper">
-          <div className="grid grid-cols-3 border-b border-ink" role="tablist">
+          <div className="grid grid-cols-4 border-b border-ink" role="tablist">
             {TABS.map((t, i) => (
               <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => onTab(t.id)}
-                className={`text-left px-3 md:px-4 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                className={`text-left px-2.5 md:px-3.5 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
                 <span className="block text-[13.5px] font-medium leading-tight">{t.label}</span>
                 <span className={`label ${tab === t.id ? "text-paper/60" : "text-mute"}`}>{t.hint}</span>
               </button>
@@ -113,6 +120,10 @@ export function EnforcementApp({ view }: { view: EnforcementView }) {
               onPick={id => select("place", id)} />}
             {tab === "why" && <WhyTab view={view} selectedId={selection?.id ?? null} onPick={select} />}
             {tab === "districts" && <DistrictTab view={view} />}
+            {tab === "tips" && <ConcernTab concern={view.concern} onPick={b => {
+              setSelection(null); setFocus({ lat: b.lat, lon: b.lon, zoom: 12 });
+              if (window.matchMedia("(max-width: 1023px)").matches) window.scrollTo({ top: 0, behavior: "smooth" });
+            }} />}
           </div>
         </aside>
       </main>

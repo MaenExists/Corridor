@@ -7,17 +7,20 @@ import { Header } from "@/components/Header";
 import type { Basemap } from "@/components/map/base";
 import { BED_STEPS, DISTANCE_STEPS, type AccessLayer, type Point } from "@/components/map/RecoveryMapView";
 import { date, pct } from "@/components/enforcement/copy";
+import { cellOf } from "@/lib/tipRules";
+import { ReportTab } from "./ReportTab";
 
 const RecoveryMapView = dynamic(() => import("@/components/map/RecoveryMapView"), {
   ssr: false,
   loading: () => <div className="absolute inset-0 grid place-items-center label text-mute">Loading map</div>,
 });
 
-type Tab = "far" | "find" | "districts";
+type Tab = "far" | "find" | "districts" | "report";
 const TABS: { id: Tab; label: string; hint: string }[] = [
-  { id: "far", label: "Far from help", hint: "Places" },
+  { id: "far", label: "Far away", hint: "Places" },
   { id: "find", label: "Find help", hint: "Centres" },
   { id: "districts", label: "Districts", hint: "Compare" },
+  { id: "report", label: "Report", hint: "Tell us" },
 ];
 
 function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
@@ -41,6 +44,17 @@ export function PublicApp({ view }: { view: PublicView }) {
   const [onlyGov, setOnlyGov] = useState(false);
   const [gridState, setGridState] = useState<"loading" | "ready" | "missing">("loading");
   const [locating, setLocating] = useState<string | null>(null);
+  const [pick, setPick] = useState<[number, number] | null>(null);
+  const [pickInside, setPickInside] = useState(true);
+  const reporting = tab === "report";
+  const [formOpen, setFormOpen] = useState(false);
+  // Marking a spot needs streets and buildings, so the shading steps aside while reporting.
+  const [savedLayer, setSavedLayer] = useState<AccessLayer | null>(null);
+  const chooseTab = (t: Tab) => {
+    if (t === "report" && tab !== "report") { setSavedLayer(layer); setLayer("none"); }
+    if (t !== "report" && tab === "report" && savedLayer) { setLayer(savedLayer); setSavedLayer(null); }
+    setTab(t);
+  };
 
   const nearest = useMemo(() => probe ? view.centres.map(c => ({ c, d: km(probe, c) })).sort((a, b) => a.d - b.d).slice(0, 3) : [],
     [probe, view.centres]);
@@ -53,6 +67,10 @@ export function PublicApp({ view }: { view: PublicView }) {
     showMapOnSmall();
   };
   const pickCentre = (c: Centre) => { setCentreId(c.id); setProbe(null); setFocus({ lat: c.lat, lon: c.lon, zoom: 12 }); showMapOnSmall(); };
+  const pickAt = (lat: number, lon: number, zoom?: number) => {
+    setPick(cellOf(lat, lon)); setProbe(null); setCentreId(null);
+    if (zoom) setFocus({ lat, lon, zoom });
+  };
   const locate = () => {
     if (!navigator.geolocation) { setLocating("This browser cannot share a location."); return; }
     setLocating("Finding you…");
@@ -74,14 +92,15 @@ export function PublicApp({ view }: { view: PublicView }) {
 
   return (
     <div className="min-h-dvh lg:h-dvh grid grid-rows-[56px_auto_auto] lg:grid-rows-[56px_minmax(0,1fr)_auto] bg-paper">
-      <Header section="public" tagline="Where people live far from de-addiction help, and where the nearest help is."
+      <Header section="public" tagline="Where help is far, where the nearest help is, and a safe way to report what you notice."
         updated={view.checkedOn ? date(view.checkedOn) : undefined} />
 
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
         <section className="relative h-[62vh] lg:h-auto lg:min-h-0 border-b lg:border-b-0 border-ink overflow-hidden">
           <RecoveryMapView centres={view.centres} basemap={basemap} layer={layer} showCentres={showCentres} focus={focus}
-            probe={probe} selectedCentre={centreId} onProbe={(lat, lon) => probeAt(lat, lon, "This spot")}
-            onCentre={id => { const c = view.centres.find(x => x.id === id); if (c) pickCentre(c); }}
+            probe={reporting ? null : probe} pick={reporting ? pick : null} onPickInside={setPickInside} selectedCentre={centreId}
+            onProbe={(lat, lon) => reporting ? pickAt(lat, lon) : probeAt(lat, lon, "This spot")}
+            onCentre={id => { const c = view.centres.find(x => x.id === id); if (c) reporting ? pickAt(c.lat, c.lon) : pickCentre(c); }}
             onGridReady={ok => setGridState(ok ? "ready" : "missing")} />
 
           <div className="absolute left-3 top-3 md:left-4 md:top-4 z-[500] bg-paper border border-ink w-[206px] md:w-[260px]">
@@ -123,13 +142,17 @@ export function PublicApp({ view }: { view: PublicView }) {
             <button onClick={locate} className="label px-3 py-2 border border-ink bg-paper hover:bg-ink hover:text-paper">◎ Near me</button>
           </div>
 
-          {!probe && !centre && (
+          {reporting ? formOpen && (
+            <div className={`absolute left-3 bottom-3 md:left-4 md:bottom-4 z-[500] border px-3 py-2 text-[12.5px] ${pick && pickInside ? "bg-paper border-ink" : "bg-signal border-signal text-white"}`}>
+              {!pick ? "Tap the map where you noticed it." : pickInside ? "Marked. Tap again to move it." : "That spot is outside Kerala's populated area. Tap inside the outline."}
+            </div>
+          ) : !probe && !centre && (
             <div className="hidden md:block absolute left-4 bottom-4 z-[500] bg-paper border border-ink px-3 py-2 text-[12.5px]">
               {locating ?? "Tap anywhere on the map to see the nearest help."}
             </div>
           )}
 
-          {probe && (
+          {probe && !reporting && (
             <Card onClose={() => setProbe(null)} eyebrow={probeLabel}
               title={nearest[0] ? `${nearest[0].d < 1 ? "Under 1" : Math.round(nearest[0].d)} km to the nearest help` : "No centre found"}>
               <ol>
@@ -150,7 +173,7 @@ export function PublicApp({ view }: { view: PublicView }) {
             </Card>
           )}
 
-          {centre && (
+          {centre && !reporting && (
             <Card onClose={() => setCentreId(null)} eyebrow={centre.government ? "Government de-addiction centre" : "Registered de-addiction centre"}
               title={centre.name}>
               <div className="grid grid-cols-2 border-t border-ink">
@@ -169,16 +192,20 @@ export function PublicApp({ view }: { view: PublicView }) {
         </section>
 
         <aside className="flex flex-col lg:min-h-0 lg:border-l border-ink bg-paper">
-          <div className="grid grid-cols-3 border-b border-ink" role="tablist">
+          <div className="grid grid-cols-4 border-b border-ink" role="tablist">
             {TABS.map((t, i) => (
-              <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-                className={`text-left px-3 md:px-4 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+              <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => chooseTab(t.id)}
+                className={`text-left px-2.5 md:px-3.5 py-3 ${i ? "border-l border-ink" : ""} ${tab === t.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
                 <span className="block text-[13.5px] font-medium leading-tight">{t.label}</span>
                 <span className={`label ${tab === t.id ? "text-paper/60" : "text-mute"}`}>{t.hint}</span>
               </button>
             ))}
           </div>
           <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto scroll-thin">
+            {tab === "report" && (
+              <ReportTab pick={pick && pickInside ? pick : null} onPick={(lat, lon) => pickAt(lat, lon, 13)} onClearPick={() => setPick(null)}
+                onFindHelp={() => { chooseTab("find"); locate(); }} onFormOpen={setFormOpen} />
+            )}
             {view.missing && <p className="m-5 p-3 border border-ink text-[13px]">{view.missing}</p>}
 
             {tab === "far" && !view.missing && (

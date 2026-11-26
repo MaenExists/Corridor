@@ -1,3 +1,5 @@
+import type { ConcernSummary } from "./tipRules";
+
 export type Level = "high" | "elevated" | "watch";
 
 export type WatchPlace = {
@@ -72,6 +74,7 @@ export type EnforcementView = {
   districtForecast: { status: string; note: string };
   weekly: number[];
   record: Record | null;
+  concern: ConcernSummary;
   missing: string[];
 };
 

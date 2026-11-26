@@ -1,6 +1,7 @@
 import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { concernSummary } from "./tips";
 import type { Cell, DistrictRow, EnforcementView, Gateway, HotspotKind, Level, WatchPlace } from "./types";
 
 // Model outputs stay local and gitignored; the server reads them at request time.
@@ -123,13 +124,21 @@ async function districts(): Promise<{ rows: DistrictRow[] }> {
 }
 
 export async function enforcementView(): Promise<EnforcementView> {
-  const [grid, patterns, district, forecasts] = await Promise.all([
+  const [grid, patterns, district, forecasts, concern] = await Promise.all([
     json<Grid>(path.join(GENERATED, "grid_forecast.json")),
     json<Patterns>(path.join(GENERATED, "patterns.json")),
     districts(),
     json<{ status: string; latest_complete_month: string; resume_after_gap_months: number }>(
       path.join(PUBLIC, "prepared/district_monthly/forecast_2026-11-30.json")),
+    concernSummary(),
   ]);
+  // Name each public-tip area after the nearest known locality, so nobody reads coordinates off a list.
+  const named = [...(grid?.cells ?? []).map(c => ({ lat: c.lat, lon: c.lon, name: c.locality })),
+    ...(patterns?.clusters ?? []).map(c => ({ lat: c.lat, lon: c.lon, name: c.locality }))];
+  for (const b of concern.blocks) {
+    const best = named.map(n => ({ n, d: km(n, b) })).sort((x, y) => x.d - y.d)[0];
+    b.near = best && best.d < 8 ? best.n.name : undefined;
+  }
   const missing: string[] = [];
   if (!grid) missing.push("Grid forecast not built. Run make news-harvest hotspot-forecast.");
   if (!patterns) missing.push("Pattern brief not built. Run make patterns-forecast.");
@@ -173,6 +182,7 @@ export async function enforcementView(): Promise<EnforcementView> {
       topTwenty: 20, topTwentyHit: cc.top20_with_later_report,
       newPlaces: cc.total.new_place_reports, newCaught: cc.total.risk_terrain_watch,
     } : null,
+    concern,
     missing,
   };
 }
