@@ -1,9 +1,9 @@
 import type { Level } from "@/lib/types";
 
 export const LEVEL: Record<Level, { label: string; fill: string; text: string }> = {
-  high: { label: "High", fill: "#e0301e", text: "Most likely" },
-  elevated: { label: "Raised", fill: "#f07a5c", text: "Likely" },
-  watch: { label: "Watch", fill: "#f6c7bf", text: "Worth watching" },
+  high: { label: "High", fill: "#ff3b26", text: "Most likely" },
+  elevated: { label: "Raised", fill: "#c0341f", text: "Likely" },
+  watch: { label: "Watch", fill: "#6e2519", text: "Worth watching" },
 };
 
 export const KIND: Record<string, { letter: string; title: string; plain: string }> = {

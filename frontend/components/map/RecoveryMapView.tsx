@@ -9,11 +9,11 @@ export type AccessLayer = "distance" | "beds" | "none";
 export type Point = { lat: number; lon: number; zoom?: number } | null;
 
 export const DISTANCE_STEPS: [number, string, string][] = [
-  [5, "#efeadf", "under 5 km"], [10, "#f6c7bf", "5–10 km"], [15, "#f07a5c", "10–15 km"],
-  [20, "#e0301e", "15–20 km"], [Infinity, "#7a1209", "over 20 km"],
+  [5, "#161615", "under 5 km"], [10, "#5a1c14", "5–10 km"], [15, "#a8291a", "10–15 km"],
+  [20, "#ff3b26", "15–20 km"], [Infinity, "#ff8a6e", "over 20 km"],
 ];
 export const BED_STEPS: [number, string, string][] = [
-  [5, "#7a1209", "under 5"], [20, "#e0301e", "5–20"], [50, "#f07a5c", "20–50"], [100, "#f6c7bf", "50–100"],
+  [5, "#ff8a6e", "under 5"], [20, "#ff3b26", "5–20"], [50, "#a8291a", "20–50"], [100, "#5a1c14", "50–100"],
   [Infinity, "transparent", "100 or more"],
 ];
 const colour = (steps: [number, string, string][], v: number) => steps.find(s => v < s[0])![1];

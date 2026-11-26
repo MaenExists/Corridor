@@ -9,7 +9,7 @@ export type { Basemap };
 export type Layers = { places: boolean; kinds: boolean; gateways: boolean };
 export type Focus = { lat: number; lon: number; zoom?: number } | null;
 
-const LEVEL_FILL: Record<Level, string> = { high: "#e0301e", elevated: "#f07a5c", watch: "#f6c7bf" };
+const LEVEL_FILL: Record<Level, string> = { high: "#ff3b26", elevated: "#c0341f", watch: "#6e2519" };
 const KIND_LETTER: Record<string, string> = {
   "entry gateway": "G", "air or sea entry": "A", "transit corridor": "T", "retail market": "R",
   "venue-linked": "V", emerging: "E",
@@ -70,7 +70,7 @@ export default function MapView(props: Props) {
     if (!props.layers.places) return;
     for (const p of [...props.places].reverse()) {
       leaflet.circleMarker([p.lat, p.lon], {
-        radius: p.level === "high" ? 6.5 : p.level === "elevated" ? 5 : 3.5, color: "#0b0b0b", weight: 1,
+        radius: p.level === "high" ? 6.5 : p.level === "elevated" ? 5 : 3.5, color: "#e8e6df", weight: 1,
         fillColor: LEVEL_FILL[p.level], fillOpacity: 1,
       }).bindTooltip(`${p.name}`, { className: "nt-tip", direction: "top" })
         .on("click", () => select.current("place", p.id)).addTo(g);
@@ -125,7 +125,7 @@ export default function MapView(props: Props) {
     g.clearLayers();
     if (!props.focus) return;
     m.flyTo([props.focus.lat, props.focus.lon], props.focus.zoom ?? 12, { duration: .7 });
-    leaflet.circle([props.focus.lat, props.focus.lon], { radius: 3000, color: "#0b0b0b", weight: 1.5, dashArray: "5 5", fill: false })
+    leaflet.circle([props.focus.lat, props.focus.lon], { radius: 3000, color: "#e8e6df", weight: 1.5, dashArray: "5 5", fill: false })
       .addTo(g);
   }
 

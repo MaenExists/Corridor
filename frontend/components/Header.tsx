@@ -3,9 +3,9 @@ import Link from "next/link";
 export function Mark() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" aria-hidden>
-      <rect x="1" y="1" width="22" height="22" fill="none" stroke="#0b0b0b" strokeWidth="1.5" />
-      <path d="M1 12h22M12 1v22" stroke="#0b0b0b" strokeWidth="1" />
-      <rect x="13.5" y="4" width="6" height="6" fill="#e0301e" />
+      <rect x="1" y="1" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M1 12h22M12 1v22" stroke="currentColor" strokeWidth="1" />
+      <rect x="13.5" y="4" width="6" height="6" fill="#ff3b26" />
     </svg>
   );
 }

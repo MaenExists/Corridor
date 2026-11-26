@@ -96,7 +96,7 @@ export function PublicApp({ view }: { view: PublicView }) {
                 <p className="text-[12.5px] mb-2">{layer === "distance" ? "Straight-line distance to the nearest centre" : "Listed beds within 25 km, per 100,000 people"}</p>
                 <div className="grid grid-cols-5 border border-ink">
                   {steps.map(([, fill], i) => <i key={i} className={`h-3 block ${i ? "border-l border-ink/30" : ""}`}
-                    style={{ background: fill === "transparent" ? "repeating-linear-gradient(45deg,#f3f1ea 0 3px,#e2dfd5 3px 6px)" : fill }} />)}
+                    style={{ background: fill === "transparent" ? "repeating-linear-gradient(45deg,#0a0a0a 0 3px,#222220 3px 6px)" : fill }} />)}
                 </div>
                 <div className="flex justify-between mt-1 font-mono text-[9.5px] text-mute">
                   <span>{steps[0][2]}</span><span>{steps[steps.length - 1][2]}</span>

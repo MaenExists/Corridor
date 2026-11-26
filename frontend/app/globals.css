@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f3f1ea;
-  --color-paper-2: #ebe8df;
-  --color-ink: #0b0b0b;
-  --color-ink-2: #3d3d3a;
-  --color-mute: #77756d;
-  --color-signal: #e0301e;
-  --color-signal-soft: #f6c7bf;
-  --color-ok: #1f6f4a;
+  --color-paper: #0a0a0a;
+  --color-paper-2: #141413;
+  --color-ink: #e8e6df;
+  --color-ink-2: #b4b2aa;
+  --color-mute: #7d7b74;
+  --color-signal: #ff3b26;
+  --color-signal-soft: #5a1c14;
+  --color-ok: #3fb67f;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 @layer base {
+  html { color-scheme: dark; }
   html, body { height: 100%; }
   body {
     background: var(--color-paper);
@@ -32,9 +33,9 @@
   position: fixed;
   inset: -50%;
   z-index: 2000;
-  opacity: .11;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grain 1.2s steps(6) infinite;
 }
 @keyframes grain {
@@ -54,10 +55,10 @@
 .label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; }
 .tabular { font-variant-numeric: tabular-nums; }
 
-/* Leaflet, restyled to the paper-and-ink system. */
-.leaflet-container { background: #d9d6cc; font-family: var(--font-sans); }
-.leaflet-tile-pane.sat .leaflet-tile { filter: grayscale(.45) contrast(1.06) brightness(1.04) saturate(.9); }
-.leaflet-tile-pane.street .leaflet-tile { filter: grayscale(1) contrast(.95) brightness(1.06); }
+/* Leaflet, restyled to the black theme. */
+.leaflet-container { background: #111110; font-family: var(--font-sans); }
+.leaflet-tile-pane.sat .leaflet-tile { filter: grayscale(.55) contrast(1.08) brightness(.72) saturate(.85); }
+.leaflet-tile-pane.street .leaflet-tile { filter: invert(1) grayscale(1) contrast(.88) brightness(.82); }
 .leaflet-control-zoom { border: 1px solid var(--color-ink) !important; border-radius: 0 !important; box-shadow: none !important; }
 .leaflet-control-zoom a {
   background: var(--color-paper) !important; color: var(--color-ink) !important; border-radius: 0 !important;
@@ -65,7 +66,7 @@
 }
 .leaflet-control-zoom a:last-child { border-bottom: 0 !important; }
 .leaflet-control-attribution {
-  background: rgba(243, 241, 234, .86) !important; font-family: var(--font-mono); font-size: 9.5px; color: var(--color-ink-2);
+  background: rgba(10, 10, 10, .82) !important; font-family: var(--font-mono); font-size: 9.5px; color: var(--color-ink-2);
   border-top: 1px solid var(--color-ink); border-left: 1px solid var(--color-ink);
 }
 .leaflet-control-attribution a { color: var(--color-ink); }
@@ -74,7 +75,7 @@
   box-shadow: none; font-family: var(--font-sans); font-size: 12px; padding: 6px 8px;
 }
 .leaflet-tooltip.nt-tip::before { display: none; }
-.nt-gate { color: #0b0b0b; font-size: 15px; line-height: 15px; text-align: center; text-shadow: 0 0 3px #fff, 0 0 1px #fff; }
+.nt-gate { color: #e8e6df; font-size: 15px; line-height: 15px; text-align: center; text-shadow: 0 0 3px #000, 0 0 1px #000; }
 .nt-type {
   width: 22px; height: 22px; border: 1.5px solid var(--color-ink); background: var(--color-paper); color: var(--color-ink);
   font: 600 10px/19px var(--font-mono); text-align: center;
@@ -85,12 +86,12 @@
 
 /* Recovery map */
 .nt-grid { image-rendering: pixelated; }
-.nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #f3f1ea; border: 1.5px solid #0b0b0b; }
-.nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #0b0b0b; border-color: #f3f1ea; outline: 1px solid #0b0b0b; }
-.nt-centre.sel { outline: 2px solid #e0301e; outline-offset: 2px; }
-.nt-probe { width: 22px; height: 22px; border: 1.5px solid #0b0b0b; border-radius: 50%; background: rgba(243,241,234,.35);
-  box-shadow: 0 0 0 4px rgba(243,241,234,.55); position: relative; }
-.nt-probe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #0b0b0b; }
+.nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #0a0a0a; border: 1.5px solid #e8e6df; }
+.nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #e8e6df; border-color: #0a0a0a; outline: 1px solid #e8e6df; }
+.nt-centre.sel { outline: 2px solid #ff3b26; outline-offset: 2px; }
+.nt-probe { width: 22px; height: 22px; border: 1.5px solid #e8e6df; border-radius: 50%; background: rgba(10,10,10,.35);
+  box-shadow: 0 0 0 4px rgba(10,10,10,.55); position: relative; }
+.nt-probe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #e8e6df; }
 .leaflet-container.cursor-crosshair { cursor: crosshair; }
 .nt-far .nt-centre { width: 6px; height: 6px; margin: 4px; border-width: 1px; }
 .nt-far .nt-centre.gov { width: 9px; height: 9px; margin: 2.5px; }

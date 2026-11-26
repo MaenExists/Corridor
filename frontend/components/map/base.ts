@@ -24,8 +24,8 @@ export async function createMap(host: HTMLElement) {
     const polys: number[][][][] = geom.type === "MultiPolygon" ? geom.coordinates : [geom.coordinates];
     const world = [[-89, -179], [-89, 179], [89, 179], [89, -179]] as [number, number][];
     const holes = polys.map(poly => poly[0].map(([x, y]) => [y, x] as [number, number]));
-    L.polygon([world, ...holes], { interactive: false, stroke: false, fillColor: "#f3f1ea", fillOpacity: .62 }).addTo(mask);
-    L.polygon(holes, { interactive: false, color: "#0b0b0b", weight: 1.25, fill: false }).addTo(mask);
+    L.polygon([world, ...holes], { interactive: false, stroke: false, fillColor: "#0a0a0a", fillOpacity: .7 }).addTo(mask);
+    L.polygon(holes, { interactive: false, color: "#e8e6df", weight: 1.25, fill: false }).addTo(mask);
   });
   fetch("/geo/kerala-districts.geojson").then(r => r.json()).then(geo => {
     L.geoJSON(geo, { interactive: false, style: { color: "#ffffff", weight: 1, opacity: .75, fill: false, dashArray: "2 3" } })
@@ -51,7 +51,7 @@ export function setBasemap(ctx: { L: typeof Leaflet; map: Leaflet.Map; districts
   ] : [L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap contributors" })];
   ctx.base.forEach(l => l.addTo(map));
   ctx.districts.eachLayer(l => (l as Leaflet.GeoJSON).setStyle?.({
-    color: basemap === "satellite" ? "#ffffff" : "#0b0b0b", opacity: basemap === "satellite" ? .75 : .45 }));
+    color: "#ffffff", opacity: basemap === "satellite" ? .7 : .45 }));
 }
 
 export type MapContext = Awaited<ReturnType<typeof createMap>>;

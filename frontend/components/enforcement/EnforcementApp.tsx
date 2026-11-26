@@ -127,7 +127,7 @@ function Toggle({ on, onClick, children }: { on: boolean; onClick: () => void; c
     <button onClick={onClick} aria-pressed={on}
       className={`w-full flex items-center gap-2.5 text-left ${on ? "" : "opacity-40"} hover:opacity-100`}>
       <span className={`size-3.5 border border-ink grid place-items-center ${on ? "bg-ink" : ""}`}>
-        {on && <svg viewBox="0 0 10 10" className="size-2.5"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#f3f1ea" strokeWidth="1.6" /></svg>}
+        {on && <svg viewBox="0 0 10 10" className="size-2.5"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#0a0a0a" strokeWidth="1.6" /></svg>}
       </span>
       {children}
     </button>
