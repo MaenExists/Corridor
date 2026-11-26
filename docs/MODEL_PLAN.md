@@ -213,6 +213,26 @@ Next inputs that could change this: official station-level or Excise range count
 - **New places are still unsolved.** Fresh-list hit rate on the reused window was 20.9% for the risk terrain against 14.3% for population (difference −2.0 to +13.8 points). After the cutoff it was 5.3% against 9.3%. The pattern ranker was unstable (23.5% on all reports in the reused window) and remains not adopted.
 - **Border gateways now appear.** With News18's coverage, the cluster rules label Muthanga (Wayanad–Karnataka crossing), Neyyattinkara (near the Tamil Nadu crossings) and Manjeshwar as entry gateways. Thalassery is labelled because the Mahé (Puducherry) enclave boundary counts as a land border. Muthanga now ranks among the top forecast cells. These are descriptive, not validated.
 
+## Knowledge-cutoff test of the grid system (`make hotspot-cutoff`, 26 November 2026)
+
+Everything is frozen at 30 June 2026 end of day: the ranker and ETAS fits *and* the reports the model may read (1,100 located reports). One forecast was issued from that state and never updated. It was scored against the 162 located reports published from 1 July to 25 November 2026, on the 1,262-report table that includes News18 Malayalam. The flagged area is the top 1% of cells (461 km²).
+
+| Month | Located reports | Grid ranker | Repeat map | Long-run hotspots | Population |
+| --- | --- | --- | --- | --- | --- |
+| Jul 2026 | 33 | 26 | 21 | 10 | 3 |
+| Aug 2026 | 30 | 23 | 20 | 8 | 5 |
+| Sep 2026 | 44 | 35 | 27 | 12 | 8 |
+| Oct 2026 | 38 | 28 | 25 | 8 | 4 |
+| Nov 2026 (to 25th) | 17 | 11 | 8 | 5 | 4 |
+| **Total** | **162** | **123 (75.9%)** | **101 (62.3%)** | **43 (26.5%)** | **24 (14.8%)** |
+
+- The single frozen forecast held up for five months. It caught 70–80% of each month's located reports, with November at 65% on a partial month. It never fell below the repeat map.
+- Of the 20 localities it ranked highest at the cutoff, 13 had at least one later report within 2 km. Examples: Perumbavoor (8), Badagara (7), Angamaly (5), Gothurutha (5), Kalamassery (4), Mattancherry (4), and Muthanga at the Karnataka crossing (2). Seven had none, including Kalikavu, Mulamthuruthy, Anchal and Chirayinkeezhu.
+- New places stayed unsolved. 23 of the 162 reports (14%) came from localities with no report before the cutoff. The risk-terrain watch list caught 1 of them and a population list caught 2.
+- The rolling reading, with frozen weights and weekly new reports, scored 70.8% on the earlier 974-report table, against 65.9% for the repeat map.
+
+Caveats: 162 reports is a small sample, and an exact binomial 95% interval on 75.9% is roughly 69–82%. The gazetteer and OpenStreetMap context are November 2026 snapshots, used only for locating text and for the watch list. All outcomes are *reported* seizures in five publishers' coverage.
+
 ## Next-month model for official registrations
 
 The private runner targets recorded monthly Kerala Excise NDPS registrations. Use one reconciled agency and definition. At the end of each month in IST, reconstruct exactly the release versions known at that date. Input history requires 12 consecutive complete months across all 14 districts. Allow a one-month publication lag. Use a seasonal repeat, the latest available month, and an average of the three latest complete months as baselines. A regularized Poisson model learns a correction to that recent average with persistence and seasonal deviations.
