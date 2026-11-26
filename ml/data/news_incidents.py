@@ -48,6 +48,9 @@ TOI_SECTIONS = re.compile(r"indiatimes\.com/city/(kochi|thiruvananthapuram|kozhi
 ASIANET_YEAR = "https://www.asianetnews.com/sitemap/{year}/index.xml"
 ASIANET_SECTIONS = re.compile(r"asianetnews\.com/(kerala-news|local-news)/")
 ASIANET_FIRST_YEAR = 2022
+N18_DAILY = "https://malayalam.news18.com/commonfeeds/v1/mal/sitemap/daily/{day}.xml"
+N18_SECTION = re.compile(r"malayalam\.news18\.com/news/(kerala|crime)/")
+N18_FIRST_DAY = date(2018, 1, 1)  # earliest daily sitemap the publisher serves
 ONM_SITEMAPS = ["https://www.onmanorama.com/kerala.sitemaplist1.xml", "https://www.onmanorama.com/kerala.sitemaplist2.xml",
                 *[f"https://www.onmanorama.com/archive-sitemaplist{n}.xml" for n in range(1, 5)]]
 ONM_PATH = re.compile(r"onmanorama\.com/news/kerala/(20\d{2})/(\d{2})/(\d{2})/[^/]+\.html$")
@@ -158,6 +161,15 @@ def asianet_rows(url, refresh=False):
             yield {"source": "asianet", "section": section.group(1), "published": day, "url": loc}
 
 
+def n18_rows(day, refresh=False):
+    """News18 Malayalam: Malayalam stories with English slugs that often name the town."""
+    body = cached(RAW / "n18" / f"{day}.xml.gz", N18_DAILY.format(day=day), refresh)
+    for loc in re.findall(rb"<loc>\s*(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?\s*</loc>", body):
+        url = loc.decode("utf-8", "replace")
+        if N18_SECTION.search(url):
+            yield {"source": "n18", "section": "kerala", "published": day.isoformat(), "url": url}
+
+
 def onm_rows(refresh=True):
     """Onmanorama keeps only recent weeks in its sitemaps: a freshness feed, re-read on every harvest."""
     for url in ONM_SITEMAPS:
@@ -173,6 +185,8 @@ def slug(url):
     path = url.split("?")[0].rstrip("/")
     if "indiatimes.com" in path:
         return path.split("/articleshow/")[0].rsplit("/", 1)[-1]
+    if "news18.com" in path:
+        return re.sub(r"(-[a-z]{1,4})*-\d{4,}\.html$", "", path.rsplit("/", 1)[-1])
     if "asianetnews.com" in path:
         return re.sub(r"-[a-z0-9]{2,4}-[a-z0-9]{6}$", "", path.rsplit("/", 1)[-1])
     return re.sub(r"-\d{5,}\.html$|\.html$", "", path.rsplit("/", 1)[-1])
@@ -194,6 +208,9 @@ def harvest(refresh_recent=7, workers=6):
             rows.extend(found)
         for found in pool.map(lambda u: list(asianet_rows(u)), asianet_days()):
             rows.extend(found)
+        n18_days = [d for d in days if d >= N18_FIRST_DAY]
+        for found in pool.map(lambda d: list(n18_rows(d, refresh=(today - d).days < refresh_recent)), n18_days):
+            rows.extend(found)
     rows.extend(onm_rows())
     seen, kept = set(), []
     for row in rows:
@@ -213,6 +230,7 @@ def harvest(refresh_recent=7, workers=6):
 
 # ---------------------------------------------------------------- places
 
+MALAYALAM_DRUG = re.compile("ലഹരി|കഞ്ചാവ്|എംഡിഎംഎ|മയക്കുമരുന്ന്|ഹാഷിഷ്|മെത്താംഫെറ്റമിൻ|രാസലഹരി")
 SECTION_DISTRICT = {"kochi": "Ernakulam", "thiruvananthapuram": "Thiruvananthapuram", "kozhikode": "Kozhikode"}
 DISTRICT_WORDS = {
     "thiruvananthapuram": "Thiruvananthapuram", "trivandrum": "Thiruvananthapuram", "kollam": "Kollam",
@@ -441,7 +459,9 @@ def build(fetch_descriptions=False):
     located = []
     for row in candidates:
         description = summaries.get(row["url"], {}).get("description", "")
-        if description and not DRUG.search(plain(description).replace(" ", "-")):
+        latin = sum(c.isascii() for c in description) >= 0.8 * len(description)
+        drug_words = DRUG.search(plain(description).replace(" ", "-")) or MALAYALAM_DRUG.search(description)
+        if description and latin and not drug_words:
             continue  # the summary shows the story is not about a drug seizure
         where = locate(row["slug"], row["section"], index, description)
         if not where:

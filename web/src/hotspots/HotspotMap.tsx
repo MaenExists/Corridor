@@ -18,7 +18,7 @@ type Brief = {
 };
 
 const SOURCES: Record<string, string> = { nie: "New Indian Express", toi: "Times of India", onm: "Onmanorama",
-  asianet: "Asianet News" };
+  asianet: "Asianet News", n18: "News18 Malayalam" };
 
 type Cluster = { lat: number; lon: number; locality: string; taluk: string | null; district: string; reports: number;
   types: string[]; elongation: number; large_haul_share: number; median_grams: number | null; synthetic_share: number;
@@ -245,7 +245,7 @@ export function HotspotMap() {
       <h2>What this is and is not</h2>
       <ul>
         <li>It forecasts <b>reported</b> seizures: a seizure that was made, announced and picked up by a news desk
-          (New Indian Express, Times of India, Onmanorama, Asianet News). Reporting follows enforcement effort and editors' attention, so city desks and large hauls weigh more.</li>
+          (New Indian Express, Times of India, Onmanorama, Asianet News, News18 Malayalam). Reporting follows enforcement effort and editors' attention, so city desks and large hauls weigh more.</li>
         <li>A cell that is not flagged has not been shown to be free of drugs. Coverage gaps are not safety.</li>
         <li>It is strong at "where seizures keep being reported" and weak at new places: about a quarter of seizures
           happen at a locality with no earlier report, and almost none of those fall in flagged cells. Palakkad, Kasaragod,
