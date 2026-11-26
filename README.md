@@ -73,3 +73,15 @@ After both fits, run `make eval-counts` to train a lagged Poisson challenger and
 - [Data access and draft requests](docs/DATA_REQUESTS.md)
 - [Status and remaining gates](docs/FINAL_REPORT.md)
 - [Hackathon demo script](docs/DEMO_SCRIPT.md)
+
+## NarcoTrace frontend (Next.js)
+
+`frontend/` is the new interface, built with Next.js 15 and Tailwind CSS 4: light paper, black rules, grain and a satellite-first map. The enforcement view is live, and the public view comes next.
+
+```sh
+make frontend-setup   # Node 22 via mise, then npm ci
+make frontend         # http://127.0.0.1:3000/enforcement
+make frontend-build   # typecheck and production build
+```
+
+The server reads the local, gitignored model outputs at request time (`web/public/generated/hotspots/*.json`, the Excise CSVs and the district forecast status). Nothing from them is bundled or committed. Set `NARCOTRACE_ROOT` to point at another checkout. Build the inputs first with `make hotspot-forecast patterns-forecast hotspot-cutoff`.

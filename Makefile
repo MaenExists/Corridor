@@ -1,5 +1,5 @@
 PY := .venv/bin/python
-.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff
+.PHONY: setup test demo serve build typecheck synthetic evaluate real forecast refresh api feed release-real browser-test replay challenge prepare-inputs prepare-research prepare-training train-annual train-boosting eval-counts monthly-forecast excise-history district-dev district-test district-forecast excise-snapshot cutoff-check where-dev where-test where-audit recovery-map recovery-refresh news-harvest news-incidents hotspot-dev hotspot-test hotspot-postcutoff hotspot-audit hotspot-forecast context-layers patterns-evaluate patterns-forecast hotspot-cutoff frontend-setup frontend frontend-build
 setup:
 	uv venv --allow-existing --python 3.12 .venv
 	uv pip install --python $(PY) -r requirements.txt
@@ -109,3 +109,10 @@ api:
 	bash scripts/demo.sh --api-only
 browser-test:
 	node scripts/browser-smoke.mjs
+NODE22 = mise exec node@22 --
+frontend-setup:
+	mise install node@22 && cd frontend && $(NODE22) npm ci --no-audit --no-fund
+frontend:
+	cd frontend && $(NODE22) npm run dev
+frontend-build:
+	cd frontend && $(NODE22) npm run typecheck && $(NODE22) npm run build

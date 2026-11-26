@@ -1,0 +1,62 @@
+import type { EnforcementView } from "@/lib/types";
+import { date, month, pct } from "./copy";
+
+export function TrackRecord({ view }: { view: EnforcementView }) {
+  const r = view.record;
+  const weekly = view.weekly.slice(-52);
+  const peak = Math.max(...weekly, 1);
+  return (
+    <footer className="grid grid-cols-2 lg:grid-cols-[1.25fr_1.4fr_1fr_1fr_1.3fr] border-t border-ink">
+      {r ? (
+        <>
+          <Cell label="How often it is right" first>
+            <p className="text-[34px] leading-none tracking-[-0.03em] font-medium tabular">
+              3 <span className="text-mute font-normal text-[20px]">in</span> 4
+            </p>
+            <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">
+              A forecast frozen on {date(r.cutoff)} caught {r.caught} of {r.total} later seizures in 1% of Kerala.
+            </p>
+          </Cell>
+          <Cell label="Month by month since then">
+            <div className="flex items-end gap-2 h-[46px]">
+              {r.months.map(m => (
+                <div key={m.month} className="flex-1 flex flex-col items-center gap-1" title={`${m.caught} of ${m.total}`}>
+                  <div className="w-full h-[30px] bg-paper-2 border border-ink/30 relative">
+                    <div className="absolute bottom-0 inset-x-0 bg-ink" style={{ height: `${(m.caught / Math.max(m.total, 1)) * 100}%` }} />
+                  </div>
+                  <span className="font-mono text-[9.5px] text-mute">{month(m.month).split(" ")[0]} {pct(m.caught / Math.max(m.total, 1))}</span>
+                </div>
+              ))}
+            </div>
+          </Cell>
+          <Cell label="Top places">
+            <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular">{r.topTwentyHit}<span className="text-mute text-[16px]">/20</span></p>
+            <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">had a seizure afterwards.</p>
+          </Cell>
+          <Cell label="Its blind spot">
+            <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular text-signal">{r.newCaught}<span className="text-mute text-[16px]">/{r.newPlaces}</span></p>
+            <p className="mt-1.5 text-[12px] text-ink-2 leading-snug">brand-new places caught. It sees repeats, not firsts.</p>
+          </Cell>
+        </>
+      ) : <Cell label="Track record" first><p className="text-[13px]">Run make hotspot-cutoff to measure it.</p></Cell>}
+      <Cell label={`Seizures reported per week · ${view.reportsUsed.toLocaleString()} used`}>
+        <div className="flex items-end gap-[2px] h-[46px]">
+          {weekly.map((v, i) => (
+            <i key={i} className={`flex-1 block ${i >= weekly.length - 4 ? "bg-signal" : "bg-ink"}`}
+              style={{ height: `${Math.max(3, (v / peak) * 100)}%` }} title={`${v}`} />
+          ))}
+        </div>
+        <p className="mt-1 text-[11px] text-mute">Past year · last four weeks in red</p>
+      </Cell>
+    </footer>
+  );
+}
+
+function Cell({ label, children, first }: { label: string; children: React.ReactNode; first?: boolean }) {
+  return (
+    <div className={`px-4 md:px-5 py-3 border-ink border-b lg:border-b-0 ${first ? "" : "lg:border-l"} max-lg:[&:nth-child(even)]:border-l max-lg:last:col-span-2 cross`}>
+      <p className="label text-mute mb-2">{label}</p>
+      {children}
+    </div>
+  );
+}
