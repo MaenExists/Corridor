@@ -1,10 +1,10 @@
 import type { Level } from "@/lib/types";
 
-/** Priority levels in terminal green, stepping down in brightness. Electric blue marks live and emerging signals. */
+/** Priority levels on the map stay red (hot to dim), against the green interface; electric blue marks emerging signals. */
 export const LEVEL: Record<Level, { label: string; fill: string; text: string }> = {
-  high: { label: "Top priority", fill: "#00FF41", text: "Top priority" },
-  elevated: { label: "Priority", fill: "#00B12E", text: "Priority" },
-  watch: { label: "Watch", fill: "#0B6624", text: "On watch" },
+  high: { label: "Top priority", fill: "#ff3b26", text: "Top priority" },
+  elevated: { label: "Priority", fill: "#c0341f", text: "Priority" },
+  watch: { label: "Watch", fill: "#6e2519", text: "On watch" },
 };
 export const ACCENT = "#00FF41";
 export const ELECTRIC = "#00C2FF";
