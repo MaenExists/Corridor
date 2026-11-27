@@ -36,13 +36,13 @@ Aibin will set out the problem.
 
 **[3 · The curve]** *→ twice for the notes, then → to move on.*
 
-Kerala Excise recorded about **3,000 drug cases in 2016. In 2025, 12,566.** That is more than four times as many in nine years.
+In 2025, Kerala Excise recorded **12,566 drug cases, the highest on record**: more than a thousand a month, and over four times 2016. This year is on the same pace, with **10,191 cases by October**. These figures come from an official answer in the Kerala Legislative Assembly.
 
 **[4 · Kerala leads India]**
 
-This is now the largest drug-case burden of any state in India. In 2023 Kerala registered **30,697 cases**: double Maharashtra, nearly three times Punjab, and **one in four** of all such cases in the country.
+The latest national figures, from the National Crime Records Bureau for 2024, show Kerala police registered **27,149 drug cases, more than any other state**. That is nearly double Maharashtra and three times Punjab. Kerala has under 3% of India's population but **one in four** of its drug cases.
 
-The most serious figure is on the right. Among young people arrested or in treatment, **70% started using between the ages of 10 and 15.**
+Kerala's rate is **75.5 cases per lakh people, almost ten times the national rate**. And **95% of those cases were for personal use**, not trafficking. This is a problem of demand, and demand is what prevention addresses.
 
 **[5 · Always one step behind]**
 
