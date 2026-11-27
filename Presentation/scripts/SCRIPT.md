@@ -1,6 +1,6 @@
 # NarcoTrace · 7-minute script
 
-**Open the deck in short mode:** `Presentation/index.html?short`. It has 13 scenes. `→` moves to the next scene or reveals the next item on a slide.
+**Open the deck in short mode:** `Presentation/index.html?short`. It has 14 scenes. `→` moves to the next scene or reveals the next item on a slide.
 **Before you start:** open http://127.0.0.1:3000/enforcement and http://127.0.0.1:3000/public in two browser tabs, ready for the demo.
 
 | Time | Speaker | Part | Slides |
@@ -8,8 +8,8 @@
 | 0:00 – 0:45 | **Maen** | Introduction | 1 |
 | 0:45 – 2:15 | **Aibin** | The problem | 2–5 |
 | 2:15 – 3:45 | **Kiran** | Research and data | 6–8 |
-| 3:45 – 5:30 | **Maen** | How it works and the enforcement demo | 9–11 |
-| 5:30 – 7:00 | **Yaris** | Public demo, vision and close | 11–13 |
+| 3:45 – 5:30 | **Maen** | How it works, scorecard, enforcement demo | 9–12 |
+| 5:30 – 7:00 | **Yaris** | Public demo, vision and close | 12–14 |
 
 *Italic lines are actions. Everything else is spoken.*
 
@@ -94,7 +94,11 @@ In those five months, 263 seizures were reported, and **85% of them were inside 
 
 We'll be honest: brand-new places are still hard, and we caught 9 of 43. The system says that openly, because a tool officers can trust has to tell the truth.
 
-**[11 · LIVE]** *Switch to the enforcement tab.*
+**[11 · The scorecard]**
+
+In plain numbers: **84.8% accuracy**, **48.5% precision** on our top 20, and a **15.2% error rate**. Our first model caught 62.7%. The district model's range was right 82% of the time. Our own honest mark is about **7 out of 10**: strong where trouble comes back, weaker where it starts fresh.
+
+**[12 · LIVE]** *Switch to the enforcement tab.*
 
 This is what an Excise or Police analyst would see every week.
 - *Priority tab:* the red zones are this month's priority list.
@@ -109,7 +113,7 @@ Yaris will show you the side built for the public.
 
 ## YARIS · Public demo, vision and close (1 min 30 sec)
 
-**[11 · LIVE]** *Switch to the public tab.*
+**[12 · LIVE]** *Switch to the public tab.*
 
 Drugs aren't only a police problem. They're a **health** problem.
 - *Tap ◎ Near me:* anyone can find the nearest de-addiction centre in one tap.
@@ -119,7 +123,7 @@ Drugs aren't only a police problem. They're a **health** problem.
 
 *Switch back to the deck.*
 
-**[12 · The vision]**
+**[13 · The vision]**
 
 So where does this go? Today, NarcoTrace predicts from public data. With official data, it can work down to each police station. With treatment data, it can show where people are actually being hurt.
 
@@ -127,7 +131,7 @@ Our dream is **one shared map for Kerala**, where Excise, Police, Health, school
 
 Our goal isn't to catch more people. It's that **fewer people ever need to be caught, or treated.**
 
-**[13 · Finale]**
+**[14 · Finale]**
 
 NarcoTrace: **see it earlier, reach them sooner.** Thank you. We're happy to take your questions.
 
