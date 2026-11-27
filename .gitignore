@@ -33,3 +33,6 @@ dist/
 /frontend/.open-next/
 /frontend/.cf/
 /frontend/.dev.vars
+
+# Pitch deck copied in for /ppt (scripts/sync-ppt.mjs)
+/frontend/public/ppt/

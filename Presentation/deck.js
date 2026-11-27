@@ -144,11 +144,12 @@ function Particles(canvas, box, opts = {}) {
 
 /* ---------------- scene manager ---------------- */
 // index.html?short plays the 7-minute cut: only these scenes, in deck order.
-const SHORT = ["s-open", "s-curve", "s-india", "s-reactive", "s-prevent", "s-archive", "s-news", "s-field",
-  "s-grid", "s-cutoff", "s-score", "s-live", "s-vision", "s-finale"];
+const SHORT = ["s-open", "s-act1", "s-curve", "s-india", "s-reactive", "s-prevent", "s-act3", "s-archive", "s-news", "s-field",
+  "s-act4", "s-grid", "s-cutoff", "s-score", "s-live-enf", "s-act5", "s-live-pub", "s-vision", "s-finale"];
 const short = new URLSearchParams(location.search).has("short");
 const scenes = $$(".scene").filter(s => !short || SHORT.includes(s.id));
-const ACT_TINT = [["#ff3b26", "#ffb627"], ["#ff3b26", "#ff7a26"], ["#ff3b26", "#00c2ff"], ["#ffb627", "#ff3b26"], ["#00c2ff", "#ffb627"], ["#00ff41", "#00c2ff"], ["#00c2ff", "#00ff41"], ["#ffb627", "#00c2ff"]];
+// Five parts: introduction, problem, research & data, how it works & enforcement, public, vision & close.
+const ACT_TINT = [["#ff3b26", "#ffb627"], ["#ff3b26", "#ff7a26"], ["#ffb627", "#ff3b26"], ["#00ff41", "#00c2ff"], ["#00c2ff", "#00ff41"]];
 const hooks = {};
 let cur = -1, step = 0, loops = [];
 const loop = fn => { let on = true; const f = now => { if (!on) return; fn(now); requestAnimationFrame(f); }; requestAnimationFrame(f); loops.push(() => on = false); };
@@ -160,13 +161,13 @@ const later = (fn, ms) => { const id = setTimeout(fn, ms); loops.push(() => clea
   scenes.forEach(s => counts[s.dataset.act] = (counts[s.dataset.act] || 0) + 1);
   Object.keys(counts).forEach(a => { const sp = document.createElement("span"); sp.style.setProperty("--n", counts[a]); sp.dataset.act = a; sp.innerHTML = "<i></i>"; prog.appendChild(sp); });
   const g = $("#ovGrid");
-  scenes.forEach((s, i) => { const b = document.createElement("button"); b.innerHTML = `<span>${String(i + 1).padStart(2, "0")} · ACT ${["0", "I", "II", "III", "IV", "V", "VI", "FIN"][s.dataset.act]}</span><b>${s.dataset.title}</b>`; b.onclick = () => { document.body.classList.remove("ov"); go(i); }; g.appendChild(b); });
+  scenes.forEach((s, i) => { const b = document.createElement("button"); b.innerHTML = `<span>${String(i + 1).padStart(2, "0")} · ${["INTRO", "PART I", "PART II", "PART III", "PART IV"][s.dataset.act]}</span><b>${s.dataset.title}</b>`; b.onclick = () => { document.body.classList.remove("ov"); go(i); }; g.appendChild(b); });
 })();
 function updateHud() {
   const s = scenes[cur], act = +s.dataset.act;
   $("#counter").textContent = `${String(cur + 1).padStart(2, "0")} / ${scenes.length}`;
   $("#sceneTitle").textContent = s.dataset.title;
-  $("#actLabel").textContent = ["Opening", "Act I · Problem", "Act II · Stakes", "Act III · Research", "Act IV · Technology", "Act V · Prototype", "Act VI · Impact", "Finale"][act];
+  $("#actLabel").textContent = ["Introduction", "I · The problem", "II · Research & data", "III · How it works", "IV · Public & vision"][act];
   $("#crit").innerHTML = s.dataset.crit || "";
   const [a, b] = ACT_TINT[act];
   stage.style.setProperty("--tint", a); stage.style.setProperty("--tint2", b);
@@ -190,7 +191,7 @@ function go(i, atEnd = false) {
   runCounters(s);
   hooks[s.id]?.enter?.(s);
   if (atEnd) { const n = +(s.dataset.steps || 0); while (step < n) advanceStep(s); }
-  history.replaceState(null, "", "#" + (i + 1));
+  history.replaceState(null, "", location.pathname + location.search + "#" + (i + 1));
   updateHud();
 }
 function advanceStep(s) {
@@ -690,6 +691,8 @@ hooks["s-public"] = Viewer("#pubScreen", "#pubThumbs", [
 })();
 
 /* ---------------- boot ---------------- */
+// Live buttons use app paths, which work when the app serves the deck at /ppt; from a file they open the local server.
+if (location.protocol === "file:") document.querySelectorAll("[data-app]").forEach(a => a.href = "http://127.0.0.1:3000" + a.dataset.app);
 if (!NT) console.warn("assets/data.js missing — run: python3 Presentation/tools/build_data.py");
 const start = parseInt(location.hash.slice(1), 10);
 go(Number.isFinite(start) ? start - 1 : 0);
