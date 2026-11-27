@@ -89,6 +89,12 @@ export function PublicApp({ view }: { view: PublicView }) {
       p => { setLocating(null); probeAt(p.coords.latitude, p.coords.longitude, t.yourLocation, 11); },
       () => setLocating(t.geoDenied), { enableHighAccuracy: false, timeout: 10000 });
   };
+  // App shortcuts and shared links can open a tab directly: /public?tab=report
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("tab");
+    if (wanted && (TABS as string[]).includes(wanted)) chooseTab(wanted as Tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setProbe(null); setCentreId(null); } };
     window.addEventListener("keydown", onKey);

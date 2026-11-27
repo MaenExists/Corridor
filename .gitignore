@@ -24,3 +24,7 @@ node_modules/
 dist/
 /web/public/generated/
 *.tsbuildinfo
+
+# Presentation: private derived data and product screenshots
+/Presentation/assets/data.js
+/Presentation/assets/shots/

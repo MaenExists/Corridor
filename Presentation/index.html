@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NarcoTrace — Hackfinity 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <div id="leak" class="layer"><i></i><i></i></div>
+
+  <!-- ===================================================== 00 COLD OPEN -->
+  <section class="scene" id="s-open" data-act="0" data-title="Cold open">
+    <canvas class="full" id="c-open"></canvas>
+    <div class="title">
+      <div class="pre" id="openType"></div>
+      <h1 id="openTitle">NarcoTrace</h1>
+      <p class="tag">Forecasting where Kerala's next drug seizures will be reported, and showing where help is too far away.</p>
+    </div>
+    <div class="event"><span class="chip">Hackfinity 2026</span><span class="chip">TOOFAN · St. John's School, Anchal</span><span class="chip" style="color:var(--green)">Prevention + Recovery</span></div>
+    <div class="hint">Move the cursor over Kerala · press → to begin</div>
+  </section>
+
+  <!-- ===================================================== AGENDA -->
+  <section class="scene" id="s-agenda" data-act="0" data-title="Our story, mapped to your rubric">
+    <div class="kicker a">The cut</div>
+    <h2 class="a" style="--d:120">Six acts. Built around <em>how you'll judge us.</em></h2>
+    <div class="reel">
+      <div class="frame a" style="--d:300"><span class="r">ACT I</span><h4>The problem</h4><p>Kerala's recorded drug cases quadrupled in a decade.</p><span class="w">Context</span></div>
+      <div class="frame a" style="--d:380"><span class="r">ACT II</span><h4>Why it matters</h4><p>Response is reactive. Help is far away.</p><span class="w">Context</span></div>
+      <div class="frame a hot" style="--d:460"><span class="r">ACT III</span><h4>The research</h4><p>Recovered archives, 628,964 stories, Malayalam text.</p><span class="w">Research · 30%</span></div>
+      <div class="frame a hot" style="--d:540"><span class="r">ACT IV</span><h4>How it works</h4><p>Five models, pre-registered and tested once.</p><span class="w">Research · 30%</span></div>
+      <div class="frame a hot" style="--d:620;border-color:rgba(0,255,65,.5)"><span class="r">ACT V</span><h4>The prototype</h4><p>A frozen forecast, live product, real results.</p><span class="w" style="color:var(--green)">Prototype · 50%</span></div>
+      <div class="frame a hot" style="--d:700"><span class="r">ACT VI</span><h4>In the field</h4><p>Who uses it, how, and why it's safe.</p><span class="w" style="color:var(--green)">Usability · 50%</span></div>
+      <div class="frame a" style="--d:780"><span class="r">FIN</span><h4>Q&amp;A</h4><p>Our team, the honest limits, the asks.</p><span class="w" style="color:var(--blue)">Soft skills · 20%</span></div>
+    </div>
+    <div class="weightbar a" style="--d:600"><div style="--w:30%">Research &amp; depth · 30%</div><div style="--w:50%">Innovation &amp; working prototype · 50%</div><div style="--w:20%">Soft skills · 20%</div></div>
+  </section>
+
+  <!-- ===================================================== ACT I -->
+  <section class="scene chapter" id="s-act1" data-act="1" data-title="Act I — The problem" data-scope>
+    <div class="sweep"></div><div class="roman">I</div>
+    <div class="act a">ACT I</div>
+    <h1 class="a" style="--d:150">The problem</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">Kerala's recorded drug cases are rising fast, and today's response only sees them after they happen.</p>
+  </section>
+
+  <section class="scene" id="s-curve" data-act="1" data-title="The curve" data-steps="2">
+    <div class="kicker a">Kerala Excise · NDPS cases recorded per month</div>
+    <h2 class="a" style="--d:120">From <span class="num" data-count="2985">0</span> cases a year to <em class="num" data-count="12566">0</em>.</h2>
+    <svg id="curve" class="a" style="--d:200;position:absolute;left:150px;top:390px" width="1620" height="520"></svg>
+    <div class="note a" data-at="1" style="left:690px;top:600px"><b>2020</b>Cases fall in the lockdown year, then climb again.</div>
+    <div class="note a" data-at="2" style="left:1220px;top:410px;max-width:300px"><b>Oct 2024</b>Public uploads stop. We recovered 2025–26 from a Legislative Assembly answer and the live Excise site.</div>
+    <div class="src">Recorded cases also rise with enforcement effort; they are not a count of people who use drugs. Sources: Kerala Excise monthly statements 2016–24 · KLA unstarred Q.640 annexure · excise.kerala.gov.in (Oct 2026)</div>
+  </section>
+
+  <section class="scene" id="s-spread" data-act="1" data-title="It is everywhere">
+    <div class="row" style="height:100%">
+      <div class="col" style="width:760px">
+        <div class="kicker a">Excise NDPS cases per 100,000 residents</div>
+        <h2 class="a" style="--d:120">No district <em>is spared.</em></h2>
+        <div class="year a" style="--d:300;margin-top:60px" id="spreadYear">2016</div>
+        <p class="lede a" style="--d:380;margin-top:18px" id="spreadLine"></p>
+        <div class="ctrl a" style="--d:460"><button class="btn" id="spreadPlay">❚❚ Pause</button><input type="range" id="spreadRange" min="2016" max="2024" step="1" value="2016"></div>
+        <div class="legend a" style="--d:520;margin-top:30px"><span>0</span><canvas class="ramp" id="spreadRamp" width="240" height="10"></canvas><span id="spreadMax"></span><span>per 100k / yr</span></div>
+      </div>
+      <div class="grow" style="position:relative">
+        <svg id="dmap" class="dmap a z" style="--d:200;position:absolute;right:20px;top:-60px" width="560" height="900"></svg>
+        <div class="tip" id="dtip"></div>
+      </div>
+      <div class="col a r" style="--d:500;width:330px;padding-top:40px" id="spreadRank"></div>
+    </div>
+    <div class="src">2024 covers January–September. Population: WorldPop 2020. Hover a district.</div>
+  </section>
+
+  <section class="scene" id="s-reactive" data-act="1" data-title="Always one step behind">
+    <div class="kicker a">Three failures we found</div>
+    <h2 class="a" style="--d:120">Today the system <em>reacts.</em> It never sees ahead.</h2>
+    <div class="row" style="margin-top:80px;gap:30px">
+      <div class="card grow a" style="--d:350"><div class="n">01 · AFTER THE FACT</div><h3>Enforcement learns where only after a seizure.</h3><p>Patrol and raid planning leans on memory and tips. Nothing ranks <b>next month's</b> places, or says how confident that ranking is.</p></div>
+      <div class="card grow a" style="--d:500"><div class="n">02 · DATA GOES DARK</div><h3>Official numbers arrive late, or stop.</h3><p>Excise stopped uploading monthly statements in <b>October 2024</b>. The gap lasted nearly two years. A plan built on public data was flying blind.</p></div>
+      <div class="card grow a" style="--d:650"><div class="n">03 · HELP IS FAR</div><h3>Treatment isn't where the cases are.</h3><p><b class="num" data-count="19.9" data-dec="1">0</b><b>%</b> of Kerala's residents live more than 10 km from a de-addiction centre. In Idukki it's <b>46%</b>.</p></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== ACT II -->
+  <section class="scene chapter" id="s-act2" data-act="2" data-title="Act II — Why it matters" data-scope>
+    <div class="sweep"></div><div class="roman">II</div>
+    <div class="act a">ACT II</div>
+    <h1 class="a" style="--d:150">Why it matters</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">Prevention needs two things in time: where trouble will surface next, and how far the nearest help is.</p>
+  </section>
+
+  <section class="scene" id="s-gap" data-act="2" data-title="The distance to help" data-steps="2">
+    <canvas class="full" id="c-gap"></canvas>
+    <div style="position:absolute;left:150px;top:150px;width:720px">
+      <div class="kicker a">46,057 one-kilometre squares · 34.7 million people</div>
+      <h2 class="a" style="--d:120" id="gapTitle">Where Kerala lives.</h2>
+      <p class="lede a" style="--d:240" id="gapLede">Every dot is a square kilometre, lit by how many people live there.</p>
+      <div class="ctrl a" style="--d:360">
+        <button class="btn on" data-gap="0">People</button><button class="btn" data-gap="1">Distance to help</button><button class="btn" data-gap="2">Affected &amp; far</button>
+      </div>
+      <div class="stats a" style="--d:480;margin-top:50px;grid-template-columns:1fr 1fr" id="gapStats">
+        <div class="stat"><div class="v red num" data-count="19.9" data-dec="1" data-suf="%">0</div><div class="k">of residents live over 10 km from a de-addiction centre</div></div>
+        <div class="stat"><div class="v red num" data-count="1.65" data-dec="2" data-suf="M">0</div><div class="k">people in drug-affected areas live over 10 km from help</div></div>
+        <div class="stat"><div class="v num" data-count="322">0</div><div class="k">centres located: 308 registered and 14 Vimukthi</div></div>
+        <div class="stat"><div class="v red num" data-count="46">0</div><div class="k">% of Idukki more than 10 km away. 16% are beyond 20 km</div></div>
+      </div>
+    </div>
+    <div class="src" style="left:1100px;max-width:680px">Straight-line distance. WorldPop 2020 · KSMHA register · Vimukthi directory · NCRB &amp; Excise cases placed within districts. Not a count of people who use drugs.</div>
+  </section>
+
+  <section class="scene" id="s-blind" data-act="2" data-title="A blind spot is not a safe spot">
+    <div style="margin-top:120px">
+      <div class="kicker a">Our first principle</div>
+      <h1 class="a" style="--d:200;font-size:150px;margin-top:30px;max-width:1500px">A blind spot is not<br>a <em>safe spot.</em></h1>
+      <div class="row" style="margin-top:90px;gap:60px">
+        <p class="lede a grow" style="--d:600;font-size:23px"><b>We forecast what agencies record.</b><br>That follows enforcement effort as well as drugs. We never present it as a count of users.</p>
+        <p class="lede a grow" style="--d:750;font-size:23px"><b>Missing data shows as unknown.</b><br>A quiet district with no reports is never painted safe.</p>
+        <p class="lede a grow" style="--d:900;font-size:23px"><b>Places, never people.</b><br>Only coarse areas are shown. Nothing scores individuals or triggers action automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== ACT III -->
+  <section class="scene chapter" id="s-act3" data-act="3" data-title="Act III — The research" data-scope data-crit="Research &amp; depth · 30%">
+    <div class="sweep"></div><div class="roman">III</div>
+    <div class="act a">ACT III</div>
+    <h1 class="a" style="--d:150">The research</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">Kerala had no clean dataset. We rebuilt one from scattered sources: archived PDFs, Assembly answers, six newsrooms and two languages.</p>
+    <div class="weight a" style="--d:800">◆ Research &amp; depth · 30% of score</div>
+  </section>
+
+  <section class="scene" id="s-archive" data-act="3" data-title="Data archaeology" data-crit="Research &amp; depth · 30%">
+    <div class="row" style="gap:90px">
+      <div class="col" style="width:720px">
+        <div class="kicker a">Data archaeology</div>
+        <h2 class="a" style="--d:120">We dug <em>105 months</em> of official records out of the Internet Archive.</h2>
+        <p class="lede a" style="--d:260">Kerala Excise posts its monthly district statements as PDFs, then takes them down. We recovered every archived copy from January 2016 to September 2024. Each month was checked against its own <b>printed statewide total</b> and fingerprinted with SHA-256.</p>
+        <div class="stats a" style="--d:400;margin-top:40px;grid-template-columns:repeat(3,1fr)">
+          <div class="stat"><div class="v amber num" data-count="105">0</div><div class="k">months verified</div></div>
+          <div class="stat"><div class="v num" data-count="1470">0</div><div class="k">district-months</div></div>
+          <div class="stat"><div class="v num" data-count="14">0</div><div class="k">districts, zero gaps</div></div>
+        </div>
+        <p class="small a" style="--d:560;margin-top:26px"><span class="blue">■</span> 2025–26 came from a Kerala Legislative Assembly answer (Unstarred Q.640). It matches the Economic Review total exactly. October 2026 comes from the live Excise site, saved monthly.</p>
+      </div>
+      <div class="grow a r" style="--d:300;position:relative;padding-top:20px">
+        <div class="tiles" id="tiles"></div>
+        <div class="stamp" id="stamp" style="left:120px;top:300px">VERIFIED</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-news" data-act="3" data-title="Reading 628,964 stories" data-steps="3" data-crit="Research &amp; depth · 30%">
+    <div class="row" style="gap:80px">
+      <div class="col" style="width:820px">
+        <div class="kicker a">News as a sensor</div>
+        <h2 class="a" style="--d:120">We read <em>a decade of Kerala news</em> to find where seizures happen.</h2>
+        <div class="funnel a" style="--d:300;margin-top:50px">
+          <div class="fstep" style="width:100%"><span class="v num" data-count="628964">0</span><span class="k">Kerala stories scanned, 2016–2026, from sitemaps</span></div>
+          <div class="fstep" style="width:82%"><span class="v num" data-count="85708">0</span><span class="k">placed on the map by our geocoder</span></div>
+          <div class="fstep" style="width:62%;border-color:var(--green);background:linear-gradient(90deg,rgba(0,255,65,.2),rgba(0,255,65,.03))"><span class="v num green" data-count="1979">0</span><span class="k">drug seizures pinned to a locality</span></div>
+        </div>
+        <div class="press a" style="--d:500"><span>Times of India</span><span>New Indian Express</span><span>Onmanorama</span><span>Asianet News</span><span class="ml">News18 മലയാളം</span><span class="ml">മാധ്യമം Madhyamam</span></div>
+      </div>
+      <div class="grow col" style="padding-top:70px">
+        <div class="kicker a" style="--d:200;color:var(--green)">We built a Malayalam geocoder</div>
+        <div class="mlcard a r" style="--d:350;margin-top:26px">
+          <div class="mltext"><span class="hit" data-k="1">പെരുമ്പാവൂർ:</span> കഞ്ചാവുമായി യുവാവ് പിടിയിൽ. പ്രതി <span class="miss" data-k="2">ആലുവ സ്വദേശിയാണ്.</span></div>
+          <div class="mlnote">
+            <div class="a" data-at="1"><i class="ok">PLACE</i>Dateline "X:" places the seizure in Perumbavoor</div>
+            <div class="a" data-at="2"><i class="no">IGNORE</i>"സ്വദേശി" is a hometown, not where it happened. Same for "from X", "to X" and "താമസ"</div>
+          </div>
+        </div>
+        <div class="stats a" data-at="3" style="margin-top:30px;grid-template-columns:1fr 1fr">
+          <div class="stat"><div class="v green">82%</div><div class="k">agree with the English geocoder to within 3 km (304 stories)</div></div>
+          <div class="stat"><div class="v green">+628</div><div class="k">seizures located that English alone missed. Malappuram rose from ~30 to 218</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="src">Illustrative sentence ("Perumbavoor: youth held with ganja. The accused is from Aluva."). Rules: case endings ‑ൽ ‑യിൽ ‑ലെ, datelines, "X police/excise".</div>
+  </section>
+
+  <section class="scene" id="s-sources" data-act="3" data-title="Every source we used" data-crit="Research &amp; depth · 30%">
+    <div class="kicker a">The evidence base</div>
+    <h2 class="a" style="--d:120">Fourteen sources. <em>One map.</em></h2>
+    <svg id="constel" class="flow a" style="--d:200;position:absolute;left:0;top:250px" width="1920" height="760"></svg>
+  </section>
+
+  <section class="scene" id="s-findings" data-act="3" data-title="What the research revealed" data-crit="Research &amp; depth · 30%">
+    <div class="kicker a">What we discovered</div>
+    <h2 class="a" style="--d:120">Seizures are <em>not random.</em> Neither is the news.</h2>
+    <div class="row" style="margin-top:70px;gap:90px">
+      <div class="grow">
+        <div class="hbar a" style="--d:300"><span class="lab">Same locality again</span><span class="t"><i style="--c:var(--red)" data-w="73.9"></i></span><span class="v">74%</span></div>
+        <p class="small a" style="--d:320;margin:-4px 0 26px">of reported seizures came from places with an earlier report.</p>
+        <div class="hbar a" style="--d:420"><span class="lab">First-ever places already in the news</span><span class="t"><i style="--c:var(--amber)" data-w="81"></i></span><span class="v">78–85%</span></div>
+        <p class="small a" style="--d:440;margin:-4px 0 26px">of seizures at new places happened where news of any kind already reached.</p>
+        <div class="hbar a" style="--d:540"><span class="lab">Two city desks' share</span><span class="t"><i style="--c:var(--blue)" data-w="62"></i></span><span class="v">62%</span></div>
+        <p class="small a" style="--d:560;margin:-4px 0 0">of English reports came from Ernakulam and Thiruvananthapuram. That bias is why we added Malayalam sources.</p>
+      </div>
+      <div style="width:620px" class="col">
+        <div class="kicker a" style="--d:300">Relative risk, reported seizures</div>
+        <div class="row a" style="--d:450;margin-top:30px;align-items:flex-end;gap:50px">
+          <div><div class="big red glow num" data-count="5.2" data-dec="1" data-suf="×">0</div><p class="lede" style="font-size:22px;margin-top:14px">within 0.5 km of a<br>railway station</p></div>
+          <div><div class="big amber num" data-count="2.3" data-dec="1" data-suf="×">0</div><p class="lede" style="font-size:22px;margin-top:14px">near a national<br>highway</p></div>
+        </div>
+        <p class="small a" style="--d:600;margin-top:40px">Context from OpenStreetMap, plus 31 border crossings we found from road and rail lines. The patterns explain where seizures cluster. They did <b>not</b> predict brand-new places better than population, and we report that.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-field" data-act="3" data-title="Field research (team)" data-crit="Research &amp; depth · 30%">
+    <div class="kicker a">On the ground</div>
+    <h2 class="a" style="--d:120">What we heard from <em>the people closest to it.</em></h2>
+    <!-- TEAM: replace these placeholder cards with your interviews, surveys, field visits and quotes. -->
+    <div class="row" style="margin-top:70px;gap:30px">
+      <div class="card todo grow a" style="--d:300"><div class="n">TEAM RESEARCH · 01</div><h3>[Interviews]</h3><p>Who we spoke to (Excise, Police, de-addiction counsellors, teachers) and the key quote.</p></div>
+      <div class="card todo grow a" style="--d:450"><div class="n">TEAM RESEARCH · 02</div><h3>[Survey]</h3><p>Sample size, where, and the headline number.</p></div>
+      <div class="card todo grow a" style="--d:600"><div class="n">TEAM RESEARCH · 03</div><h3>[Field visit / literature]</h3><p>What we saw, and how it changed the design.</p></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== ACT IV -->
+  <section class="scene chapter" id="s-act4" data-act="4" data-title="Act IV — How it works" data-scope data-crit="Research &amp; depth · 30%">
+    <div class="sweep"></div><div class="roman">IV</div>
+    <div class="act a">ACT IV</div>
+    <h1 class="a" style="--d:150">How it works</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">One pipeline, five models, and a rule we never break: each design is written down before it sees the test data, then scored once.</p>
+  </section>
+
+  <section class="scene" id="s-pipeline" data-act="4" data-title="The pipeline" data-crit="Research &amp; depth · 30%">
+    <div class="kicker a">Architecture</div>
+    <h2 class="a" style="--d:120">From raw records to <em>a decision someone can check.</em></h2>
+    <svg id="pipe" class="flow a" style="--d:200;position:absolute;left:0;top:300px" width="1920" height="700"></svg>
+  </section>
+
+  <section class="scene" id="s-district" data-act="4" data-title="Model 1 · District month" data-crit="Research &amp; depth · 30%">
+    <div class="row" style="gap:100px">
+      <div class="col" style="width:760px">
+        <div class="kicker a">Model 1 · Where next, by district</div>
+        <h2 class="a" style="--d:120">Next month's cases for all <em>14 districts</em>, with ranges.</h2>
+        <div class="a mono" style="--d:300;margin-top:50px;font-size:28px;line-height:1.7;padding:30px 34px;border:1px solid var(--line);background:rgba(255,255,255,.02)">
+          <span class="mutec">expected</span> = <span class="amber">district share</span> × <span class="blue">statewide total</span> × <span class="red">season</span><br>
+          <span class="mutec" style="font-size:18px">→ 80% range · P(top-four) · P(running hot) · two alerts a month</span>
+        </div>
+        <p class="lede a" style="--d:450;font-size:22px">Trained on 2016–2022. Tested <b>once</b> on Jan 2023 – Sep 2024, data it had never seen, against the best simple method.</p>
+      </div>
+      <div class="grow col" style="padding-top:40px">
+        <table class="t a" style="--d:300">
+          <tr style="transition-delay:.5s"><th>Held-out test</th><th>NarcoTrace</th><th>Best simple</th></tr>
+          <tr style="transition-delay:.7s"><td>Mean error / district-month</td><td class="n green">8.70</td><td class="n mutec">9.31</td></tr>
+          <tr style="transition-delay:.85s"><td>Bias</td><td class="n green">−0.1%</td><td class="n mutec">−4.6%</td></tr>
+          <tr style="transition-delay:1s"><td>80% range actually held</td><td class="n green">82%</td><td class="n mutec">—</td></tr>
+          <tr style="transition-delay:1.15s"><td>Ranking correlation</td><td class="n green">0.81</td><td class="n mutec">0.77</td></tr>
+          <tr style="transition-delay:1.3s"><td>Hot-district alerts right</td><td class="n green">38%</td><td class="n mutec">18% base</td></tr>
+        </table>
+        <p class="small a" style="--d:900;margin-top:24px">Honest: the gain is modest, and about a third of district calls miss by more than 20%. Forecasts two or three months out lost to simple averages, so we <b>withhold</b> them.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-grid" data-act="4" data-title="Model 2 · The 1 km grid" data-steps="2" data-crit="Research &amp; depth · 30%">
+    <canvas class="full" id="c-grid"></canvas>
+    <div style="position:absolute;left:150px;top:150px;width:760px">
+      <div class="kicker a" style="color:var(--green)">Model 2 · Grid forecast v3.1</div>
+      <h2 class="a" style="--d:120">Which <em style="color:var(--green)">square kilometre</em>, in the next four weeks?</h2>
+      <p class="lede a" style="--d:260;font-size:24px">Our key insight: a forecast of <i>reported</i> seizures must model how reports are <b>located</b> and <b>covered</b>. Only <b class="green">5,754</b> of 46,057 squares can ever receive a located report. Our first model wasted 270 of its 461 picks outside them.</p>
+      <div class="a" data-at="1" style="margin-top:40px">
+        <div class="kicker" style="color:var(--ink2)">What drives the ranker (drop when shuffled)</div>
+        <div id="importance" style="margin-top:16px"></div>
+      </div>
+    </div>
+    <div class="note a" data-at="2" style="right:170px;bottom:150px;left:auto;border-color:var(--green);max-width:380px"><b style="color:var(--green)">461 squares = 1% of Kerala</b>LightGBM ranker over each square's history, nearby activity, an ETAS self-exciting process, news coverage, surroundings and season. Refit every 13 weeks.</div>
+  </section>
+
+  <section class="scene" id="s-rigor" data-act="4" data-title="Scientific discipline" data-crit="Research &amp; depth · 30%">
+    <div class="kicker a">How we keep ourselves honest</div>
+    <h2 class="a" style="--d:120">We <em>froze time</em> to test ourselves.</h2>
+    <svg id="timeline" class="a" style="--d:200;position:absolute;left:150px;top:420px" width="1620" height="300"></svg>
+    <div class="row" style="position:absolute;left:150px;right:150px;bottom:130px;gap:30px">
+      <p class="small a grow" style="--d:900"><b>Pre-registered.</b> Settings and pass/fail gates were written down before any test score.</p>
+      <p class="small a grow" style="--d:1000"><b>Scored once.</b> No retuning on a window that has already been scored.</p>
+      <p class="small a grow" style="--d:1100"><b>Chronological.</b> Never trained on the future. A leakage test is built in.</p>
+      <p class="small a grow" style="--d:1200"><b>Abstains.</b> A forecast is withheld, with a reason, when the data is stale.</p>
+    </div>
+  </section>
+
+  <!-- ===================================================== ACT V -->
+  <section class="scene chapter" id="s-act5" data-act="5" data-title="Act V — The prototype" data-scope data-crit="Innovation &amp; prototype · 50%">
+    <div class="sweep"></div><div class="roman">V</div>
+    <div class="act a">ACT V</div>
+    <h1 class="a" style="--d:150">The prototype</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">A working system, already scored against five months it had never seen.</p>
+    <div class="weight a" style="--d:800">◆ Innovation &amp; working prototype · 50% of score</div>
+  </section>
+
+  <section class="scene" id="s-cutoff" data-act="5" data-title="The frozen forecast test" data-crit="Innovation &amp; prototype · 50%">
+    <canvas class="full" id="c-cut"></canvas>
+    <div style="position:absolute;left:150px;top:140px;width:840px">
+      <div class="frozen a"><span>❄</span> Model frozen · 30 June 2026, 23:59 IST</div>
+      <h2 class="a" style="--d:120;font-size:68px">We locked one forecast, then <em style="color:var(--green)">let time run.</em></h2>
+      <div class="ctrl a" style="--d:260"><button class="btn" id="cutPlay">▶ Run Jul → Nov 2026</button><span class="clock" id="cutClock">30 JUN 2026</span></div>
+      <div class="months a" style="--d:340" id="cutMonths"></div>
+      <div class="row a" style="--d:420;margin-top:40px;align-items:flex-end;gap:50px">
+        <div><div class="big green glow num" id="cutPct">0%</div><p class="lede" style="font-size:21px;margin-top:10px" id="cutLine">of later reported seizures fell inside the 1% of Kerala we flagged</p></div>
+      </div>
+      <div id="cutBars" style="margin-top:30px;opacity:0;transition:opacity 1s"></div>
+    </div>
+    <div class="src" style="left:1100px;max-width:680px">263 located reports, 1 Jul – 25 Nov 2026. 19 of the top 20 places had a later report within 2 km. Brand-new places: 9 of 43 caught.</div>
+  </section>
+
+  <section class="scene" id="s-enforce" data-act="5" data-title="Product · Enforcement view" data-crit="Innovation &amp; prototype · 50%">
+    <div class="row" style="height:100%;gap:50px">
+      <div class="col" style="width:430px">
+        <div class="kicker a" style="color:var(--green)">Live product · Enforcement</div>
+        <h2 class="a" style="--d:120;font-size:58px">Where to look in the <em style="color:var(--green)">next four weeks.</em></h2>
+        <div class="thumbs a" style="--d:300;margin-top:36px" id="enfThumbs"></div>
+      </div>
+      <div class="grow a z" style="--d:200;padding-top:10px"><div class="screen" id="enfScreen" style="width:100%;height:740px"></div></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-public" data-act="5" data-title="Product · Public view" data-crit="Innovation &amp; prototype · 50%">
+    <div class="row" style="height:100%;gap:50px">
+      <div class="col" style="width:430px">
+        <div class="kicker a">Live product · Public &amp; recovery</div>
+        <h2 class="a" style="--d:120;font-size:58px">Help that's <em>easy to find.</em> In Malayalam too.</h2>
+        <div class="thumbs a" style="--d:300;margin-top:36px" id="pubThumbs"></div>
+      </div>
+      <div class="grow a z" style="--d:200;padding-top:10px"><div class="screen" id="pubScreen" style="width:100%;height:740px"></div></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-innov" data-act="5" data-title="What's genuinely new" data-crit="Innovation &amp; prototype · 50%">
+    <div class="kicker a">Innovation</div>
+    <h2 class="a" style="--d:120">Five things <em>nobody had built</em> for Kerala.</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:60px">
+      <div class="card a" style="--d:300"><div class="n">01</div><h3>Measurement-aware forecasting</h3><p>It models where a seizure gets <b>reported and located</b>, not just where drugs move. That took accuracy from 63% to 85%.</p></div>
+      <div class="card a" style="--d:400"><div class="n">02</div><h3>Malayalam geocoder</h3><p>It reads datelines and case endings, and skips hometowns. It locates 628 seizures English sources missed.</p></div>
+      <div class="card a" style="--d:500"><div class="n">03</div><h3>Self-auditing forecast ledger</h3><p>Every weekly list is locked and scored four weeks later. If v3.1 trails v1 over Dec–May, it <b>reverts automatically</b>.</p></div>
+      <div class="card a" style="--d:600"><div class="n">04</div><h3>Bias-resistant public tips</h3><p>What and roughly where, never who. An area surfaces only when <b>5+ independent people</b> report it on 2+ days, above the local norm.</p></div>
+      <div class="card a" style="--d:700"><div class="n">05</div><h3>Enforcement and care, one system</h3><p>The same evidence tells police where to look and tells health planners where help is too far.</p></div>
+      <div class="card a" style="--d:800;border-color:rgba(0,255,65,.4)"><div class="n green">+</div><h3>Recovered public data</h3><p>A verified 105-month district series that wasn't available anywhere in usable form.</p></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-live" data-act="5" data-title="Live demo" data-crit="Innovation &amp; prototype · 50%">
+    <div style="display:grid;place-items:center;height:100%;text-align:center">
+      <div>
+        <div class="kicker a" style="justify-content:center;color:var(--green)">Cut to</div>
+        <h1 class="a glow" style="--d:200;font-size:220px;letter-spacing:-.06em;color:var(--green)">LIVE</h1>
+        <p class="lede a" style="--d:400;margin:20px auto 0">Priority list → why there → drug-affected areas far from help → nearest centre from "Near me" → Malayalam → report a tip.</p>
+        <div class="ctrl a" style="--d:600;justify-content:center;margin-top:50px">
+          <a class="btn" href="http://127.0.0.1:3000/enforcement" target="_blank" style="text-decoration:none">Open enforcement ↗</a>
+          <a class="btn" href="http://127.0.0.1:3000/public" target="_blank" style="text-decoration:none">Open public ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== ACT VI -->
+  <section class="scene chapter" id="s-act6" data-act="6" data-title="Act VI — In the field" data-scope data-crit="Innovation &amp; prototype · 50%">
+    <div class="sweep"></div><div class="roman">VI</div>
+    <div class="act a">ACT VI</div>
+    <h1 class="a" style="--d:150">In the field</h1>
+    <div class="rule"></div>
+    <p class="sub a" style="--d:500">Who uses it, what a week looks like, and why the results can be trusted.</p>
+  </section>
+
+  <section class="scene" id="s-week" data-act="6" data-title="A week with NarcoTrace" data-crit="Innovation &amp; prototype · 50%">
+    <div class="row" style="gap:60px">
+      <div class="col" style="width:640px">
+        <div class="kicker a">How it's used</div>
+        <h2 class="a" style="--d:120">A loop that <em>checks itself</em> every week.</h2>
+        <div class="stats a" style="--d:300;margin-top:50px">
+          <div class="stat"><div class="v" style="font-size:34px;color:var(--green)">Enforcement analysts</div><div class="k">The four-week priority list, why each place, rising areas and the official district picture. They decide. Nothing is dispatched automatically.</div></div>
+          <div class="stat"><div class="v" style="font-size:34px;color:var(--red)">Health &amp; recovery planners</div><div class="k">Drug-affected areas far from help, ranked localities and district gaps, showing where a new centre or outreach reaches the most people.</div></div>
+          <div class="stat"><div class="v" style="font-size:34px;color:var(--blue)">The public</div><div class="k">Nearest help from any spot, helplines, and a safe tip form in English or Malayalam.</div></div>
+        </div>
+      </div>
+      <div class="grow a z" style="--d:250;position:relative"><svg id="cycle" class="cycle" width="900" height="820"></svg></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-honest" data-act="6" data-title="Why it's effective (and where it isn't)" data-crit="Innovation &amp; prototype · 50%">
+    <div class="kicker a">Why you can trust it</div>
+    <h2 class="a" style="--d:120">Every number is next to <em>the simplest alternative.</em></h2>
+    <div class="row" style="margin-top:60px;gap:90px">
+      <div class="grow">
+        <div class="kicker a" style="--d:250;color:var(--green)">Where it wins</div>
+        <div id="winBars" style="margin-top:20px"></div>
+      </div>
+      <div style="width:620px">
+        <div class="kicker a" style="--d:250">Where it's weak, and we say so</div>
+        <div class="stats a" style="--d:400;margin-top:20px">
+          <div class="stat"><div class="k" style="margin:0"><b>A simple rule comes close.</b> "Reported before, then most news" ties v3.1 overall. The model's real edge is first-ever places: 38% vs 25%.</div></div>
+          <div class="stat"><div class="k" style="margin:0"><b>New places stay hard.</b> 9 of 43 first-ever places were caught after the cutoff.</div></div>
+          <div class="stat"><div class="k" style="margin:0"><b>It measures reports, not drugs.</b> News is a selected sample: city desks are over-covered.</div></div>
+          <div class="stat"><div class="k" style="margin:0"><b>Calibrated, a little low.</b> 814 reports predicted vs 889 observed after the cutoff.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s-ethics" data-act="6" data-title="Safeguards by design" data-crit="Innovation &amp; prototype · 50%">
+    <div class="kicker a">Built to do no harm</div>
+    <h2 class="a" style="--d:120">Safeguards are <em>in the code,</em> not just the slides.</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:70px">
+      <div class="card a" style="--d:300"><div class="n">PLACES, NOT PEOPLE</div><h3>No names. No houses.</h3><p>Tips have no person, phone or vehicle fields. Notes are scrubbed on the server. Taps snap to 1 km before they leave the phone.</p></div>
+      <div class="card a" style="--d:420"><div class="n">ANTI-CAMPAIGN</div><h3>5 people · 3 first-hand · 2 days</h3><p>Bursts are held for review. Reporters across many blocks are dropped. Each area is tested against its own neighbours (Poisson, p &lt; 0.01).</p></div>
+      <div class="card a" style="--d:540"><div class="n">ANTI-STIGMA</div><h3>No public tip map</h3><p>Notes describing people by faith, caste or origin are held out. Enforcement sees only dashed, unverified 3 × 3 km blocks.</p></div>
+      <div class="card a" style="--d:660"><div class="n">NO FEEDBACK LOOP</div><h3>Tips never train the model</h3><p>Small cells under five are suppressed. Every forecast states its data date and can be withheld.</p></div>
+    </div>
+    <p class="lede a" style="--d:900;margin-top:50px;font-size:22px">Emergencies go straight to official lines: <b>112</b> · Yodhav <b>99959 66666</b> · Excise <b>155358</b> · de-addiction <b>14446</b>.</p>
+  </section>
+
+  <section class="scene" id="s-next" data-act="6" data-title="What's next" data-crit="Innovation &amp; prototype · 50%">
+    <div class="kicker a">Roadmap &amp; asks</div>
+    <h2 class="a" style="--d:120">Give it better data and <em>it gets sharper.</em></h2>
+    <div class="row" style="margin-top:70px;gap:30px">
+      <div class="card grow a" style="--d:300"><div class="n">DEC 2026 → MAY 2027</div><h3>Prospective test</h3><p>The weekly ledger scores v3.1 against v1 on the future. First result <b>27 Dec 2026</b>.</p></div>
+      <div class="card grow a" style="--d:420"><div class="n">ASK · EXCISE &amp; POLICE</div><h3>Station-level monthly counts</h3><p>Statements for Oct 2024 onward restart the district forecast immediately. Range-office counts sharpen the "where".</p></div>
+      <div class="card grow a" style="--d:540"><div class="n">ASK · VIMUKTHI &amp; DHS</div><h3>Care demand by taluk</h3><p>Admissions, waiting times and staffed beds, as suppressed aggregates. That turns distance into real demand.</p></div>
+      <div class="card grow a" style="--d:660"><div class="n">BUILD</div><h3>Travel time &amp; wastewater</h3><p>Road travel time instead of straight lines. Wastewater testing gives an anonymous, near-real-time read on use.</p></div>
+    </div>
+  </section>
+
+  <!-- ===================================================== FINALE -->
+  <section class="scene" id="s-finale" data-act="7" data-title="Finale · Q&amp;A" data-crit="Soft skills · 20%">
+    <canvas class="full" id="c-fin"></canvas>
+    <div style="position:absolute;left:150px;top:270px;width:900px">
+      <div class="kicker a">NarcoTrace</div>
+      <h1 class="a" style="--d:200;font-size:132px;letter-spacing:-.055em;margin-top:30px;line-height:.95">See it earlier.<br><em>Reach them sooner.</em></h1>
+      <p class="lede a" style="--d:500">Recorded drug cases forecast a month ahead, seizure reports four weeks ahead at 1 km, and distance to help for every square kilometre of Kerala.</p>
+      <div class="row a" style="--d:800;margin-top:60px;gap:14px;flex-wrap:wrap">
+        <span class="chip">[Team member 1]</span><span class="chip">[Team member 2]</span><span class="chip">[Team member 3]</span><span class="chip">[Team member 4]</span>
+      </div>
+      <div class="kicker a" style="--d:1000;margin-top:60px;color:var(--blue)">Questions welcome</div>
+    </div>
+  </section>
+
+  <div id="grain" class="layer"></div>
+  <div id="scanline" class="layer"></div>
+  <div id="vignette" class="layer"></div>
+  <div id="barTop" class="bar"></div><div id="barBot" class="bar"></div>
+  <div id="flash" class="layer"></div>
+  <div id="hud" class="layer">
+    <i class="corner a"></i><i class="corner b"></i><i class="corner c"></i><i class="corner d"></i>
+    <div class="tl"><span class="rec">NarcoTrace</span><span id="tc">00:00:00:00</span></div>
+    <div class="tr"><span class="chip crit" id="crit"></span><span class="chip" id="actLabel"></span></div>
+    <div class="bl" id="sceneTitle"></div>
+    <div class="br"><span id="counter"></span></div>
+    <div id="progress"></div>
+  </div>
+  <div id="overview"><div class="kicker" style="margin-bottom:30px">Scenes · press O to close</div><div class="grid" id="ovGrid"></div></div>
+</div>
+<script src="assets/data.js"></script>
+<script src="deck.js"></script>
+</body>
+</html>
