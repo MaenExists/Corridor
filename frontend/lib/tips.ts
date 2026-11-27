@@ -13,10 +13,30 @@ const ROOT = process.env.NARCOTRACE_ROOT ?? path.join(process.cwd(), "..");
 const DIR = process.env.NARCOTRACE_TIPS_DIR ?? path.join(ROOT, "ml/data/real/public_tips");
 const FILE = path.join(DIR, "tips.jsonl");
 
+/** Minimal D1 surface, so the app does not need the Workers type package. */
+type D1 = {
+  prepare(sql: string): { bind(...values: unknown[]): { all<T>(): Promise<{ results: T[] }>; run(): Promise<unknown> } };
+};
+type CfEnv = { DB?: D1; TIPS_SALT?: string };
+
+/** On Cloudflare, tips live in D1 and the salt is a Worker secret. Locally there is no Cloudflare context. */
+async function cloudflare(): Promise<CfEnv | null> {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const env = getCloudflareContext().env as CfEnv;
+    return env.DB ? env : null;
+  } catch { return null; }
+}
+
 /** A server-side secret, so stored reporter keys cannot be linked back to a browser's own key. */
 let salt: Buffer | null = null;
 async function secret() {
   if (salt) return salt;
+  const cf = await cloudflare();
+  if (cf) {
+    if (!cf.TIPS_SALT || !/^[0-9a-f]{64}$/.test(cf.TIPS_SALT)) throw new Error("TIPS_SALT secret is not set");
+    return (salt = Buffer.from(cf.TIPS_SALT, "hex"));
+  }
   await mkdir(DIR, { recursive: true, mode: 0o700 });
   const file = path.join(DIR, "salt");
   try { salt = Buffer.from((await readFile(file, "utf8")).trim(), "hex"); }
@@ -25,6 +45,13 @@ async function secret() {
 }
 
 async function load(): Promise<StoredTip[]> {
+  const cf = await cloudflare();
+  if (cf) {
+    // Only the last 120 days matter: 90 for the areas, 30 for the per-device limit.
+    const since = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
+    const { results } = await cf.DB!.prepare("SELECT data FROM tips WHERE day >= ? ORDER BY day").bind(since).all<{ data: string }>();
+    return results.map(r => JSON.parse(r.data) as StoredTip);
+  }
   try {
     return (await readFile(FILE, "utf8")).split("\n").filter(Boolean).map(l => JSON.parse(l) as StoredTip);
   } catch { return []; }
@@ -90,8 +117,14 @@ export async function submitTip(input: TipInput, connection: string): Promise<Ti
     note: note.text, redacted: note.redacted, reporter,
     status: note.aboutGroup ? "held" : "counted", ...(note.aboutGroup ? { reason: "about_group" } : {}),
   };
-  await mkdir(DIR, { recursive: true, mode: 0o700 });
-  await appendFile(FILE, JSON.stringify(tip) + "\n", { mode: 0o600 });
+  const cf = await cloudflare();
+  if (cf) {
+    await cf.DB!.prepare("INSERT INTO tips (id, day, reporter, data) VALUES (?, ?, ?, ?)")
+      .bind(tip.id, tip.day, tip.reporter, JSON.stringify(tip)).run();
+  } else {
+    await mkdir(DIR, { recursive: true, mode: 0o700 });
+    await appendFile(FILE, JSON.stringify(tip) + "\n", { mode: 0o600 });
+  }
   return { ok: true, counted: tip.status === "counted" };
 }
 

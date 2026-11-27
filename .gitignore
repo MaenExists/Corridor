@@ -28,3 +28,8 @@ dist/
 # Presentation: private derived data and product screenshots
 /Presentation/assets/data.js
 /Presentation/assets/shots/
+
+# Cloudflare build output and bundled data snapshot (private model outputs)
+/frontend/.open-next/
+/frontend/.cf/
+/frontend/.dev.vars

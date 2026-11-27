@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "narcotrace",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "workers_dev": true,
+  "d1_databases": [
+    { "binding": "DB", "database_name": "narcotrace-tips", "database_id": "REPLACE_AFTER_CREATE", "migrations_dir": "migrations" }
+  ]
+}

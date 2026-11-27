@@ -1,12 +1,10 @@
 import "server-only";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { readJson, stamp } from "./files";
 import type { Centre, DistrictAccess, FarPlace, Grade, NeedPlace, PublicView } from "./types";
 
-const ROOT = process.env.NARCOTRACE_ROOT ?? path.join(process.cwd(), "..");
-export const ACCESS_MAP = path.join(ROOT, "web/public/generated/recovery/access_map.json");
+export const ACCESS_MAP = "web/public/generated/recovery/access_map.json";
 // Built by `make recovery-need` (ml/recovery/drug_burden.py): coarse grades only, no seizure locations.
-export const NEED_MAP = path.join(ROOT, "web/public/generated/recovery/need_map.json");
+export const NEED_MAP = "web/public/generated/recovery/need_map.json";
 
 type Raw = {
   meta: { built_on: string; far_km: number; centres_located: number; centres_unlocated: number; limits: string[];
@@ -31,22 +29,26 @@ type RawNeed = {
 
 let needCache: { mtime: number; raw: RawNeed } | null = null;
 export async function rawNeedMap(): Promise<RawNeed | null> {
-  try {
-    const { stat } = await import("node:fs/promises");
-    const mtime = (await stat(NEED_MAP)).mtimeMs;
-    if (!needCache || needCache.mtime !== mtime) needCache = { mtime, raw: JSON.parse(await readFile(NEED_MAP, "utf8")) };
-    return needCache.raw;
-  } catch { return null; }
+  const mtime = await stamp(NEED_MAP);
+  if (mtime == null) return null;
+  if (!needCache || needCache.mtime !== mtime) {
+    const raw = await readJson<RawNeed>(NEED_MAP);
+    if (!raw) return null;
+    needCache = { mtime, raw };
+  }
+  return needCache.raw;
 }
 
 let cache: { mtime: number; raw: Raw } | null = null;
 export async function rawAccessMap(): Promise<Raw | null> {
-  try {
-    const { stat } = await import("node:fs/promises");
-    const mtime = (await stat(ACCESS_MAP)).mtimeMs;
-    if (!cache || cache.mtime !== mtime) cache = { mtime, raw: JSON.parse(await readFile(ACCESS_MAP, "utf8")) };
-    return cache.raw;
-  } catch { return null; }
+  const mtime = await stamp(ACCESS_MAP);
+  if (mtime == null) return null;
+  if (!cache || cache.mtime !== mtime) {
+    const raw = await readJson<Raw>(ACCESS_MAP);
+    if (!raw) return null;
+    cache = { mtime, raw };
+  }
+  return cache.raw;
 }
 
 export async function publicView(): Promise<PublicView> {

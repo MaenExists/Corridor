@@ -1,13 +1,12 @@
 import "server-only";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { readJson, readText } from "./files";
 import { concernSummary } from "./tips";
 import type { Cell, DistrictRow, EnforcementView, Gateway, HotspotKind, Ledger, Level, PatternsV2, WatchPlace } from "./types";
 
 // Model outputs stay local and gitignored; the server reads them at request time.
-const ROOT = process.env.NARCOTRACE_ROOT ?? path.join(process.cwd(), "..");
-const GENERATED = path.join(ROOT, "web/public/generated/hotspots");
-const PUBLIC = path.join(ROOT, "ml/data/real/public_sources");
+const GENERATED = "web/public/generated/hotspots";
+const PUBLIC = "ml/data/real/public_sources";
+const join = (...parts: string[]) => parts.join("/");
 
 const SOURCE: Record<string, string> = {
   nie: "New Indian Express", toi: "Times of India", asianet: "Asianet News", n18: "News18 Malayalam", onm: "Onmanorama",
@@ -19,12 +18,12 @@ const SURROUNDING: Record<string, string> = {
   airport: "an airport", port: "a port or harbour", land_border: "the state border", border_gateway: "a border crossing",
 };
 
-async function json<T>(file: string): Promise<T | null> {
-  try { return JSON.parse(await readFile(file, "utf8")) as T; } catch { return null; }
-}
+const json = <T,>(file: string) => readJson<T>(file);
 async function csv(file: string): Promise<Record<string, string>[]> {
   try {
-    const [head, ...lines] = (await readFile(file, "utf8")).trim().split(/\r?\n/);
+    const text = await readText(file);
+    if (text == null) return [];
+    const [head, ...lines] = text.trim().split(/\r?\n/);
     const keys = head.split(",");
     return lines.map(line => Object.fromEntries(line.split(",").map((v, i) => [keys[i], v])));
   } catch { return []; }
@@ -149,8 +148,8 @@ function ledgerView(raw: RawLedger | null): Ledger | null {
 }
 
 async function districts(): Promise<{ rows: DistrictRow[] }> {
-  const live = await csv(path.join(PUBLIC, "excise_live_months.csv"));
-  const history = await csv(path.join(PUBLIC, "excise_enforcement_monthly.csv"));
+  const live = await csv(join(PUBLIC, "excise_live_months.csv"));
+  const history = await csv(join(PUBLIC, "excise_enforcement_monthly.csv"));
   const latestStart = live.map(r => r.period_start).sort().at(-1);
   const byYear = new Map<string, Map<number, number>>();
   const months2024 = new Map<string, number[]>();
@@ -179,14 +178,14 @@ async function districts(): Promise<{ rows: DistrictRow[] }> {
 
 export async function enforcementView(): Promise<EnforcementView> {
   const [grid, patterns, district, forecasts, concern, v2, ledger] = await Promise.all([
-    json<Grid>(path.join(GENERATED, "grid_forecast.json")),
-    json<Patterns>(path.join(GENERATED, "patterns.json")),
+    json<Grid>(join(GENERATED, "grid_forecast.json")),
+    json<Patterns>(join(GENERATED, "patterns.json")),
     districts(),
     json<{ status: string; latest_complete_month: string; resume_after_gap_months: number }>(
-      path.join(PUBLIC, "prepared/district_monthly/forecast_2026-11-30.json")),
+      join(PUBLIC, "prepared/district_monthly/forecast_2026-11-30.json")),
     concernSummary(),
-    json<RawV2>(path.join(GENERATED, "patterns_v2.json")),
-    json<RawLedger>(path.join(GENERATED, "ledger.json")),
+    json<RawV2>(join(GENERATED, "patterns_v2.json")),
+    json<RawLedger>(join(GENERATED, "ledger.json")),
   ]);
   // Name each public-tip area after the nearest known locality, so nobody reads coordinates off a list.
   const named = [...(grid?.cells ?? []).map(c => ({ lat: c.lat, lon: c.lon, name: c.locality })),

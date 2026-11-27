@@ -1,27 +1,26 @@
 import "server-only";
-import { readFile, stat } from "node:fs/promises";
-import path from "node:path";
+import { readJson, stamp } from "./files";
 import { fold, labelRank, type PlaceHit } from "./placeRules";
 
 // Built by `make place-names` from the local OpenStreetMap extract; local and gitignored.
-const ROOT = process.env.NARCOTRACE_ROOT ?? path.join(process.cwd(), "..");
-const FILE = path.join(ROOT, "web/public/generated/places/kerala_places.json");
+const FILE = "web/public/generated/places/kerala_places.json";
 
 type Row = [string, string, string, number, number, number, string];
 type Indexed = { row: Row; key: string; words: string[] };
 let cache: { mtime: number; rows: Indexed[] } | null = null;
 
 async function load() {
-  try {
-    const mtime = (await stat(FILE)).mtimeMs;
-    if (!cache || cache.mtime !== mtime) {
-      const rows = (JSON.parse(await readFile(FILE, "utf8")).places as Row[]).map(row => ({
-        row, key: fold(row[0]), words: row[0].split(/[\s,()/-]+/).map(fold).filter(Boolean),
-      }));
-      cache = { mtime, rows };
-    }
-    return cache.rows;
-  } catch { return null; }
+  const mtime = await stamp(FILE);
+  if (mtime == null) return null;
+  if (!cache || cache.mtime !== mtime) {
+    const data = await readJson<{ places: Row[] }>(FILE);
+    if (!data) return null;
+    const rows = data.places.map(row => ({
+      row, key: fold(row[0]), words: row[0].split(/[\s,()/-]+/).map(fold).filter(Boolean),
+    }));
+    cache = { mtime, rows };
+  }
+  return cache.rows;
 }
 
 const hit = ([name, ml, kind, rank, lat, lon, district]: Row): PlaceHit => ({ name, ml, kind, rank, lat, lon, district });
