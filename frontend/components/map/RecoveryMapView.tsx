@@ -11,17 +11,17 @@ export type SpotInfo = { grade: "high" | "elevated" | "some" | null; km: number 
 export type Point = { lat: number; lon: number; zoom?: number } | null;
 
 export const DISTANCE_STEPS: [number, string, string][] = [
-  [5, "#161615", "under 5 km"], [10, "#5a1c14", "5–10 km"], [15, "#a8291a", "10–15 km"],
-  [20, "#ff3b26", "15–20 km"], [Infinity, "#ff8a6e", "over 20 km"],
+  [5, "#161615", "under 5 km"], [10, "#3d0606", "5–10 km"], [15, "#660a0a", "10–15 km"],
+  [20, "#8a0303", "15–20 km"], [Infinity, "#c1121f", "over 20 km"],
 ];
 export const BED_STEPS: [number, string, string][] = [
-  [5, "#ff8a6e", "under 5"], [20, "#ff3b26", "5–20"], [50, "#a8291a", "20–50"], [100, "#5a1c14", "50–100"],
+  [5, "#c1121f", "under 5"], [20, "#8a0303", "5–20"], [50, "#660a0a", "20–50"], [100, "#3d0606", "50–100"],
   [Infinity, "transparent", "100 or more"],
 ];
 /** Drug-affected squares only, by distance to help: near help stays grey, far from help turns red. */
 export const NEED_STEPS: [number, string, string][] = [
-  [5, "#4a4944", "under 5 km"], [10, "#7a2a1c", "5–10 km"], [15, "#c0341f", "10–15 km"],
-  [20, "#ff3b26", "15–20 km"], [Infinity, "#ff8a6e", "over 20 km"],
+  [5, "#4a4944", "under 5 km"], [10, "#4d0707", "5–10 km"], [15, "#760b0b", "10–15 km"],
+  [20, "#8a0303", "15–20 km"], [Infinity, "#c1121f", "over 20 km"],
 ];
 const colour = (steps: [number, string, string][], v: number) => steps.find(s => v < s[0])![1];
 const GRADE = { h: "high", e: "elevated", s: "some" } as const;
@@ -155,8 +155,8 @@ export default function RecoveryMapView(props: Props) {
       cells.current = new Set(grid.current.lat.map((a, i) => cellOf(a, grid.current!.lon[i]).join(":")));
     const inside = cells.current ? cells.current.has(props.pick.join(":")) : true;
     handlers.current.onPickInside?.(inside);
-    c.L.rectangle([[lat - h, lon - h], [lat + h, lon + h]], { color: inside ? "#ff3b26" : "#7d7b74", weight: 2,
-      fillColor: inside ? "#ff3b26" : "#7d7b74", fillOpacity: .18, dashArray: inside ? undefined : "3 3", interactive: false }).addTo(g);
+    c.L.rectangle([[lat - h, lon - h], [lat + h, lon + h]], { color: inside ? "#c1121f" : "#7d7b74", weight: 2,
+      fillColor: inside ? "#c1121f" : "#7d7b74", fillOpacity: .18, dashArray: inside ? undefined : "3 3", interactive: false }).addTo(g);
     // A tap at state scale is too small to check; come in close enough to see the square.
     if (inside && c.map.getZoom() < 11) c.map.flyTo([lat, lon], 13, { duration: .6 });
   }

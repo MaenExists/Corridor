@@ -231,7 +231,7 @@ export function ReportTab({ pick, pickName, onPick, onClearPick, onFindHelp, onF
           <div className="px-5 py-5 border-b border-ink">
             <h2 className="text-[22px] leading-[1.15] tracking-[-0.015em] font-medium">{t.dangerTitle}</h2>
             <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">{t.dangerSub}</p>
-            <a href="tel:112" className="mt-4 flex items-center justify-between bg-signal text-white px-4 py-3">
+            <a href="tel:112" className="mt-4 flex items-center justify-between bg-signal text-paper font-medium px-4 py-3">
               <span className="text-[30px] leading-none font-medium tabular">112</span><span className="label">{t.call}</span>
             </a>
           </div>

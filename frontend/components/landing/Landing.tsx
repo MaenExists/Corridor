@@ -255,10 +255,10 @@ function Doors() {
           </div>
         </Link>
 
-        <Link ref={b} href="/public" className="lp-door lp-door-blue rv" style={{ ["--d" as string]: "220ms" }}>
+        <Link ref={b} href="/public" className="lp-door lp-door-amber rv" style={{ ["--d" as string]: "220ms" }}>
           <div className="lp-door-spot" aria-hidden />
           <div className="relative flex items-center justify-between">
-            <span className="label text-[#00c2ff]">Open to all · Public</span>
+            <span className="label text-[#ffbf00]">Open to all · Public</span>
             <span className="label text-mute hidden sm:inline">/public · English · മലയാളം</span>
           </div>
           <Rings />
@@ -268,7 +268,7 @@ function Doors() {
               Where people live far from de-addiction care, the nearest centres to any spot, and a safe way to tell the
               authorities what you notice, without giving your name.
             </p>
-            <p className="mt-8 flex items-center justify-between border-t border-[#00c2ff]/40 pt-4 text-[#00c2ff]">
+            <p className="mt-8 flex items-center justify-between border-t border-[#ffbf00]/40 pt-4 text-[#ffbf00]">
               <span className="label">Open the map</span><span className="lp-arrow text-[22px]">→</span>
             </p>
           </div>
@@ -300,10 +300,10 @@ function Rings() {
   return (
     <div className="relative my-10 h-[150px] flex items-center justify-center" aria-hidden>
       {[0, 1, 2, 3].map(i => <span key={i} className="lp-ring" style={{ animationDelay: `${i * 0.9}s` }} />)}
-      <span className="relative size-3 rounded-full bg-ink shadow-[0_0_0_6px_rgba(0,194,255,.18)]" />
-      <span className="absolute left-[calc(50%+70px)] top-[38%] size-2.5 bg-[#00c2ff] lp-centre" />
-      <span className="absolute left-[calc(50%-120px)] top-[64%] size-2.5 bg-[#00c2ff] lp-centre" style={{ animationDelay: ".8s" }} />
-      <span className="absolute left-[calc(50%+150px)] top-[72%] size-2.5 bg-[#00c2ff]/50 lp-centre" style={{ animationDelay: "1.6s" }} />
+      <span className="relative size-3 rounded-full bg-ink shadow-[0_0_0_6px_rgba(255,191,0,.18)]" />
+      <span className="absolute left-[calc(50%+70px)] top-[38%] size-2.5 bg-[#ffbf00] lp-centre" />
+      <span className="absolute left-[calc(50%-120px)] top-[64%] size-2.5 bg-[#ffbf00] lp-centre" style={{ animationDelay: ".8s" }} />
+      <span className="absolute left-[calc(50%+150px)] top-[72%] size-2.5 bg-[#ffbf00]/50 lp-centre" style={{ animationDelay: "1.6s" }} />
     </div>
   );
 }

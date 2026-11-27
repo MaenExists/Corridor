@@ -32,7 +32,7 @@ export function Header({ section, tagline, updated, languages }: {
       <nav className="flex shrink-0" aria-label="Sections">
         {SECTIONS.map((id, i) => id === section
           ? <span key={id} aria-current="page"
-              className={`flex items-center px-3 md:px-5 border-ink label ${id === "enforcement" ? "bg-signal text-paper font-semibold" : "bg-ink text-paper"} ${i ? "md:border-r" : "border-r"}`}>{t.sections[id]}</span>
+              className={`flex items-center px-3 md:px-5 border-ink label bg-signal text-paper font-semibold ${i ? "md:border-r" : "border-r"}`}>{t.sections[id]}</span>
           : <Link key={id} href={`/${id}`}
               className={`flex items-center px-3 md:px-5 border-ink label text-ink-2 hover:bg-paper-2 ${i ? "md:border-r" : "border-r"}`}>{t.sections[id]}</Link>)}
       </nav>

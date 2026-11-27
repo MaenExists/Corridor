@@ -27,7 +27,7 @@ function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   return 12742 * Math.asin(Math.sqrt(h));
 }
 const oneIn = (share: number) => share > 0 ? Math.round(1 / share) : 0;
-const GRADE_FILL = { high: "#ff3b26", elevated: "#c0341f", some: "#6e2519" } as const;
+const GRADE_FILL = { high: "#c1121f", elevated: "#8a0303", some: "#4d0707" } as const;
 
 export function PublicApp({ view }: { view: PublicView }) {
   const { t, lang, district, place } = useLang();
@@ -110,7 +110,7 @@ export function PublicApp({ view }: { view: PublicView }) {
   const ends = layer === "beds" ? t.legend.bedsEnds : t.legend.distanceEnds;
 
   return (
-    <div className="min-h-dvh lg:h-dvh grid grid-rows-[56px_auto_auto] lg:grid-rows-[56px_minmax(0,1fr)_auto] bg-paper">
+    <div className="theme-public min-h-dvh lg:h-dvh grid grid-rows-[56px_auto_auto] lg:grid-rows-[56px_minmax(0,1fr)_auto] bg-paper">
       <Header section="public" tagline={t.tagline} languages updated={view.checkedOn ? date(view.checkedOn) : undefined} />
 
       <main className="grid lg:grid-cols-[minmax(0,1fr)_420px] min-h-0">
@@ -127,7 +127,7 @@ export function PublicApp({ view }: { view: PublicView }) {
               <div className="grid grid-cols-4 border-b border-ink" role="group" aria-label="Shading">
                 {(["need", "distance", "beds", "none"] as AccessLayer[]).map((id, i) => (
                   <button key={id} onClick={() => setLayer(id)} aria-pressed={layer === id}
-                    className={`label py-2 ${i ? "border-l border-ink" : ""} ${layer === id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>{t.layers[id]}</button>
+                    className={`label py-2 ${i ? "border-l border-ink" : ""} ${layer === id ? "bg-signal text-paper" : "hover:bg-paper-2"}`}>{t.layers[id]}</button>
                 ))}
               </div>
               {layer !== "none" && (
@@ -166,7 +166,7 @@ export function PublicApp({ view }: { view: PublicView }) {
           </div>
 
           {reporting ? formOpen && (
-            <div className={`absolute left-3 bottom-3 md:left-4 md:bottom-4 z-[500] border px-3 py-2 text-[12.5px] ${pick && pickInside ? "bg-paper border-ink" : "bg-signal border-signal text-white"}`}>
+            <div className={`absolute left-3 bottom-3 md:left-4 md:bottom-4 z-[500] border px-3 py-2 text-[12.5px] ${pick && pickInside ? "bg-paper border-ink" : "bg-signal border-signal text-paper"}`}>
               {!pick ? t.reportTap : pickInside ? t.reportMarked : t.reportOutside}
             </div>
           ) : !probe && !centre && (
@@ -223,7 +223,7 @@ export function PublicApp({ view }: { view: PublicView }) {
           <div className="grid grid-cols-4 border-b border-ink" role="tablist">
             {TABS.map((id, i) => (
               <button key={id} role="tab" aria-selected={tab === id} onClick={() => chooseTab(id)}
-                className={`min-w-0 text-left py-3 ${lang === "ml" ? "px-2 md:px-2.5" : "px-2.5 md:px-3.5"} ${i ? "border-l border-ink" : ""} ${tab === id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                className={`min-w-0 text-left py-3 ${lang === "ml" ? "px-2 md:px-2.5" : "px-2.5 md:px-3.5"} ${i ? "border-l border-ink" : ""} ${tab === id ? "bg-signal text-paper" : "hover:bg-paper-2"}`}>
                 <span className={`block font-medium leading-tight ${lang === "ml" ? "text-[12.5px]" : "text-[13.5px]"}`}>{t.tabs[id][0]}</span>
                 <span className={`label ${tab === id ? "text-paper/60" : "text-mute"}`}>{t.tabs[id][1]}</span>
               </button>

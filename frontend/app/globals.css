@@ -36,6 +36,13 @@
   --color-electric: #00c2ff;
 }
 .theme-enforcement :focus-visible { outline-color: #00ff41; }
+/* Public wears amber for its interface; its map is painted in blood red (see RecoveryMapView). */
+.theme-public {
+  --color-signal: #ffbf00;
+  --color-signal-soft: #4a3800;
+}
+.theme-public :focus-visible { outline-color: #ffbf00; }
+.theme-public ::selection { background: #ffbf00; color: #0a0a0a; }
 .theme-enforcement ::selection { background: #00ff41; color: #0a0a0a; }
 .glow { text-shadow: 0 0 14px rgba(0, 255, 65, .45); }
 .glow-electric { text-shadow: 0 0 14px rgba(0, 194, 255, .5); }
@@ -117,7 +124,7 @@
 .nt-grid { image-rendering: pixelated; }
 .nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #0a0a0a; border: 1.5px solid #e8e6df; }
 .nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #e8e6df; border-color: #0a0a0a; outline: 1px solid #e8e6df; }
-.nt-centre.sel { outline: 2px solid #ff3b26; outline-offset: 2px; }
+.nt-centre.sel { outline: 2px solid #ffbf00; outline-offset: 2px; }
 .nt-probe { width: 22px; height: 22px; border: 1.5px solid #e8e6df; border-radius: 50%; background: rgba(10,10,10,.35);
   box-shadow: 0 0 0 4px rgba(10,10,10,.55); position: relative; }
 .nt-probe::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #e8e6df; }
@@ -183,8 +190,8 @@
 .lp-btn-green { background: #00ff41; color: #0a0a0a; font-weight: 600; box-shadow: 0 0 40px rgba(0,255,65,.25); }
 .lp-btn-green::before { background: var(--color-ink); }
 .lp-btn-ghost { border: 1px solid rgba(232,230,223,.45); color: var(--color-ink); background: rgba(10,10,10,.4); backdrop-filter: blur(6px); }
-.lp-btn-ghost::before { background: #00c2ff; }
-.lp-btn-ghost:hover { color: #0a0a0a; border-color: #00c2ff; }
+.lp-btn-ghost::before { background: #ffbf00; }
+.lp-btn-ghost:hover { color: #0a0a0a; border-color: #ffbf00; }
 
 .lp-marquee { animation: lp-marquee 40s linear infinite; }
 @keyframes lp-marquee { to { transform: translateX(-33.333%); } }
@@ -209,19 +216,19 @@
 .lp-door-spot { position: absolute; inset: 0; opacity: 0; transition: opacity .4s; pointer-events: none; }
 .lp-door:hover .lp-door-spot { opacity: 1; }
 .lp-door-green .lp-door-spot { background: radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(0,255,65,.14), transparent 60%); }
-.lp-door-blue .lp-door-spot { background: radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(0,194,255,.15), transparent 60%); }
+.lp-door-amber .lp-door-spot { background: radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(255,191,0,.13), transparent 60%); }
 .lp-door-green:hover { border-color: rgba(0,255,65,.55); box-shadow: 0 30px 80px -30px rgba(0,255,65,.35); }
-.lp-door-blue:hover { border-color: rgba(0,194,255,.55); box-shadow: 0 30px 80px -30px rgba(0,194,255,.35); }
+.lp-door-amber:hover { border-color: rgba(255,191,0,.55); box-shadow: 0 30px 80px -30px rgba(255,191,0,.3); }
 .lp-door-green::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(0,255,65,.035) 0 1px, transparent 1px 3px); }
 .lp-arrow { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
 .lp-door:hover .lp-arrow { transform: translateX(8px); }
 
 .lp-term { width: 0; animation: lp-type 7.5s steps(40) infinite; }
 @keyframes lp-type { 0% { width: 0; } 14% { width: 100%; } 88% { width: 100%; opacity: 1; } 100% { width: 100%; opacity: 0; } }
-.lp-ring { position: absolute; left: 50%; top: 50%; width: 340px; height: 340px; margin: -170px; border-radius: 50%; border: 1px solid rgba(0,194,255,.55);
+.lp-ring { position: absolute; left: 50%; top: 50%; width: 340px; height: 340px; margin: -170px; border-radius: 50%; border: 1px solid rgba(255,191,0,.55);
   transform: scale(0); opacity: 0; animation: lp-ring 3.6s cubic-bezier(.2,.6,.3,1) infinite; }
 @keyframes lp-ring { 0% { transform: scale(0); opacity: .9; } 100% { transform: scale(1); opacity: 0; } }
-.lp-centre { box-shadow: 0 0 14px #00c2ff; animation: lp-centre 2.4s ease-in-out infinite; }
+.lp-centre { box-shadow: 0 0 14px #ffbf00; animation: lp-centre 2.4s ease-in-out infinite; }
 @keyframes lp-centre { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
 
 .lp-node { animation: lp-node .6s cubic-bezier(.2,.8,.2,1) forwards; }
