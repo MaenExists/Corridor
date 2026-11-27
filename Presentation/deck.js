@@ -456,10 +456,11 @@ hooks["s-findings"] = { enter: fillBars };
     ["GUARDRAILS", "#ff3b26", [["Pre-registered gates", "SCORED ONCE"], ["Weekly frozen ledger", "AUTO-REVERT"], ["Abstain & suppress", "STALE DATA · CELLS < 5"]]],
     ["PRODUCT", "#ece9e1", [["Enforcement view", "NEXT 28 DAYS"], ["Public view", "ENGLISH · മലയാളം"], ["Safe tips", "QUARANTINED FROM MODEL"]]],
   ];
-  const LINKS = [[0, 0, 1, 0], [1, 0, 1, 1], [1, 0, 1, 2], [2, 0, 1, 1], [2, 0, 1, 2], [3, 0, 1, 2],
-    [0, 1, 2, 0], [0, 1, 2, 1], [1, 1, 2, 2], [1, 1, 2, 3], [2, 1, 2, 2], [2, 1, 2, 3], [2, 1, 2, 4],
-    [0, 2, 3, 0], [1, 2, 3, 0], [2, 2, 3, 1], [3, 2, 3, 1], [4, 2, 3, 2],
-    [0, 3, 4, 0], [1, 3, 4, 0], [2, 3, 4, 1], [2, 3, 4, 0]];
+  const LINKS = [ // [fromCol, fromRow, toCol, toRow]
+    [0, 0, 1, 0], [0, 1, 1, 1], [0, 2, 1, 1], [0, 2, 1, 2], [0, 3, 1, 2],
+    [1, 0, 2, 0], [1, 0, 2, 1], [1, 1, 2, 2], [1, 1, 2, 3], [1, 2, 2, 2], [1, 2, 2, 3], [1, 2, 2, 4],
+    [2, 0, 3, 0], [2, 1, 3, 0], [2, 2, 3, 1], [2, 3, 3, 1], [2, 4, 3, 2], [2, 0, 3, 2],
+    [3, 0, 4, 0], [3, 1, 4, 0], [3, 1, 4, 1], [3, 2, 4, 1], [3, 2, 4, 2]];
   function build() {
     if (built) return; built = true;
     const NW = 270, NH = 78, xs = [100, 470, 840, 1210, 1580], pos = [];
@@ -468,7 +469,7 @@ hooks["s-findings"] = { enter: fillBars };
       const gap = 18, tot = items.length * NH + (items.length - 1) * gap, y0 = 40 + (620 - tot) / 2;
       pos[c] = items.map((_, r) => ({ x: xs[c], y: y0 + r * (NH + gap) }));
     });
-    LINKS.forEach(([r1, c1, r2, c2], i) => {
+    LINKS.forEach(([c1, r1, c2, r2], i) => {
       const a = pos[c1][r1], b = pos[c2][r2], x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
       const d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
       svgEl("path", { d, class: "wire" }, svg);
@@ -636,11 +637,11 @@ hooks["s-public"] = Viewer("#pubScreen", "#pubThumbs", [
 /* ---- usage cycle ---- */
 (() => {
   const svg = $("#cycle"); let built = false, nodes = [];
-  const N = [["MONDAY · LOCK", "New 4-week list frozen", "#00ff41"], ["REVIEW", "Analyst reads 'why there'", "#00ff41"], ["DECIDE", "Officers plan; a human acts", "#00ff41"],
-    ["CARE", "Planners target far-from-help", "#ff3b26"], ["PUBLIC", "Find help · report safely", "#00c2ff"], ["+4 WEEKS · SCORE", "Scored vs baselines; reverts if worse", "#ffb627"]];
+  const N = [["MONDAY · LOCK", "New 4-week list frozen", "#00ff41"], ["REVIEW", "Analyst reads why", "#00ff41"], ["DECIDE", "Officers plan; a human acts", "#00ff41"],
+    ["CARE", "Planners close the gap", "#ff3b26"], ["PUBLIC", "Find help · report safely", "#00c2ff"], ["+4 WEEKS · SCORE", "Scored; reverts if worse", "#ffb627"]];
   function build() {
     if (built) return; built = true;
-    const cx = 450, cy = 410, r = 290;
+    const cx = 430, cy = 400, r = 255;
     svgEl("circle", { cx, cy, r, fill: "none", stroke: "rgba(236,233,225,.12)", "stroke-width": 2 }, svg);
     const arc = svgEl("circle", { cx, cy, r, fill: "none", stroke: "#00ff41", "stroke-width": 3, "stroke-dasharray": `${r * .9} ${r * 7}`, "stroke-linecap": "round", style: "filter:drop-shadow(0 0 8px #00ff41)" }, svg);
     svgEl("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${cx} ${cy}`, to: `360 ${cx} ${cy}`, dur: "12s", repeatCount: "indefinite" }, arc);

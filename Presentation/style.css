@@ -213,9 +213,10 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0; bord
 .screen img.on { opacity: 1; transform: scale(1.06); }
 .screen .missing { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mute); font-family: "GeistMono", monospace; font-size: 16px; text-align: center; padding: 40px; }
 .thumbs { display: flex; flex-direction: column; gap: 4px; }
-.thumbs button { all: unset; cursor: pointer; padding: 18px 22px; border-left: 2px solid transparent; transition: all .35s; }
-.thumbs button h5 { font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
-.thumbs button p { font-size: 16px; color: var(--mute); margin-top: 6px; line-height: 1.45; }
+.thumbs button { all: unset; cursor: pointer; padding: 11px 20px; border-left: 2px solid transparent; transition: all .35s; }
+.thumbs button h5 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+.thumbs button p { font-size: 15px; color: var(--mute); margin-top: 4px; line-height: 1.4; max-height: 0; overflow: hidden; transition: max-height .5s; }
+.thumbs button.on p { max-height: 90px; }
 .thumbs button.on { border-left-color: var(--tint); background: linear-gradient(90deg, rgba(255,255,255,.06), transparent); }
 .thumbs button.on p { color: var(--ink2); }
 .callout { position: absolute; border: 2px solid var(--tint); box-shadow: 0 0 0 9999px rgba(0,0,0,.35), 0 0 30px var(--tint); opacity: 0; transition: all .8s var(--ease); pointer-events: none; }
