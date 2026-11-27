@@ -144,7 +144,7 @@ function Particles(canvas, box, opts = {}) {
 
 /* ---------------- scene manager ---------------- */
 // index.html?short plays the 7-minute cut: only these scenes, in deck order.
-const SHORT = ["s-open", "s-act1", "s-curve", "s-india", "s-reactive", "s-prevent", "s-act3", "s-archive", "s-news", "s-field",
+const SHORT = ["s-open", "s-act1", "s-curve", "s-india", "s-reactive", "s-prevent", "s-act3", "s-field", "s-hunt", "s-news",
   "s-act4", "s-grid", "s-cutoff", "s-score", "s-live-enf", "s-act5", "s-live-pub", "s-vision", "s-finale"];
 const short = new URLSearchParams(location.search).has("short");
 const scenes = $$(".scene").filter(s => !short || SHORT.includes(s.id));
@@ -324,7 +324,7 @@ addEventListener("touchend", e => { if (tx0 == null) return; const dx = e.change
     let tot = 0; const list = [];
     for (const [k, d] of Object.entries(D)) { const r = rate(d, y); tot += d.y[y] || 0; list.push([d.name, r]); if (paths[k]) paths[k].style.fill = ramp(Math.sqrt(r / maxRate)); }
     list.sort((a, b) => b[1] - a[1]);
-    $("#spreadLine").innerHTML = `<b>${fmt(tot)}</b> Excise NDPS cases recorded across Kerala${y === 2024 ? " (Jan–Sep)" : ""}.`;
+    $("#spreadLine").innerHTML = `<b>${fmt(tot)}</b> drug cases recorded by Excise across Kerala${y === 2024 ? " (Jan–Sep)" : ""}.`;
     $("#spreadRank").innerHTML = `<div class="kicker" style="font-size:13px">Highest rate · ${y}</div>` + list.slice(0, 8).map(([n, r], i) =>
       `<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;font-size:19px"><span>${i + 1}. ${n}</span><span class="mono" style="color:var(--ink2)">${fmt(r)}</span></div><div style="height:4px;background:rgba(255,255,255,.07);margin-top:6px"><div style="height:100%;width:${r / maxRate * 100}%;background:${ramp(Math.sqrt(r / maxRate))};transition:width .8s"></div></div></div>`).join("");
   }
@@ -418,9 +418,9 @@ hooks["s-news"] = { step(s, n) { $$(".mltext [data-k]", s).forEach(e => e.classL
 (() => {
   const svg = $("#constel"); let built = false;
   const SRC = [
-    ["Kerala Excise statements", "105 MONTHS · 2016–24", "#ffb627"], ["Legislative Assembly answer", "MONTHLY 2025–26", "#ffb627"], ["Excise live site", "MONTHLY SNAPSHOTS", "#ffb627"], ["NCRB district tables", "POLICE NDPS CASES", "#ffb627"],
-    ["Times of India", "NEWS SITEMAPS", "#00c2ff"], ["New Indian Express", "NEWS SITEMAPS", "#00c2ff"], ["Onmanorama", "NEWS SITEMAPS", "#00c2ff"], ["Asianet News", "MALAYALAM SUMMARIES", "#00c2ff"], ["News18 Malayalam", "MALAYALAM", "#00c2ff"], ["Madhyamam", "185,919 STORIES", "#00c2ff"],
-    ["KSMHA register", "308 CENTRES · BEDS", "#ff3b26"], ["Vimukthi directory", "14 CENTRES", "#ff3b26"], ["WorldPop 2020", "46,057 KM² · 34.7M", "#00ff41"], ["OpenStreetMap + GeoNames", "STATIONS · ROADS · 31 CROSSINGS", "#00ff41"],
+    ["Excise monthly reports", "105 MONTHS · 2016–24", "#ffb627"], ["Legislative Assembly answer", "MONTHLY 2025–26", "#ffb627"], ["Excise website", "SAVED EVERY MONTH", "#ffb627"], ["National crime records", "POLICE DRUG CASES", "#ffb627"],
+    ["Times of India", "STORY ARCHIVE", "#00c2ff"], ["New Indian Express", "STORY ARCHIVE", "#00c2ff"], ["Onmanorama", "STORY ARCHIVE", "#00c2ff"], ["Asianet News", "MALAYALAM", "#00c2ff"], ["News18 Malayalam", "MALAYALAM", "#00c2ff"], ["Madhyamam", "185,919 STORIES", "#00c2ff"],
+    ["State centre register", "308 CENTRES · BEDS", "#ff3b26"], ["Vimukthi directory", "14 CENTRES", "#ff3b26"], ["Population map", "34.7 MILLION PEOPLE", "#00ff41"], ["OpenStreetMap", "STATIONS · ROADS · BORDERS", "#00ff41"],
   ];
   function build() {
     if (built) return; built = true;
@@ -502,8 +502,8 @@ hooks["s-india"] = { enter: fillBars };
     ctx = makeCanvas($("#c-grid")); box = fitBox(1040, 70, 780, 950);
     base = renderCells(box, k => `rgba(236,233,225,${q(.05 + popAlpha(k) * .22, 20)})`);
     fl = NT.flagged.map(f => ({ x: box.x(f[1]), y: box.y(f[0]), r: f[2], e: f[3] }));
-    const imp = [["News coverage", 8.5, "#00ff41"], ["Square's own history", 8.0, "#00ff41"], ["Surroundings", 1.5, "#00c2ff"], ["Population", 1.0, "#00c2ff"], ["Neighbours + ETAS", 0.7, "#00c2ff"]];
-    $("#importance").innerHTML = imp.map(([n, v, c]) => `<div class="hbar" style="grid-template-columns:240px 1fr 80px;margin:8px 0;font-size:18px"><span class="lab">${n}</span><span class="t" style="height:20px"><i style="--c:${c}" data-w="${v / 8.5 * 100}"></i></span><span class="v" style="font-size:19px">+${v}</span></div>`).join("");
+    const imp = [["News about the area", 8.5, "#00ff41"], ["Past seizures there", 8.0, "#00ff41"], ["What's around it", 1.5, "#00c2ff"], ["How many live there", 1.0, "#00c2ff"], ["Activity nearby", 0.7, "#00c2ff"]];
+    $("#importance").innerHTML = imp.map(([n, v, c]) => `<div class="hbar" style="grid-template-columns:240px 1fr 80px;margin:8px 0;font-size:18px"><span class="lab">${n}</span><span class="t" style="height:20px"><i style="--c:${c}" data-w="${v / 8.5 * 100}"></i></span><span class="v" style="font-size:19px"></span></div>`).join("");
   }
   let t0 = 0;
   function draw(now) {
@@ -574,12 +574,12 @@ hooks["s-india"] = { enter: fillBars };
   function finish() {
     const tot = months.reduce((a, m) => a + m.located_reports, 0), v3 = months.reduce((a, m) => a + m.v3, 0);
     const v1 = months.reduce((a, m) => a + (m.v1 || 0), 0), rep = months.reduce((a, m) => a + (m.rep || 0), 0), pop = months.reduce((a, m) => a + (m.pop || 0), 0);
-    const rows = [["NarcoTrace v3.1", v3, "#00ff41"], ["Our first model (v1)", v1, "#00c2ff"], ["Same place again", rep, "#6f6d66"], ["Where people live", pop, "#3d3c38"]];
+    const rows = [["NarcoTrace", v3, "#00ff41"], ["Our first try", v1, "#00c2ff"], ["Same place again", rep, "#6f6d66"], ["Where people live", pop, "#3d3c38"]];
     $("#cutBars").innerHTML = rows.map(([n, v, c]) => `<div class="hbar" style="grid-template-columns:260px 1fr 90px;margin:8px 0;font-size:18px"><span class="lab">${n}</span><span class="t" style="height:22px"><i style="--c:${c}" data-w="${v / tot * 100}"></i></span><span class="v" style="font-size:20px">${Math.round(v / tot * 1000) / 10}%</span></div>`).join("");
     $("#cutBars").style.opacity = 1;
     setTimeout(() => $$("#cutBars i").forEach((i, k) => setTimeout(() => i.style.width = i.dataset.w + "%", k * 160)), 100);
     $("#cutPlay").textContent = "↻ Replay";
-    $("#cutLine").innerHTML = `<b>${v3} of ${tot}</b> later reported seizures fell inside the 1% of Kerala we flagged on 30 June`;
+    $("#cutLine").innerHTML = `<b>${v3} of ${tot}</b> seizures that came later happened inside the 1% of Kerala we flagged on 30 June`;
   }
   function draw(now) {
     ctx.clearRect(0, 0, W, H); ctx.drawImage(base, 0, 0, W, H);
@@ -644,7 +644,7 @@ hooks["s-public"] = Viewer("#pubScreen", "#pubThumbs", [
 (() => {
   const svg = $("#cycle"); let built = false, nodes = [];
   const N = [["MONDAY · LOCK", "New 4-week list frozen", "#00ff41"], ["REVIEW", "Analyst reads why", "#00ff41"], ["DECIDE", "Officers plan; a human acts", "#00ff41"],
-    ["CARE", "Planners close the gap", "#ff3b26"], ["PUBLIC", "Find help · report safely", "#00c2ff"], ["+4 WEEKS · SCORE", "Scored; reverts if worse", "#ffb627"]];
+    ["CARE", "Planners close the gap", "#ff3b26"], ["PUBLIC", "Find help · report safely", "#00c2ff"], ["+4 WEEKS · CHECK", "Checked; switches back if worse", "#ffb627"]];
   function build() {
     if (built) return; built = true;
     const cx = 430, cy = 400, r = 255;
@@ -674,9 +674,9 @@ hooks["s-public"] = Viewer("#pubScreen", "#pubThumbs", [
     const ms = NT.cutoff.v1.by_month, tot = ms.reduce((a, m) => a + m.located_reports, 0);
     const v3 = NT.cutoff.v3.caught, v1 = ms.reduce((a, m) => a + m.grid_ranker, 0), rep = ms.reduce((a, m) => a + m.repeat_locality_1km, 0), pop = ms.reduce((a, m) => a + m.population, 0);
     const row = (n, v, c, sfx = "%") => `<div class="hbar"><span class="lab">${n}</span><span class="t"><i style="--c:${c}" data-w="${v}"></i></span><span class="v">${v.toFixed(1)}${sfx}</span></div>`;
-    $("#winBars").innerHTML = `<p class="small" style="margin-bottom:6px">1 km grid · frozen 30 Jun, caught Jul–Nov (1% of Kerala)</p>` +
-      row("NarcoTrace v3.1", v3 / tot * 100, "#00ff41") + row("Our first model", v1 / tot * 100, "#00c2ff") + row("Same place again", rep / tot * 100, "#6f6d66") + row("Where people live", pop / tot * 100, "#3d3c38") +
-      `<p class="small" style="margin:34px 0 6px">District month · mean error, lower is better (Jan 2023 – Sep 2024)</p>` +
+    $("#winBars").innerHTML = `<p class="small" style="margin-bottom:6px">Seizures caught, Jul–Nov 2026 (we flagged 1% of Kerala)</p>` +
+      row("NarcoTrace", v3 / tot * 100, "#00ff41") + row("Our first try", v1 / tot * 100, "#00c2ff") + row("Same place again", rep / tot * 100, "#6f6d66") + row("Where people live", pop / tot * 100, "#3d3c38") +
+      `<p class="small" style="margin:34px 0 6px">District forecast · average miss in cases, lower is better</p>` +
       `<div class="hbar"><span class="lab">NarcoTrace</span><span class="t"><i style="--c:#00ff41" data-w="${8.70 / 10 * 100}"></i></span><span class="v">8.70</span></div>` +
       `<div class="hbar"><span class="lab">12-month average</span><span class="t"><i style="--c:#6f6d66" data-w="${9.31 / 10 * 100}"></i></span><span class="v">9.31</span></div>`;
     fillBars(s);

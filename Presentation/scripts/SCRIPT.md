@@ -63,23 +63,30 @@ But you can't prevent what you can't see. Prevention needs two things: **where t
 
 **[7 · Part II card]** *→*
 
-**[8 · Data archaeology]**
+**[8 · We went to the source]**
 
-To predict anything, you need data, and Kerala had no ready dataset. The Excise department posts its monthly reports online, then takes them down. So we **dug them out of the Internet Archive**: 105 months, from 2016 to 2024, for all 14 districts. We checked every month against its own official total.
+To teach an AI, you need examples. The best examples would be real case files: where and when each seizure happened. So we went straight to the source. **We contacted Police and Excise officers and asked.**
 
-**[9 · News as a sensor]** *Press → for each step.*
+They couldn't share them. There wasn't enough time to get approval, and the law protects these files because they involve ongoing court cases and people's personal details. Fair enough. So we had to find another way.
 
-That tells you *which district*. To find *which town*, we turned the news into a sensor. We scanned **over six lakh news stories** and found **1,979 drug seizures** with an exact place.
+**[9 · The data hunt]**
 
-English papers mostly cover Kochi and Thiruvananthapuram, so we built a **Malayalam reader**. *(→)* It knows that "Perumbavoor:" at the start of a story means the seizure happened there. *(→)* It also knows that "Aluva swadeshi" only means where the person is from. *(→)* That found **628 seizures that English news alone missed.**
+This slide shows every door we knocked on.
+- The case files: **closed**.
+- The Excise website: **closed**. It only shows the latest month, and the old reports are deleted.
+- But the **Internet Archive** had saved copies. We rescued **105 months** of official reports, 2016 to 2024, and checked every one against its printed total.
+- When uploads stopped in 2024, a minister's answer in the **Kerala Assembly** gave us 2025 and 2026.
+- Official numbers only tell you *which district*. To find *which town*, we read **ten years of newspapers**.
 
-**[10 · We went to the source]**
+**[10 · Reading ten years of news]** *Press → for each step.*
 
-Now the honest part. The best data would be real case files, so we went to the source. **We contacted Police and Excise officers and asked for them.** They couldn't share them in time, and the law protects those files because they involve ongoing cases and personal details.
+The computer read **over six lakh news stories** and found **1,979 drug seizures** with an exact town or village.
 
-So we built everything from **public records**, and that became our strength. Every number you see can be checked by anyone. And the day official data is shared, NarcoTrace is ready for it.
+English papers mostly cover Kochi and Thiruvananthapuram, so we taught the computer to **read Malayalam**. *(→)* It knows "Perumbavoor:" at the start means the seizure happened there. *(→)* And "Aluva swadeshi" only means where the person is from. *(→)* That found **628 more seizures** English news missed.
 
-Maen will show you what the AI does with this data.
+So everything the AI learned from is public, and anyone can check it. And the day officials share real data, NarcoTrace is ready.
+
+Maen will show you what the AI does with it.
 
 ---
 
@@ -87,34 +94,36 @@ Maen will show you what the AI does with this data.
 
 **[11 · Part III card]** *→*
 
-**[12 · The 1 km grid]** *Press → twice.*
+**[12 · Forecast 2 · By square kilometre]** *Press → twice.*
 
-We split Kerala into **46,000 squares, each one kilometre wide**. The AI looks at every square: what happened there before, what's happening nearby, the news, and what's around it, such as railway stations and highways. Then it picks the **1% of Kerala** most likely to see a drug seizure in the next four weeks.
+Think of Kerala as a chessboard of **46,000 squares, each one kilometre wide**. For every square, the computer asks simple questions. Was there a seizure here before? Is something happening nearby? Is this area in the news? Is there a railway station or highway close by?
 
-One idea made the biggest difference. The model learns not only where drugs move, but **where seizures actually get reported**. That alone took us from 63% to 85%.
+From that, it picks the **1% of squares** most likely to see a seizure in the next four weeks. Our big idea was teaching it **where seizures get reported**, not just where drugs move. That alone took us from 63% to 85%.
 
-**[13 · The frozen test]** *It plays automatically. Let it run.*
+**[13 · The locked-forecast test]** *It plays by itself. Let it run.*
 
-But does it really work? We ran the toughest test we could. We **froze the model on 30 June**, with no more learning, and waited five months.
-
-In those five months, 263 seizures were reported, and **85% of them were inside the 1% of Kerala we had flagged.** Nineteen of our top 20 places had a seizure.
-
-We'll be honest: brand-new places are still hard, and we caught 9 of 43. The system says that openly, because a tool officers can trust has to tell the truth.
+But does it really work? We did the fairest test possible. On **30 June we locked the forecast**, so no more changes or learning, and then we waited five months to see what happened.
 
 **[14 · The scorecard]**
 
-In plain numbers: **84.8% accuracy**, **48.5% precision** on our top 20, and a **15.2% error rate**. Our first model caught 62.7%. The district model's range was right 82% of the time. Our own honest mark is about **7 out of 10**: strong where trouble comes back, weaker where it starts fresh.
+Here's the result in plain numbers.
+- It **caught 85%** of later seizures, inside just 1% of Kerala.
+- When it pointed at its top 20 places, it was **right about half the time** within four weeks.
+- It **missed 15%**.
+- 19 of its top 20 places had a seizure nearby.
+
+Where it's weak: new places it has never seen. Our honest mark is about **7 out of 10**.
 
 **[15 · LIVE · Enforcement]** *Click "Open enforcement" on the slide.*
 
-This is what an Excise or Police analyst would see every week.
-- *Priority tab:* the red zones are this month's priority list.
-- *Click the first place:* it tells you **why**: past reports, activity nearby, and how many reports to expect.
-- *Emerging tab:* areas heating up faster than their own history.
+This is what an Excise or Police officer would see every week.
+- *Priority tab:* the red areas are where to look this month.
+- *Click the first place:* it explains **why**: past seizures, activity nearby, and how many to expect.
+- *Emerging tab:* areas that are suddenly heating up.
 
-And it **never names a person**. It shows places, and a human always decides.
+It **never names a person**. It shows places, and a human always decides.
 
-Yaris will show you the side built for the public.
+Yaris will show you the side built for everyone else.
 
 ---
 
