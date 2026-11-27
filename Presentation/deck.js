@@ -445,6 +445,7 @@ hooks["s-news"] = { step(s, n) { $$(".mltext [data-k]", s).forEach(e => e.classL
 /* ---- findings bars ---- */
 const fillBars = s => $$(".hbar i[data-w]", s).forEach((i, k) => { i.style.width = 0; setTimeout(() => i.style.width = i.dataset.w + "%", 600 + k * 180); });
 hooks["s-findings"] = { enter: fillBars };
+hooks["s-india"] = { enter: fillBars };
 
 /* ---- pipeline ---- */
 (() => {

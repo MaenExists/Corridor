@@ -14,7 +14,8 @@ for (let i = 1; i <= n; i++) {
   const steps = await page.evaluate(() => +(document.querySelector(".scene.active")?.dataset.steps || 0));
   await page.waitForTimeout(3500);
   for (let k = 0; k < steps; k++) { await page.keyboard.press("ArrowRight"); await page.waitForTimeout(1200); }
-  await page.waitForTimeout(i === 1 || i === 23 ? 6000 : 1500);
+  const id = await page.evaluate(() => document.querySelector(".scene.active")?.id);
+  await page.waitForTimeout(id === "s-open" || id === "s-cutoff" ? 6000 : 1500);
   await page.screenshot({ path: `${out}/s${String(i).padStart(2, "0")}.png` });
 }
 console.log("scenes", n, "errors", JSON.stringify(errs));
