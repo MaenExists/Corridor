@@ -143,7 +143,11 @@ function Particles(canvas, box, opts = {}) {
 }
 
 /* ---------------- scene manager ---------------- */
-const scenes = $$(".scene");
+// index.html?short plays the 7-minute cut: only these scenes, in deck order.
+const SHORT = ["s-open", "s-curve", "s-india", "s-reactive", "s-prevent", "s-archive", "s-news", "s-field",
+  "s-grid", "s-cutoff", "s-live", "s-vision", "s-finale"];
+const short = new URLSearchParams(location.search).has("short");
+const scenes = $$(".scene").filter(s => !short || SHORT.includes(s.id));
 const ACT_TINT = [["#ff3b26", "#ffb627"], ["#ff3b26", "#ff7a26"], ["#ff3b26", "#00c2ff"], ["#ffb627", "#ff3b26"], ["#00c2ff", "#ffb627"], ["#00ff41", "#00c2ff"], ["#00c2ff", "#00ff41"], ["#ffb627", "#00c2ff"]];
 const hooks = {};
 let cur = -1, step = 0, loops = [];

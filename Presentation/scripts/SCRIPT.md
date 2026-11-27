@@ -1,53 +1,144 @@
-# NarcoTrace · Speaker notes
+# NarcoTrace · 7-minute script
 
-About 13 minutes. Numbers in brackets are deck scene numbers.
+**Open the deck in short mode:** `Presentation/index.html?short`. It has 13 scenes. `→` moves to the next scene or reveals the next item on a slide.
+**Before you start:** open http://127.0.0.1:3000/enforcement and http://127.0.0.1:3000/public in two browser tabs, ready for the demo.
 
-| Order | Speaker | Scenes | Part | Time |
-|---|---|---|---|---|
-| 1 | **Maen** | 1–2 | Intro and team | 1 min |
-| 2 | **Member 3** | 3–11 | Problem and prevention | 3 min |
-| 3 | **Member 4** | 12–17 | Research and data | 2.5 min |
-| 4 | **Maen** | 18–28 | Models, results, live demo | 4 min |
-| 5 | **Yaris** | 29–35 | Impact, vision, close, Q&A | 2.5 min |
+| Time | Speaker | Part | Slides |
+|---|---|---|---|
+| 0:00 – 0:45 | **Maen** | Introduction | 1 |
+| 0:45 – 2:15 | **Aibin** | The problem | 2–5 |
+| 2:15 – 3:45 | **Kiran** | Research and data | 6–8 |
+| 3:45 – 5:30 | **Maen** | How it works and the enforcement demo | 9–11 |
+| 5:30 – 7:00 | **Yaris** | Public demo, vision and close | 11–13 |
 
-## 1 · Maen: intro (1–2)
-- Hook: every drug case in Kerala is found *after* the drugs arrive. What if we saw it coming?
-- Name the team and each person's role, then hand over.
+*Italic lines are actions. Everything else is spoken.*
 
-## 2 · Member 3: problem and prevention (3–11)
-*Story and statistics. No technical depth needed.*
-- Excise cases went from 2,985 in 2016 to 12,566 in 2025, more than four times (4).
-- Kerala has the most NDPS cases in India: 30,697 in 2023, about 1 in 4 nationally. 70% of young users started between ages 10 and 15 (5).
-- Three failures: action only after a seizure, official data that goes dark, help too far away (7).
-- **Prevention is better than cure.** $1 on prevention saves $10, but only if you know where and when (9).
-- 1.65M people in drug-affected areas live more than 10 km from help (10).
-- Places, never people. A blind spot is not a safe spot (11).
+---
 
-## 3 · Member 4: research and data (12–17)
-*The effort story: a careful, organised speaker.*
-- We recovered 105 months of Excise records from the Internet Archive (13).
-- We scanned 628,964 news stories and pinned 1,979 seizures to a locality, using a Malayalam geocoder (14).
-- Seizures repeat: 74% come back to the same locality, and they are 5.2× likelier near railway stations (16).
-- **The data problem:** we asked Police and Excise officers for case files. Timing and legal limits stopped it, so everything comes from public records, and the system is ready for official data (17).
+## MAEN · Introduction (45 sec)
 
-## 4 · Maen: models, results, demo (18–28)
-- District model: error 8.7 against 9.3, the range held 82% of the time, alerts were right 38% against an 18% base rate (20).
-- Grid model: picks the 1% of Kerala most likely to see a reported seizure in the next four weeks (21).
-- Frozen-test result: 85% of 263 later seizures fell inside the flagged 1%, against 63% before. 19 of the top 20 places were hit. New places: 9 of 43 (24).
-- Live demo, about 90 seconds: priority list → a place's reasons → Near me → Malayalam → Report tab (25–28).
+**[1 · Title]**
 
-## 5 · Yaris: impact, vision, close (29–35)
-- Use case: the analyst plans the week, the health planner places outreach, a parent finds help (30).
-- Honest limits: a simple rule comes close, and the real edge is new places (38% vs 25%) (31).
-- Safeguards: places, never people, and a human always decides (32).
-- Asks: official station-level data, care data from Vimukthi and DHS (33).
-- Vision: one shared map for preventing drug harm. Fewer people ever needing to be caught or treated (34).
-- Close: "See it earlier. Reach them sooner." Then host the Q&A (35).
+Good morning. I'm Maen, and this is Aibin, Kiran and Yaris. We are **NarcoTrace**.
 
-## Q&A: who takes what
-- **Maen:** models, accuracy, tech stack
-- **Member 4:** data sources, why no official data
-- **Member 3:** the problem, statistics
-- **Yaris:** ethics, misuse, future plans, and passing each question to the right person
+One thing bothered us. In Kerala, every drug case is found *after* the drugs have already arrived: in a town, at a bus stand, outside a school. We are always one step behind.
 
-**Don't claim:** police backing, being deployed, or predicting drug users.
+So we asked a simple question: **what if we could see it coming?**
+
+NarcoTrace is an AI system that predicts where drug trouble in Kerala is heading next, and shows where people are too far from help. Aibin will start with the problem.
+
+---
+
+## AIBIN · The problem (1 min 30 sec)
+
+**[2 · The curve]** *Press → twice to show the notes, then → to move on.*
+
+Look at this line. In 2016, Kerala Excise recorded about 3,000 drug cases. In 2025, more than 12,500. That's over **four times as many in nine years**.
+
+**[3 · Kerala leads India]**
+
+And this isn't a small problem. In 2023, Kerala had **more drug cases than any other state in India**: twice Maharashtra and almost three times Punjab. One in every four drug cases in the country was in Kerala.
+
+The number that hurts most is on the right. Of the young people caught with drugs or in treatment, **seven out of ten started between the ages of ten and fifteen.** They're children.
+
+**[4 · Always one step behind]**
+
+So why does it keep growing? Because the system only **reacts**.
+- Police find out *where* only after a seizure.
+- Official data stopped being published for almost two years.
+- And one in five people in Kerala lives more than 10 km from a de-addiction centre.
+
+**[5 · Prevention is better than cure]** *Slow down here.*
+
+We all grew up hearing that prevention is better than cure. The United Nations estimates that **every one dollar spent on prevention saves ten later**.
+
+But you can't prevent what you can't see. Prevention needs two things: **where the trouble is heading, and where help is missing.** That is exactly what we built. Kiran will show you how we found the data, and it wasn't easy.
+
+---
+
+## KIRAN · Research and data (1 min 30 sec)
+
+**[6 · Data archaeology]**
+
+To predict anything, you need data, and Kerala had no ready dataset. The Excise department posts its monthly reports online, then takes them down. So we **dug them out of the Internet Archive**: 105 months, from 2016 to 2024, for all 14 districts. We checked every month against its own official total.
+
+**[7 · News as a sensor]** *Press → for each step.*
+
+That tells you *which district*. To find *which town*, we turned the news into a sensor. We scanned **over six lakh news stories** and found **1,979 drug seizures** with an exact place.
+
+English papers mostly cover Kochi and Thiruvananthapuram, so we built a **Malayalam reader**. *(→)* It knows that "Perumbavoor:" at the start of a story means the seizure happened there. *(→)* It also knows that "Aluva swadeshi" only means where the person is from. *(→)* That found **628 seizures that English news alone missed.**
+
+**[8 · We went to the source]**
+
+Now the honest part. The best data would be real case files, so we went to the source. **We contacted Police and Excise officers and asked for them.** They couldn't share them in time, and the law protects those files because they involve ongoing cases and personal details.
+
+So we built everything from **public records**, and that became our strength. Every number you see can be checked by anyone. And the day official data is shared, NarcoTrace is ready for it.
+
+Maen will show you what the AI does with this data.
+
+---
+
+## MAEN · How it works and the enforcement demo (1 min 45 sec)
+
+**[9 · The 1 km grid]** *Press → twice.*
+
+We split Kerala into **46,000 squares, each one kilometre wide**. The AI looks at every square: what happened there before, what's happening nearby, the news, and what's around it, such as railway stations and highways. Then it picks the **1% of Kerala** most likely to see a drug seizure in the next four weeks.
+
+One idea made the biggest difference. The model learns not only where drugs move, but **where seizures actually get reported**. That alone took us from 63% to 85%.
+
+**[10 · The frozen test]** *It plays automatically. Let it run.*
+
+But does it really work? We ran the toughest test we could. We **froze the model on 30 June**, with no more learning, and waited five months.
+
+In those five months, 263 seizures were reported, and **85% of them were inside the 1% of Kerala we had flagged.** Nineteen of our top 20 places had a seizure.
+
+We'll be honest: brand-new places are still hard, and we caught 9 of 43. The system says that openly, because a tool officers can trust has to tell the truth.
+
+**[11 · LIVE]** *Switch to the enforcement tab.*
+
+This is what an Excise or Police analyst would see every week.
+- *Priority tab:* the red zones are this month's priority list.
+- *Click the first place:* it tells you **why**: past reports, activity nearby, and how many reports to expect.
+- *Emerging tab:* areas heating up faster than their own history.
+
+And it **never names a person**. It shows places, and a human always decides.
+
+Yaris will show you the side built for the public.
+
+---
+
+## YARIS · Public demo, vision and close (1 min 30 sec)
+
+**[11 · LIVE]** *Switch to the public tab.*
+
+Drugs aren't only a police problem. They're a **health** problem.
+- *Tap ◎ Near me:* anyone can find the nearest de-addiction centre in one tap.
+- *Far from help tab:* these shaded areas are drug-affected places that are far from help. That's exactly where a new centre or outreach camp would do the most good.
+- *Switch to Malayalam:* everything works in **Malayalam**.
+- *Report tab:* people can report a concern safely, saying only what and roughly where, never who. One person can't target a neighbourhood: an area shows up only when five different people report it on different days.
+
+*Switch back to the deck.*
+
+**[12 · The vision]**
+
+So where does this go? Today, NarcoTrace predicts from public data. With official data, it can work down to each police station. With treatment data, it can show where people are actually being hurt.
+
+Our dream is **one shared map for Kerala**, where Excise, Police, Health, schools and panchayats plan prevention together, *before* the harm happens.
+
+Our goal isn't to catch more people. It's that **fewer people ever need to be caught, or treated.**
+
+**[13 · Finale]**
+
+NarcoTrace: **see it earlier, reach them sooner.** Thank you. We're happy to take your questions.
+
+---
+
+## Q&A: who answers
+
+- **Maen:** how the model works and how accurate it is
+- **Kiran:** where the data came from and why there are no official files
+- **Aibin:** the statistics behind the problem
+- **Yaris:** safety, misuse and future plans, and passing other questions to the right person
+
+**Never claim** police backing, that it's already deployed, or that it identifies drug users.
+**If you're running over time**, cut the bullet lists in the demos to the first item only.
