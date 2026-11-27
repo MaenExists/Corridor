@@ -16,8 +16,8 @@ export function ConcernTab({ concern, onPick }: { concern: ConcernSummary; onPic
             : "No area stands out from public tips yet."}
         </h2>
         <p className="mt-2 text-[13px] text-ink-2 leading-relaxed">
-          Unverified, and not part of the forecast. A tip is a reason to look, never a reason to act. Tips carry no names,
-          and each area covers about 3 km.
+          Unverified and kept out of the forecast. A tip is a reason to look, never a reason to act. No names are collected,
+          and each area spans about 3 km.
         </p>
       </div>
 
@@ -35,7 +35,7 @@ export function ConcernTab({ concern, onPick }: { concern: ConcernSummary; onPic
                   <span className="block text-[11.5px] text-mute">{b.reporters} people · {b.firstHand} saw it · {b.days} days · {date(b.first)} to {date(b.last)}</span>
                 </span>
                 <span className="pr-5 text-right">
-                  <span className="block text-[15px] font-medium tabular">{b.ratio}×</span>
+                  <span className="block text-[15px] font-medium tabular text-signal">{b.ratio}×</span>
                   <span className="block text-[11px] text-mute">usual</span>
                 </span>
               </button>

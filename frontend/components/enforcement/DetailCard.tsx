@@ -9,9 +9,9 @@ export function DetailCard({ view, selection, onClose }: {
   view: EnforcementView; selection: NonNullable<Selection>; onClose: () => void;
 }) {
   return (
-    <div className="absolute left-3 right-3 bottom-3 md:right-auto md:left-4 md:bottom-4 z-[600] md:w-[380px] max-h-[calc(100%-1.5rem)] overflow-y-auto bg-paper border border-ink">
+    <div className="absolute left-3 right-3 bottom-3 md:right-auto md:left-4 md:bottom-4 z-[1001] md:w-[380px] max-h-[calc(100%-1.5rem)] overflow-y-auto bg-paper border border-ink">
       <button onClick={onClose} aria-label="Close"
-        className="absolute right-0 top-0 size-9 grid place-items-center border-l border-b border-ink hover:bg-ink hover:text-paper">
+        className="absolute right-0 top-0 size-9 grid place-items-center border-l border-b border-ink hover:bg-signal hover:text-paper">
         <svg viewBox="0 0 10 10" className="size-2.5"><path d="M1 1l8 8M9 1 1 9" stroke="currentColor" strokeWidth="1.4" /></svg>
       </button>
       {selection.kind === "place" && <Place view={view} id={selection.id} />}
@@ -28,19 +28,19 @@ function Place({ view, id }: { view: EnforcementView; id: string }) {
   return (
     <>
       <div className="px-4 pt-4 pb-3 pr-12 border-b border-ink">
-        <p className="label text-mute">#{p.rank} · {p.area}</p>
+        <p className="label text-mute"><span className="text-signal">#{p.rank}</span> · {p.area}</p>
         <h3 className="mt-1 text-[24px] leading-tight tracking-[-0.02em] font-medium">{p.name}</h3>
         <p className="mt-2 inline-flex items-center gap-2 text-[12.5px]">
-          <i className="block size-3 border border-ink" style={{ background: level.fill }} />{level.text} in the next four weeks
+          <i className="block size-3" style={{ background: level.fill }} />{level.text} · next four weeks
         </p>
       </div>
       <div className={`grid ${p.expected != null ? "grid-cols-3" : "grid-cols-2"} border-b border-ink`}>
-        <Stat value={p.reportsYear} label="seizures reported nearby, past year" />
-        <Stat value={p.reportsMonth} label="in the last four weeks" border />
-        {p.expected != null && <Stat value={p.expected < 0.95 ? p.expected.toFixed(1) : String(Math.round(p.expected))} label="reports expected, next four weeks" border />}
+        {p.expected != null && <Stat accent value={p.expected < 0.95 ? p.expected.toFixed(1) : String(Math.round(p.expected))} label="reports expected, next 4 weeks" />}
+        <Stat value={p.reportsYear} label="reported within 3 km, past year" border={p.expected != null} />
+        <Stat value={p.reportsMonth} label="in the last 4 weeks" border />
       </div>
       <div className="px-4 py-3">
-        <p className="label text-mute mb-2">Why it is flagged</p>
+        <p className="label text-mute mb-2">Why it is on the list</p>
         <ul className="space-y-1.5 text-[13px] leading-snug">
           {p.why.map(w => <li key={w} className="flex gap-2"><span className="mt-[7px] size-1 bg-ink shrink-0" />{w}</li>)}
         </ul>
@@ -51,7 +51,7 @@ function Place({ view, id }: { view: EnforcementView; id: string }) {
           <p className="text-[12.5px] text-ink-2 leading-snug"><b className="text-ink font-medium">{KIND[p.kind].title}.</b> {KIND[p.kind].plain}</p>
         </div>
       )}
-      <Note>Covers about {p.squares} km² around {p.name}. A likelihood from reported seizures, not a confirmed location.</Note>
+      <Note>About {p.squares} km² around {p.name}. A likelihood from reported seizures, not intelligence on a location or a person.</Note>
     </>
   );
 }
@@ -77,7 +77,7 @@ function Kind({ view, id }: { view: EnforcementView; id: string }) {
         {k.kinds.map(t => KIND[t] && <p key={t}><b className="font-medium">{KIND[t].title}:</b> {KIND[t].plain}</p>)}
         <p className="text-ink-2">{pct(k.recentShare)} of its reports are from the last six months. About {Math.round(k.borderKm)} km from the state border.</p>
       </div>
-      <Note>Types come from simple rules about place and haul size. They describe a pattern; they do not prove a route.</Note>
+      <Note>Labels come from fixed rules on place and haul size. They describe a pattern, not a proven route.</Note>
     </>
   );
 }
@@ -96,16 +96,16 @@ function Gate({ view, id }: { view: EnforcementView; id: string }) {
       </div>
       <Note>
         A main road or railway crosses the state border here. {g.activeNearby ? "Seizures are being reported nearby." :
-          "Few seizures nearby reach the news, so quiet here means unknown, not clean."}
+          "Few border seizures reach the news. Quiet here means unknown, not clean."}
       </Note>
     </>
   );
 }
 
-function Stat({ value, label, border }: { value: number | string; label: string; border?: boolean }) {
+function Stat({ value, label, border, accent }: { value: number | string; label: string; border?: boolean; accent?: boolean }) {
   return (
     <div className={`px-4 py-3 ${border ? "border-l border-ink" : ""}`}>
-      <p className="text-[26px] leading-none tracking-[-0.02em] font-medium tabular">{value}</p>
+      <p className={`text-[26px] leading-none tracking-[-0.02em] font-medium tabular ${accent ? "text-signal glow" : ""}`}>{value}</p>
       <p className="mt-1.5 text-[11.5px] text-mute leading-tight">{label}</p>
     </div>
   );

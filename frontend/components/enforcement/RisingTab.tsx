@@ -16,21 +16,21 @@ export function RisingTab({ v2, selectedId, onRising, onLook }: {
     <div>
       <section className="border-b border-ink">
         <div className="px-5 pt-5 pb-3">
-          <p className="label text-mute mb-2">Rising now · space-time scan</p>
+          <p className="label text-electric mb-2 prompt">Rising now · space-time scan</p>
           <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">
-            {v2.rising.length ? `${v2.rising.length} ${v2.rising.length === 1 ? "area is" : "areas are"} reporting more than their own history explains.`
-              : "No area is rising beyond its usual level right now."}
+            {v2.rising.length ? `${v2.rising.length} ${v2.rising.length === 1 ? "area is" : "areas are"} running hotter than their own history.`
+              : "Nothing is running hotter than its own history this week."}
           </h2>
           <p className="mt-2 text-[12.5px] text-ink-2 leading-relaxed">
-            Each is a circle where recent reports outnumber what the last three years predict, checked against 199 reshuffles of the dates.
-            A rise can also mean a campaign or new news coverage.
+            Recent reports in a circle are compared with what that circle's last three years predict, and tested against 199
+            random reshuffles of the dates. A rise can also be a crackdown or fresh news coverage.
           </p>
         </div>
         <ul>
           {v2.rising.map(r => (
             <li key={r.id}>
               <button onClick={() => onRising(r)}
-                className={`w-full grid grid-cols-[1fr_auto] items-center text-left px-5 py-2.5 border-t border-ink/15 ${selectedId === r.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                className={`w-full grid grid-cols-[1fr_auto] items-center text-left px-5 py-2.5 border-t border-ink/15 ${selectedId === r.id ? "bg-paper-2 text-electric" : "hover:bg-paper-2"}`}>
                 <span className="min-w-0">
                   <span className="block text-[14px] font-medium truncate">{r.name}</span>
                   <span className="block text-[11.5px] opacity-60">{r.district} · within {r.radiusKm} km · last {r.windowDays} days</span>
@@ -54,8 +54,8 @@ export function RisingTab({ v2, selectedId, onRising, onLook }: {
 
       <section>
         <div className="px-5 pt-5 pb-3">
-          <p className="label text-mute mb-2">New-place watch · {MODEL_NAME[v2.model] ?? v2.model}</p>
-          <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">Places with no report yet that look like where seizures happen.</h2>
+          <p className="label text-electric mb-2">New-place watch · {MODEL_NAME[v2.model] ?? v2.model}</p>
+          <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">No seizure reported yet, but they look like places that have them.</h2>
           <p className="mt-2 text-[12.5px] text-ink-2 leading-relaxed">
             Every square here is more than 2 km from any earlier report. Ranked by a model trained only on first reports at new places.
             {v2.adopted ? "" : " It did not pass its pre-registered test on the design years (it beat a population list but not the older terrain model), so treat it as a lead, not a forecast. Weekly lists are now frozen and scored from December."}
@@ -66,7 +66,7 @@ export function RisingTab({ v2, selectedId, onRising, onLook }: {
           {v2.lookAlike.map((l, i) => (
             <li key={l.id}>
               <button onClick={() => onLook(l)}
-                className={`w-full grid grid-cols-[36px_1fr_auto] items-center text-left border-t border-ink/15 ${selectedId === l.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                className={`w-full grid grid-cols-[36px_1fr_auto] items-center text-left border-t border-ink/15 ${selectedId === l.id ? "bg-paper-2 text-electric" : "hover:bg-paper-2"}`}>
                 <span className="font-mono text-[11.5px] text-center opacity-60">{String(i + 1).padStart(2, "0")}</span>
                 <span className="py-2.5 pr-2 min-w-0">
                   <span className="block text-[13.5px] font-medium truncate">{l.name}</span>
@@ -101,7 +101,7 @@ function Evidence({ v2 }: { v2: PatternsV2 }) {
         {v2.evaluation.map(e => (
           <tr key={e.stage} className="border-t border-ink/15">
             <td className="px-2 py-1">{e.label}<span className="text-mute"> · {e.newPlaces}</span></td>
-            <td className="px-2 py-1 text-right">{pct(e.fresh[v2.model] ?? 0)}</td>
+            <td className="px-2 py-1 text-right text-electric">{pct(e.fresh[v2.model] ?? 0)}</td>
             <td className="px-2 py-1 text-right">{pct(e.fresh.population ?? 0)}</td>
             <td className="px-2 py-1 text-right">{pct(e.fresh.risk_terrain_v1 ?? 0)}</td>
           </tr>
@@ -117,8 +117,8 @@ export function Profiles({ profiles, onPlace }: { profiles: Profile[]; onPlace: 
   return (
     <section className="border-b border-ink">
       <div className="px-5 pt-5 pb-3">
-        <p className="label text-mute mb-2">Learned hotspot profiles</p>
-        <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">{profiles.length} kinds of place keep producing seizure reports.</h2>
+        <p className="label text-signal mb-2 prompt">Learned hotspot profiles</p>
+        <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">{profiles.length} kinds of place keep turning up in seizure reports.</h2>
         <p className="mt-2 text-[12.5px] text-ink-2 leading-relaxed">
           Found by the model from what surrounds every square with reports in the last three years, against ordinary inhabited
           squares. Police and Excise offices are left out, so presence of officers does not define a profile.

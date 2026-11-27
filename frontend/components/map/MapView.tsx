@@ -5,13 +5,15 @@ import type * as Leaflet from "leaflet";
 import type { Cell, Gateway, HotspotKind, Level, Rising, WatchPlace } from "@/lib/types";
 import { BLOCK, STEP, TIP_WHAT, type ConcernBlock } from "@/lib/tipRules";
 import { setBasemap, useLeafletMap, type Basemap, type MapContext } from "./base";
+import { ELECTRIC, LEVEL } from "@/components/enforcement/copy";
 
 export type { Basemap };
 export type Layers = { places: boolean; kinds: boolean; gateways: boolean; concern: boolean; rising: boolean; lookAlike: boolean };
 export type Focus = { lat: number; lon: number; zoom?: number; ring?: boolean } | null;
 export type Pin = { lat: number; lon: number; name: string } | null;
 
-const LEVEL_FILL: Record<Level, string> = { high: "#ff3b26", elevated: "#c0341f", watch: "#6e2519" };
+
+const LEVEL_FILL: Record<Level, string> = { high: LEVEL.high.fill, elevated: LEVEL.elevated.fill, watch: LEVEL.watch.fill };
 const KIND_LETTER: Record<string, string> = {
   "entry gateway": "G", "air or sea entry": "A", "transit corridor": "T", "retail market": "R",
   "venue-linked": "V", emerging: "E",
@@ -61,7 +63,7 @@ export default function MapView(props: Props) {
     for (const c of [...props.cells].reverse()) {
       leaflet.rectangle([[c.lat - HALF, c.lon - HALF], [c.lat + HALF, c.lon + HALF]], {
         color: "#0b0b0b", weight: 1, fillColor: LEVEL_FILL[c.level], fillOpacity: .88, interactive: true,
-      }).bindTooltip(`Around ${c.place}`, { className: "nt-tip", direction: "top" })
+      }).bindTooltip(`${c.place} · ${LEVEL[c.level].text.toLowerCase()}`, { className: "nt-tip", direction: "top" })
         .on("click", () => {
           const place = props.places.find(p => p.name === c.place);
           if (place) select.current("place", place.id);
@@ -120,7 +122,7 @@ export default function MapView(props: Props) {
     for (const gate of props.gateways) {
       leaflet.marker([gate.lat, gate.lon], {
         icon: leaflet.divIcon({ className: "nt-gate", html: "◆", iconSize: [15, 15], iconAnchor: [7, 7] }),
-      }).bindTooltip(`Border crossing near ${gate.name}`, { className: "nt-tip", direction: "top" })
+      }).bindTooltip(`Border crossing · ${gate.name}`, { className: "nt-tip", direction: "top" })
         .on("click", () => select.current("gateway", gate.id)).addTo(g);
     }
   }
@@ -147,9 +149,9 @@ export default function MapView(props: Props) {
     g.clearLayers();
     if (!props.layers.rising) return;
     for (const r of props.rising) {
-      leaflet.circle([r.lat, r.lon], { radius: r.radiusKm * 1000, color: "#ff3b26", weight: 2, dashArray: "6 4",
-        fillColor: "#ff3b26", fillOpacity: .08 })
-        .bindTooltip(`Rising near ${r.name}: ${r.observed} reports in ${r.windowDays} days, ${r.expected} expected`, { className: "nt-tip", direction: "top" })
+      leaflet.circle([r.lat, r.lon], { radius: r.radiusKm * 1000, color: ELECTRIC, weight: 2, dashArray: "6 4",
+        fillColor: ELECTRIC, fillOpacity: .1 })
+        .bindTooltip(`Rising · ${r.name}: ${r.observed} reports in ${r.windowDays} days vs ${r.expected} expected`, { className: "nt-tip", direction: "top" })
         .on("click", () => select.current("rising", r.id)).addTo(g);
     }
   }
@@ -161,8 +163,8 @@ export default function MapView(props: Props) {
     if (!props.layers.lookAlike) return;
     for (const [lat, lon] of props.lookAlike) {
       leaflet.rectangle([[lat - HALF, lon - HALF], [lat + HALF, lon + HALF]], {
-        color: "#e8e6df", weight: 1.2, fill: true, fillColor: "#e8e6df", fillOpacity: .06,
-      }).bindTooltip("Looks like a hotspot, no reports yet", { className: "nt-tip", direction: "top" }).addTo(g);
+        color: ELECTRIC, weight: 1.2, fill: true, fillColor: ELECTRIC, fillOpacity: .08,
+      }).bindTooltip("Look-alike · no seizure reported yet", { className: "nt-tip", direction: "top" }).addTo(g);
     }
   }
 

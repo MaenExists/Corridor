@@ -9,6 +9,7 @@
   --color-signal: #ff3b26;
   --color-signal-soft: #5a1c14;
   --color-ok: #3fb67f;
+  --color-electric: #00c2ff;
   --font-sans: var(--font-geist-sans), "Noto Sans Malayalam Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
@@ -26,6 +27,30 @@
   ::selection { background: var(--color-ink); color: var(--color-paper); }
   :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
 }
+
+/* Enforcement wears its own palette: terminal green, with electric blue for anything live or emerging.
+   Utilities read the variables, so the whole subtree recolours. */
+.theme-enforcement {
+  --color-signal: #00ff41;
+  --color-signal-soft: #003d12;
+  --color-electric: #00c2ff;
+}
+.theme-enforcement :focus-visible { outline-color: #00ff41; }
+.theme-enforcement ::selection { background: #00ff41; color: #0a0a0a; }
+.glow { text-shadow: 0 0 14px rgba(0, 255, 65, .45); }
+.glow-electric { text-shadow: 0 0 14px rgba(0, 194, 255, .5); }
+/* A terminal prompt: "> label" with a blinking block cursor. */
+.prompt::before { content: "> "; }
+.prompt::after { content: ""; display: inline-block; width: .55em; height: 1em; margin-left: .3em; vertical-align: -0.12em;
+  background: currentColor; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.pulse { animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 194, 255, .6); } 50% { opacity: .55; box-shadow: 0 0 0 5px rgba(0, 194, 255, 0); } }
+/* Faint scanlines over the enforcement map. */
+.scanlines { pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(0, 255, 65, .05) 0 1px, transparent 1px 3px); mix-blend-mode: screen; }
+@media (prefers-reduced-motion: reduce) { .prompt::after, .pulse { animation: none; } }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Film grain over everything, including the map. */
 .grain {
@@ -84,7 +109,7 @@
   width: 22px; height: 22px; border: 1.5px solid var(--color-ink); background: var(--color-paper); color: var(--color-ink);
   font: 600 10px/19px var(--font-mono); text-align: center;
 }
-.nt-type.sel { background: var(--color-ink); color: var(--color-paper); }
+.nt-type.sel { background: var(--color-signal); border-color: var(--color-signal); color: var(--color-paper); }
 
 .scroll-thin { scrollbar-width: thin; scrollbar-color: var(--color-ink) transparent; }
 
@@ -120,4 +145,4 @@
 .nt-pin { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 .nt-pin span { background: #e8e6df; color: #0a0a0a; font: 500 12px/1 var(--font-sans); padding: 5px 7px; white-space: nowrap; }
 .nt-pin i { width: 1.5px; height: 12px; background: #e8e6df; }
-.nt-pin i::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; margin-left: -4px; border: 1.5px solid #e8e6df; background: #ff3b26; }
+.nt-pin i::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; margin-left: -4px; border: 1.5px solid #e8e6df; background: var(--color-signal); }

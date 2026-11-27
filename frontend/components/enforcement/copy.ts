@@ -1,24 +1,27 @@
 import type { Level } from "@/lib/types";
 
+/** Priority levels in terminal green, stepping down in brightness. Electric blue marks live and emerging signals. */
 export const LEVEL: Record<Level, { label: string; fill: string; text: string }> = {
-  high: { label: "High", fill: "#ff3b26", text: "Most likely" },
-  elevated: { label: "Raised", fill: "#c0341f", text: "Likely" },
-  watch: { label: "Watch", fill: "#6e2519", text: "Worth watching" },
+  high: { label: "Top priority", fill: "#00FF41", text: "Top priority" },
+  elevated: { label: "Priority", fill: "#00B12E", text: "Priority" },
+  watch: { label: "Watch", fill: "#0B6624", text: "On watch" },
 };
+export const ACCENT = "#00FF41";
+export const ELECTRIC = "#00C2FF";
 
 export const KIND: Record<string, { letter: string; title: string; plain: string }> = {
   "entry gateway": { letter: "G", title: "Entry gateway",
-    plain: "Near a state-border crossing, with large hauls. Drugs may be coming in here." },
+    plain: "Big hauls near a state-border crossing. A likely way in." },
   "air or sea entry": { letter: "A", title: "Air or sea entry",
-    plain: "Near an airport or port, with large hauls. A likely arrival point." },
+    plain: "Big hauls near an airport or port. A likely point of arrival." },
   "transit corridor": { letter: "T", title: "Transit corridor",
-    plain: "Seizures line up along a highway or railway. Drugs are likely moving through." },
-  "retail market": { letter: "R", title: "Retail market",
-    plain: "A dense town where small quantities keep turning up. Likely street-level selling." },
+    plain: "Seizures strung along a highway or railway. Supply moving through." },
+  "retail market": { letter: "R", title: "Street market",
+    plain: "A dense town where small quantities keep turning up. Street-level selling." },
   "venue-linked": { letter: "V", title: "Venue-linked",
-    plain: "Close to resorts, tourist sites or colleges. Demand gathers here." },
+    plain: "Clustered around resorts, tourist sites or colleges. Where demand gathers." },
   emerging: { letter: "E", title: "Emerging",
-    plain: "Most reports here are from the last six months. Activity is new or growing." },
+    plain: "Most reports are from the last six months. New or growing activity." },
 };
 
 export const pct = (v: number) => `${Math.round(v * 100)}%`;

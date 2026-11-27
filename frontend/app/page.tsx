@@ -26,8 +26,8 @@ export default function Home() {
           </p>
         </section>
 
-        <Door href="/enforcement" index="02" title="Enforcement" line="Where reported seizures are most likely in the next four weeks, why those places, and how often the forecast is right."
-          cta="Open the map" live />
+        <Door href="/enforcement" index="02" title="Enforcement" line="A 28-day seizure outlook for Kerala, rebuilt every week and scored against what actually got reported."
+          cta="Open the outlook" live accent />
         <Door href="/public" index="03" title="Public" line="Where people live far from de-addiction help, and the nearest centres from any spot, for families and health services."
           cta="Open the map" live />
       </main>
@@ -41,11 +41,11 @@ export default function Home() {
   );
 }
 
-function Door({ href, index, title, line, cta, live }: {
-  href: string; index: string; title: string; line: string; cta: string; live?: boolean;
+function Door({ href, index, title, line, cta, live, accent }: {
+  href: string; index: string; title: string; line: string; cta: string; live?: boolean; accent?: boolean;
 }) {
   return (
-    <Link href={href} className="group relative px-6 lg:px-10 py-12 lg:py-16 border-b lg:border-b-0 lg:border-r last:border-r-0 border-ink flex flex-col justify-between gap-10 hover:bg-ink hover:text-paper transition-colors duration-200">
+    <Link href={href} className={`group relative px-6 lg:px-10 py-12 lg:py-16 border-b lg:border-b-0 lg:border-r last:border-r-0 border-ink flex flex-col justify-between gap-10 ${accent ? "theme-enforcement hover:bg-signal" : "hover:bg-ink"} hover:text-paper transition-colors duration-200`}>
       <div>
         <p className="label opacity-60 mb-6">{index} · {live ? "Live" : "Next"}</p>
         <h2 className="text-[36px] leading-none tracking-[-0.03em] font-medium">{title}</h2>

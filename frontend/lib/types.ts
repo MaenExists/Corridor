@@ -126,6 +126,8 @@ export type EnforcementView = {
   concern: ConcernSummary;
   v2: PatternsV2 | null;
   ledger: Ledger | null;
+  /** The served model's measured skill on the most recent scored window (top-20 precision), if available. */
+  skill: { top20: number; top1pct: number; window: string } | null;
   missing: string[];
 };
 

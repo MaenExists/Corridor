@@ -43,7 +43,8 @@ type GridCell = { rank: number; lat: number; lon: number; locality: string; talu
 type V3Cutoff = { cutoff: string; checked_through: string; post_cutoff_located_reports: number; caught: number;
   new_place_reports: number; new_place_caught: number; top20_with_later_report: number;
   by_month: { month: string; located_reports: number; v3: number }[] };
-type Grid = { as_of: string; horizon_days: number; cells: GridCell[]; model?: string; v3_cutoff?: V3Cutoff; weekly_located_reports: number[];
+type Grid = { as_of: string; horizon_days: number; cells: GridCell[]; model?: string; v3_cutoff?: V3Cutoff;
+  v3_evaluation?: Record<string, Record<string, { precision_top20: number; hit_rate_1pct: number }>>; weekly_located_reports: number[];
   latest_report_by_source: Record<string, string>; located_reports_used: number;
   cutoff_check?: { cutoff: string; checked_through: string; post_cutoff_located_reports: number;
     total: { grid_ranker: number; new_place_reports: number; risk_terrain_watch: number };
@@ -249,6 +250,10 @@ export async function enforcementView(): Promise<EnforcementView> {
     concern,
     v2: v2View(v2),
     ledger: ledgerView(ledger),
+    skill: grid?.v3_evaluation?.postcutoff?.v3 ? {
+      top20: grid.v3_evaluation.postcutoff.v3.precision_top20, top1pct: grid.v3_evaluation.postcutoff.v3.hit_rate_1pct,
+      window: "Jul–Nov 2026",
+    } : null,
     missing,
   };
 }
