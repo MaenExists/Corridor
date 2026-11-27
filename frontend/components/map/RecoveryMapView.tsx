@@ -129,7 +129,7 @@ export default function RecoveryMapView(props: Props) {
         icon: c.L.divIcon({ className: "", iconSize: [14, 14], iconAnchor: [7, 7],
           html: `<div class="nt-centre${centre.government ? " gov" : ""}${selected ? " sel" : ""}"></div>` }),
         keyboard: false,
-      }).bindTooltip(`${centre.name}${centre.government ? " · Government" : ""}`, { className: "nt-tip", direction: "top" })
+      }).bindTooltip(`${centre.name}${centre.government ? " · Government" : ""}`, { className: "nt-tip nt-care", direction: "top" })
         .on("click", e => { c.L.DomEvent.stopPropagation(e); handlers.current.onCentre(centre.id); }).addTo(g);
     }
   }

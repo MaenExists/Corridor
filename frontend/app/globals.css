@@ -10,6 +10,8 @@
   --color-signal-soft: #5a1c14;
   --color-ok: #3fb67f;
   --color-electric: #00c2ff;
+  /* De-addiction and health centres on the public side: teal, apart from the blood-red map and amber interface. */
+  --color-care: #2dd4bf;
   --font-sans: var(--font-geist-sans), "Noto Sans Malayalam Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
@@ -111,6 +113,7 @@
   box-shadow: none; font-family: var(--font-sans); font-size: 12px; padding: 6px 8px;
 }
 .leaflet-tooltip.nt-tip::before { display: none; }
+.leaflet-tooltip.nt-tip.nt-care { color: #2dd4bf; border-color: #2dd4bf; }
 .nt-gate { color: #e8e6df; font-size: 15px; line-height: 15px; text-align: center; text-shadow: 0 0 3px #000, 0 0 1px #000; }
 .nt-type {
   width: 22px; height: 22px; border: 1.5px solid var(--color-ink); background: var(--color-paper); color: var(--color-ink);
@@ -122,8 +125,8 @@
 
 /* Recovery map */
 .nt-grid { image-rendering: pixelated; }
-.nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #0a0a0a; border: 1.5px solid #e8e6df; }
-.nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #e8e6df; border-color: #0a0a0a; outline: 1px solid #e8e6df; }
+.nt-centre { width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: #0a0a0a; border: 2px solid #2dd4bf; box-shadow: 0 0 6px rgba(45,212,191,.55); }
+.nt-centre.gov { width: 12px; height: 12px; margin: 1px; border-radius: 0; background: #2dd4bf; border: 1.5px solid #0a0a0a; outline: 1px solid #2dd4bf; }
 .nt-centre.sel { outline: 2px solid #ffbf00; outline-offset: 2px; }
 .nt-probe { width: 22px; height: 22px; border: 1.5px solid #e8e6df; border-radius: 50%; background: rgba(10,10,10,.35);
   box-shadow: 0 0 0 4px rgba(10,10,10,.55); position: relative; }

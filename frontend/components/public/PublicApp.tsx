@@ -147,8 +147,8 @@ export function PublicApp({ view }: { view: PublicView }) {
               )}
               <button onClick={() => setShowCentres(v => !v)} aria-pressed={showCentres}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 border-t border-ink text-[12.5px] text-left ${showCentres ? "" : "opacity-45"}`}>
-                <span className="flex items-center gap-1.5"><i className="block size-2.5 bg-ink" />{t.government}</span>
-                <span className="flex items-center gap-1.5"><i className="block size-2.5 rounded-full border-[1.5px] border-ink" />{t.registered}</span>
+                <span className="flex items-center gap-1.5 text-care"><i className="block size-2.5 bg-care" />{t.government}</span>
+                <span className="flex items-center gap-1.5 text-care"><i className="block size-2.5 rounded-full border-[1.5px] border-care" />{t.registered}</span>
               </button>
             </div>
           </div>
@@ -190,7 +190,7 @@ export function PublicApp({ view }: { view: PublicView }) {
                     <button onClick={() => pickCentre(c)} className="w-full grid grid-cols-[28px_1fr_auto] items-center text-left px-4 py-2.5 border-t border-ink/20 hover:bg-paper-2">
                       <span className="font-mono text-[11px] text-mute">{i + 1}</span>
                       <span className="min-w-0">
-                        <span className="block text-[13.5px] font-medium truncate">{c.name}</span>
+                        <span className="block text-[13.5px] font-medium truncate text-care">{c.name}</span>
                         <span className="block text-[11.5px] text-mute">{c.government ? t.govVimukthi : t.registeredCentre} · {district(c.district)}</span>
                       </span>
                       <span className="font-mono tabular text-[13px] pl-2">{t.km(d)}</span>
@@ -203,7 +203,7 @@ export function PublicApp({ view }: { view: PublicView }) {
           )}
 
           {centre && !reporting && (
-            <Card onClose={() => setCentreId(null)} eyebrow={centre.government ? t.govCentre : t.regCentre} title={centre.name} closeLabel={t.close}>
+            <Card onClose={() => setCentreId(null)} eyebrow={centre.government ? t.govCentre : t.regCentre} title={centre.name} titleClass="text-care" closeLabel={t.close}>
               <div className="grid grid-cols-2 border-t border-ink">
                 <div className="px-4 py-3">
                   <p className="text-[24px] leading-none font-medium tabular">{centre.beds ?? "—"}</p>
@@ -292,12 +292,12 @@ export function PublicApp({ view }: { view: PublicView }) {
                   {filtered.slice(0, 120).map(c => (
                     <li key={c.id}>
                       <button onClick={() => pickCentre(c)}
-                        className={`w-full grid grid-cols-[26px_1fr_auto] items-center text-left border-b border-ink/15 ${centreId === c.id ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>
+                        className={`w-full grid grid-cols-[26px_1fr_auto] items-center text-left border-b border-ink/15 ${centreId === c.id ? "bg-care text-paper" : "hover:bg-paper-2"}`}>
                         <span className="flex justify-center">{c.government
-                          ? <i className={`block size-2.5 ${centreId === c.id ? "bg-paper" : "bg-ink"}`} />
-                          : <i className="block size-2.5 rounded-full border-[1.5px] border-current" />}</span>
+                          ? <i className={`block size-2.5 ${centreId === c.id ? "bg-paper" : "bg-care"}`} />
+                          : <i className={`block size-2.5 rounded-full border-[1.5px] ${centreId === c.id ? "border-paper" : "border-care"}`} />}</span>
                         <span className="py-2.5 pr-2 min-w-0">
-                          <span className="block text-[13.5px] truncate">{c.name}</span>
+                          <span className={`block text-[13.5px] truncate ${centreId === c.id ? "font-medium" : "text-care"}`}>{c.name}</span>
                           <span className={`block text-[11.5px] ${centreId === c.id ? "text-paper/65" : "text-mute"}`}>{district(c.district)}</span>
                         </span>
                         <span className="pr-5 text-[12px] tabular opacity-70">{c.beds != null ? t.beds(c.beds) : ""}</span>
@@ -401,7 +401,7 @@ export function PublicApp({ view }: { view: PublicView }) {
   );
 }
 
-function Card({ eyebrow, title, onClose, closeLabel, children }: { eyebrow: string; title: string; onClose: () => void; closeLabel: string; children: React.ReactNode }) {
+function Card({ eyebrow, title, titleClass = "", onClose, closeLabel, children }: { eyebrow: string; title: string; titleClass?: string; onClose: () => void; closeLabel: string; children: React.ReactNode }) {
   return (
     <div className="absolute left-3 right-3 bottom-3 md:right-auto md:left-4 md:bottom-4 z-[600] md:w-[380px] max-h-[calc(100%-1.5rem)] overflow-y-auto bg-paper border border-ink">
       <button onClick={onClose} aria-label={closeLabel} className="absolute right-0 top-0 size-9 grid place-items-center border-l border-b border-ink hover:bg-ink hover:text-paper">
@@ -409,7 +409,7 @@ function Card({ eyebrow, title, onClose, closeLabel, children }: { eyebrow: stri
       </button>
       <div className="px-4 pt-4 pb-3 pr-12">
         <p className="label text-mute">{eyebrow}</p>
-        <h3 className="mt-1 text-[21px] leading-tight tracking-[-0.02em] font-medium">{title}</h3>
+        <h3 className={`mt-1 text-[21px] leading-tight tracking-[-0.02em] font-medium ${titleClass}`}>{title}</h3>
       </div>
       {children}
     </div>
