@@ -574,7 +574,7 @@ hooks["s-india"] = { enter: fillBars };
   function finish() {
     const tot = months.reduce((a, m) => a + m.located_reports, 0), v3 = months.reduce((a, m) => a + m.v3, 0);
     const v1 = months.reduce((a, m) => a + (m.v1 || 0), 0), rep = months.reduce((a, m) => a + (m.rep || 0), 0), pop = months.reduce((a, m) => a + (m.pop || 0), 0);
-    const rows = [["NarcoTrace", v3, "#00ff41"], ["Our first try", v1, "#00c2ff"], ["Same place again", rep, "#6f6d66"], ["Where people live", pop, "#3d3c38"]];
+    const rows = [["NarcoTrace", v3, "#00ff41"], ["First version", v1, "#00c2ff"], ["Same place again", rep, "#6f6d66"], ["Where people live", pop, "#3d3c38"]];
     $("#cutBars").innerHTML = rows.map(([n, v, c]) => `<div class="hbar" style="grid-template-columns:260px 1fr 90px;margin:8px 0;font-size:18px"><span class="lab">${n}</span><span class="t" style="height:22px"><i style="--c:${c}" data-w="${v / tot * 100}"></i></span><span class="v" style="font-size:20px">${Math.round(v / tot * 1000) / 10}%</span></div>`).join("");
     $("#cutBars").style.opacity = 1;
     setTimeout(() => $$("#cutBars i").forEach((i, k) => setTimeout(() => i.style.width = i.dataset.w + "%", k * 160)), 100);
@@ -675,8 +675,8 @@ hooks["s-public"] = Viewer("#pubScreen", "#pubThumbs", [
     const v3 = NT.cutoff.v3.caught, v1 = ms.reduce((a, m) => a + m.grid_ranker, 0), rep = ms.reduce((a, m) => a + m.repeat_locality_1km, 0), pop = ms.reduce((a, m) => a + m.population, 0);
     const row = (n, v, c, sfx = "%") => `<div class="hbar"><span class="lab">${n}</span><span class="t"><i style="--c:${c}" data-w="${v}"></i></span><span class="v">${v.toFixed(1)}${sfx}</span></div>`;
     $("#winBars").innerHTML = `<p class="small" style="margin-bottom:6px">Seizures caught, Jul–Nov 2026 (we flagged 1% of Kerala)</p>` +
-      row("NarcoTrace", v3 / tot * 100, "#00ff41") + row("Our first try", v1 / tot * 100, "#00c2ff") + row("Same place again", rep / tot * 100, "#6f6d66") + row("Where people live", pop / tot * 100, "#3d3c38") +
-      `<p class="small" style="margin:34px 0 6px">District forecast · average miss in cases, lower is better</p>` +
+      row("NarcoTrace", v3 / tot * 100, "#00ff41") + row("First version", v1 / tot * 100, "#00c2ff") + row("Same place again", rep / tot * 100, "#6f6d66") + row("Where people live", pop / tot * 100, "#3d3c38") +
+      `<p class="small" style="margin:34px 0 6px">District forecast · average error in cases, lower is better</p>` +
       `<div class="hbar"><span class="lab">NarcoTrace</span><span class="t"><i style="--c:#00ff41" data-w="${8.70 / 10 * 100}"></i></span><span class="v">8.70</span></div>` +
       `<div class="hbar"><span class="lab">12-month average</span><span class="t"><i style="--c:#6f6d66" data-w="${9.31 / 10 * 100}"></i></span><span class="v">9.31</span></div>`;
     fillBars(s);
