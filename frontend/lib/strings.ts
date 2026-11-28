@@ -76,9 +76,15 @@ const en = {
   ],
 
   findEyebrow: "Find help",
-  findTitle: "Search de-addiction centres by name or district.",
-  findPlaceholder: "e.g. Kozhikode",
-  findCount: (n: number, total: number) => `${n} of ${total} centres · or use ◎ Near me on the map`,
+  findTitle: "Find the de-addiction centres nearest to your town, village or PIN code.",
+  findPlaceholder: "Filter centres by name or district",
+  findCount: (n: number, total: number) => `${n} of ${total} centres`,
+  findSearch: "Your town, village or PIN code",
+  findUseLocation: "◎ Use my location",
+  findNearestTo: (name: string) => `Nearest centres to ${name}`,
+  findAll: "All centres",
+  findPrompt: "Search your place or use your location to list centres by distance.",
+  findDistanceNote: "Straight-line distance. Roads make real journeys longer; call ahead to confirm services.",
   beds: (n: number) => `${n} ${plural(n, "bed", "beds")}`,
 
   districtsEyebrow: "By district",
@@ -110,6 +116,7 @@ const en = {
       locality: "Locality", junction: "Junction", "railway station": "Railway station", "bus stand": "Bus stand",
       college: "College", hospital: "Hospital", "police station": "Police station", market: "Market", park: "Park",
       stadium: "Stadium", attraction: "Attraction", mall: "Mall", "town hall": "Town hall", airport: "Airport", harbour: "Harbour",
+      "post office": "Post office area", "pin code": "PIN code",
     } as Record<string, string>,
   },
 
@@ -252,9 +259,15 @@ const ml: Strings = {
   ],
 
   findEyebrow: "സഹായം തേടാം",
-  findTitle: "പേരോ ജില്ലയോ ഉപയോഗിച്ച് ലഹരിമുക്തി കേന്ദ്രങ്ങൾ തിരയുക.",
-  findPlaceholder: "ഉദാ: കോഴിക്കോട്",
-  findCount: (n: number, total: number) => `${total} കേന്ദ്രങ്ങളിൽ ${n} · അല്ലെങ്കിൽ മാപ്പിലെ ◎ എന്റെ അടുത്ത് ഉപയോഗിക്കുക`,
+  findTitle: "നിങ്ങളുടെ പട്ടണത്തിനോ ഗ്രാമത്തിനോ പിൻ കോഡിനോ ഏറ്റവും അടുത്തുള്ള ലഹരിമുക്തി കേന്ദ്രങ്ങൾ കണ്ടെത്തുക.",
+  findPlaceholder: "പേരോ ജില്ലയോ ഉപയോഗിച്ച് കേന്ദ്രങ്ങൾ തിരയുക",
+  findCount: (n: number, total: number) => `${total} കേന്ദ്രങ്ങളിൽ ${n}`,
+  findSearch: "നിങ്ങളുടെ പട്ടണം, ഗ്രാമം അല്ലെങ്കിൽ പിൻ കോഡ്",
+  findUseLocation: "◎ എന്റെ സ്ഥലം ഉപയോഗിക്കുക",
+  findNearestTo: (name: string) => `${name} – ഏറ്റവും അടുത്തുള്ള കേന്ദ്രങ്ങൾ`,
+  findAll: "എല്ലാ കേന്ദ്രങ്ങളും",
+  findPrompt: "ദൂരം അനുസരിച്ച് കേന്ദ്രങ്ങൾ കാണാൻ നിങ്ങളുടെ സ്ഥലം തിരയുക അല്ലെങ്കിൽ ലൊക്കേഷൻ ഉപയോഗിക്കുക.",
+  findDistanceNote: "നേർരേഖാ ദൂരം. റോഡ് വഴിയുള്ള യാത്ര കൂടുതലായിരിക്കും; പോകുന്നതിന് മുമ്പ് വിളിച്ച് ഉറപ്പാക്കുക.",
   beds: (n: number) => `${n} കിടക്കകൾ`,
 
   districtsEyebrow: "ജില്ല തിരിച്ച്",
@@ -286,6 +299,7 @@ const ml: Strings = {
       locality: "സ്ഥലം", junction: "ജംഗ്ഷൻ", "railway station": "റെയിൽവേ സ്റ്റേഷൻ", "bus stand": "ബസ് സ്റ്റാൻഡ്",
       college: "കോളേജ്", hospital: "ആശുപത്രി", "police station": "പോലീസ് സ്റ്റേഷൻ", market: "ചന്ത", park: "പാർക്ക്",
       stadium: "സ്റ്റേഡിയം", attraction: "ആകർഷണ കേന്ദ്രം", mall: "മാൾ", "town hall": "ടൗൺ ഹാൾ", airport: "വിമാനത്താവളം", harbour: "തുറമുഖം",
+      "post office": "പോസ്റ്റ് ഓഫീസ് പ്രദേശം", "pin code": "പിൻ കോഡ്",
     },
   },
 

@@ -65,10 +65,10 @@ export function PublicApp({ view }: { view: PublicView }) {
   const centre = view.centres.find(c => c.id === centreId) ?? null;
 
   const showMapOnSmall = () => { if (window.matchMedia("(max-width: 1023px)").matches) window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const probeAt = (lat: number, lon: number, label: string, zoom?: number) => {
+  const probeAt = (lat: number, lon: number, label: string, zoom?: number, scroll = true) => {
     setProbe({ lat, lon }); setProbeLabel(label); setCentreId(null);
     if (zoom) setFocus({ lat, lon, zoom });
-    showMapOnSmall();
+    if (scroll) showMapOnSmall();
   };
   const pickCentre = (c: Centre) => { setCentreId(c.id); setProbe(null); setFocus({ lat: c.lat, lon: c.lon, zoom: 12 }); showMapOnSmall(); };
   const pickAt = (lat: number, lon: number, zoom?: number, name?: string) => {
@@ -86,7 +86,7 @@ export function PublicApp({ view }: { view: PublicView }) {
     if (!navigator.geolocation) { setLocating(t.noGeo); return; }
     setLocating(t.finding);
     navigator.geolocation.getCurrentPosition(
-      p => { setLocating(null); probeAt(p.coords.latitude, p.coords.longitude, t.yourLocation, 11); },
+      p => { setLocating(null); probeAt(p.coords.latitude, p.coords.longitude, t.yourLocation, 11, tab !== "find"); },
       () => setLocating(t.geoDenied), { enableHighAccuracy: false, timeout: 10000 });
   };
   // App shortcuts and shared links can open a tab directly: /public?tab=report
@@ -102,9 +102,12 @@ export function PublicApp({ view }: { view: PublicView }) {
   }, []);
 
   const q = query.trim().toLowerCase();
+  // With a place chosen (search, Near me or a tap on the map), centres are listed nearest first with their distance.
   const filtered = view.centres.filter(c => (!onlyGov || c.government) &&
     (!q || `${c.name} ${c.district} ${DISTRICT_ML[c.district] ?? ""}`.toLowerCase().includes(q)))
-    .sort((a, b) => Number(b.government) - Number(a.government) || a.district.localeCompare(b.district) || a.name.localeCompare(b.name));
+    .map(c => ({ c, d: probe ? km(probe, c) : null }))
+    .sort((a, b) => a.d != null && b.d != null ? a.d - b.d
+      : Number(b.c.government) - Number(a.c.government) || a.c.district.localeCompare(b.c.district) || a.c.name.localeCompare(b.c.name));
   const worst = view.districts[0];
   const steps = layer === "beds" ? BED_STEPS : layer === "need" ? NEED_STEPS : DISTANCE_STEPS;
   const ends = layer === "beds" ? t.legend.bedsEnds : t.legend.distanceEnds;
@@ -280,16 +283,26 @@ export function PublicApp({ view }: { view: PublicView }) {
                 <div className="px-5 pt-5 pb-4 border-b border-ink">
                   <p className="label text-mute mb-2">{t.findEyebrow}</p>
                   <h2 className="text-[19px] leading-snug tracking-[-0.01em] font-medium">{t.findTitle}</h2>
-                  <div className="mt-3 flex border border-ink">
-                    <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.findPlaceholder}
-                      className="flex-1 min-w-0 bg-transparent px-3 py-2 text-[14px] outline-none placeholder:text-mute" aria-label={t.findTitle} />
-                    <button onClick={() => setOnlyGov(v => !v)} aria-pressed={onlyGov}
-                      className={`label px-3 border-l border-ink ${onlyGov ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>{t.government}</button>
+                  <div className="mt-3">
+                    <PlaceSearch inline onSelect={p => { const c = p.local && view.centres.find(x => x.id === p.local!.id); if (c) pickCentre(c); else probeAt(p.lat, p.lon, p.name, 12, false); }}
+                      local={searchable} placeholder={t.findSearch} />
                   </div>
-                  <p className="mt-2 text-[11.5px] text-mute">{t.findCount(filtered.length, view.centres.length)}</p>
+                  <button onClick={locate} className="mt-2 w-full label py-2 border border-ink hover:bg-ink hover:text-paper">{t.findUseLocation}</button>
+                  {locating && <p className="mt-2 text-[11.5px] text-mute">{locating}</p>}
+                  <div className="mt-3 flex border border-ink/40">
+                    <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.findPlaceholder}
+                      className="flex-1 min-w-0 bg-transparent px-3 py-1.5 text-[13px] outline-none placeholder:text-mute" aria-label={t.findPlaceholder} />
+                    <button onClick={() => setOnlyGov(v => !v)} aria-pressed={onlyGov}
+                      className={`label px-3 border-l border-ink/40 ${onlyGov ? "bg-ink text-paper" : "hover:bg-paper-2"}`}>{t.government}</button>
+                  </div>
                 </div>
+                <div className="px-5 py-3 border-b border-ink/15 flex items-baseline justify-between gap-3">
+                  <p className="text-[14px] font-medium min-w-0 truncate">{probe ? t.findNearestTo(probeLabel) : t.findAll}</p>
+                  <p className="text-[11.5px] text-mute shrink-0">{t.findCount(filtered.length, view.centres.length)}</p>
+                </div>
+                {!probe && <p className="px-5 py-2.5 border-b border-ink/15 text-[12px] text-ink-2 bg-paper-2">{t.findPrompt}</p>}
                 <ul>
-                  {filtered.slice(0, 120).map(c => (
+                  {filtered.slice(0, 120).map(({ c, d }) => (
                     <li key={c.id}>
                       <button onClick={() => pickCentre(c)}
                         className={`w-full grid grid-cols-[26px_1fr_auto] items-center text-left border-b border-ink/15 ${centreId === c.id ? "bg-care text-paper" : "hover:bg-paper-2"}`}>
@@ -298,13 +311,18 @@ export function PublicApp({ view }: { view: PublicView }) {
                           : <i className={`block size-2.5 rounded-full border-[1.5px] ${centreId === c.id ? "border-paper" : "border-care"}`} />}</span>
                         <span className="py-2.5 pr-2 min-w-0">
                           <span className={`block text-[13.5px] truncate ${centreId === c.id ? "font-medium" : "text-care"}`}>{c.name}</span>
-                          <span className={`block text-[11.5px] ${centreId === c.id ? "text-paper/65" : "text-mute"}`}>{district(c.district)}</span>
+                          <span className={`block text-[11.5px] truncate ${centreId === c.id ? "text-paper/65" : "text-mute"}`}>
+                            {c.government ? t.govVimukthi : t.registeredCentre} · {district(c.district)}{c.beds != null ? ` · ${t.beds(c.beds)}` : ""}
+                          </span>
                         </span>
-                        <span className="pr-5 text-[12px] tabular opacity-70">{c.beds != null ? t.beds(c.beds) : ""}</span>
+                        <span className="pr-5 text-right">
+                          {d != null && <span className="block font-mono tabular text-[14px] font-medium">{t.km(d)}</span>}
+                        </span>
                       </button>
                     </li>
                   ))}
                 </ul>
+                {probe && <p className="px-5 py-3 text-[11.5px] text-mute leading-snug">{t.findDistanceNote}</p>}
               </div>
             )}
 

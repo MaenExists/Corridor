@@ -133,6 +133,59 @@ def extract():
     return found
 
 
+POSTAL = Path("ml/data/real/public_sources/geo/IN_postal.zip")  # GeoNames postal codes (CC BY 4.0)
+POSTAL_DISTRICT = {"Kasargod": "Kasaragod"}
+POSTAL_KINDS = ("post office", "pin code")
+SEARCH_ONLY_RANK = 7  # above every map-label rank, so these are found by search but never drawn as labels
+
+
+def fold(s):
+    """Same spelling fold as frontend/lib/placeRules.ts, so duplicates are judged the way search sees them."""
+    import re
+    import unicodedata
+    s = "".join(c for c in unicodedata.normalize("NFD", s) if not unicodedata.combining(c)).lower()
+    s = re.sub(r"[^a-z0-9]", "", s).replace("zh", "l")
+    s = re.sub(r"([tdkgpbcs])h", r"\1", s).replace("w", "v").replace("ee", "i").replace("oo", "u").replace("y", "i")
+    return re.sub(r"(.)\1+", r"\1", s)
+
+
+def add_postal(places):
+    """Post-office localities and PIN codes, so villages missing from OpenStreetMap and PIN searches still resolve.
+
+    GeoNames gives each PIN an approximate point, shared by its post offices, so these are search-only entries:
+    good enough to find the nearest centres, never drawn on the map. A post office whose name already exists
+    within 5 km is skipped.
+    """
+    import csv
+    import io
+    import zipfile
+
+    places = [p for p in places if p[2] not in POSTAL_KINDS]
+    with zipfile.ZipFile(POSTAL) as archive:
+        rows = [r for r in csv.reader(io.TextIOWrapper(archive.open("IN.txt"), "utf-8"), delimiter="\t")
+                if r[3] == "Kerala" and r[9] and r[10]]
+    known = {}
+    for p in places:
+        known.setdefault(fold(p[0]), []).append((p[4], p[5]))
+    near = lambda a, b, c, d: math.hypot(a - c, (b - d) * math.cos(math.radians(a))) < 0.045  # about 5 km
+    by_pin, added = {}, 0
+    for r in rows:
+        pin, name, lat, lon = r[1], r[2].strip().title(), float(r[9]), float(r[10])
+        district = POSTAL_DISTRICT.get(r[5], r[5])
+        by_pin.setdefault(pin, []).append((name, lat, lon, district))
+        key = fold(name)
+        if not key or any(near(lat, lon, a, b) for a, b in known.get(key, [])):
+            continue
+        known.setdefault(key, []).append((lat, lon))
+        places.append([name, "", "post office", SEARCH_ONLY_RANK, round(lat, 5), round(lon, 5), district])
+        added += 1
+    for pin, offices in sorted(by_pin.items()):
+        lat = sum(o[1] for o in offices) / len(offices)
+        lon = sum(o[2] for o in offices) / len(offices)
+        places.append([f"{pin} · {offices[0][0]}", "", "pin code", SEARCH_ONLY_RANK, round(lat, 5), round(lon, 5), offices[0][3]])
+    return places, {"post_offices_added": added, "pin_codes": len(by_pin)}
+
+
 def build():
     found = extract()
     lat = np.array([p[4] for p in found])
@@ -155,14 +208,33 @@ def build():
             continue
         seen.setdefault(key, []).append((p[4], p[5]))
         places.append(p + [district[i]])
+    places, postal = add_postal(places)
+    write(places)
+    return summary(places) | postal
 
+
+SOURCE = ("OpenStreetMap contributors (ODbL), Geofabrik southern-zone extract; "
+          "post offices and PIN codes from GeoNames (CC BY 4.0)")
+
+
+def write(places):
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
         "built_on": date.today().isoformat(),
-        "source": "OpenStreetMap contributors (ODbL), Geofabrik southern-zone extract",
+        "source": SOURCE,
         "fields": ["name", "name_ml", "kind", "rank", "lat", "lon", "district"],
         "places": places,
     }, ensure_ascii=False, separators=(",", ":")))
+
+
+def postal_only():
+    """Refresh only the post-office and PIN entries in an existing list, without re-reading OpenStreetMap."""
+    places, postal = add_postal(json.loads(OUT.read_text())["places"])
+    write(places)
+    return summary(places) | postal
+
+
+def summary(places):
     counts = {}
     for p in places:
         counts[p[2]] = counts.get(p[2], 0) + 1
@@ -170,4 +242,5 @@ def build():
 
 
 if __name__ == "__main__":
-    print(json.dumps(build(), indent=1))
+    import sys
+    print(json.dumps(postal_only() if "--postal-only" in sys.argv else build(), indent=1))
